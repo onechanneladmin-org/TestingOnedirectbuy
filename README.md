@@ -36,6 +36,20 @@ docs/                # flow docs + CI secrets
 
 **Website flows:** see [docs/ONEDIRECTBUY_FLOWS.html](docs/ONEDIRECTBUY_FLOWS.html) (interactive HTML) or [docs/ONEDIRECTBUY_FLOWS.md](docs/ONEDIRECTBUY_FLOWS.md) for the full catalog of storefront journeys (actors, steps, routes, automation mapping).
 
+## Deploy
+
+| Role | URL |
+|------|-----|
+| UI | https://onetest.onechanneladmin.com |
+| Backend / API | https://dev-onetest.onechanneladmin.com |
+
+Same GKE Deployment (`onetest`). See **[DEPLOY.md](./DEPLOY.md)**.
+
+```bash
+gcloud builds submit --config=cloudbuild.yaml --project=gentle-epoch-277301 .
+kubectl apply -f <onechanneladmin-latest>/deploymentsAll/ui/deployment-onetest.yaml
+```
+
 ## CI
 
 GitHub Actions (`.github/workflows/playwright.yml`) runs on push/PR to `main`, `master`, or `develop`.
