@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OneDirectBuy Website Flows — Documentation</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --bg-elev: #ffffff;
+      --ink: #1a1f26;
+      --muted: #5c6670;
+      --line: #ddd6c8;
+      --accent: #c45c26;
+      --accent-soft: #f3e4d8;
+      --ok: #1f6b43;
+      --ok-bg: #e6f4ec;
+      --warn: #8a5a00;
+      --warn-bg: #fff3d6;
+      --nav: #15202b;
+      --nav-ink: #e8eef4;
+      --code-bg: #eef1f4;
+      --radius: 10px;
+      --shadow: 0 1px 2px rgba(26, 31, 38, 0.06), 0 8px 24px rgba(26, 31, 38, 0.06);
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+      --mono: "Cascadia Code", "Consolas", "SF Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 10% -10%, #efe6d8 0%, transparent 55%),
+        radial-gradient(900px 400px at 100% 0%, #e4ebe7 0%, transparent 50%),
+        var(--bg);
+      line-height: 1.55;
+    }
+
+    a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    a:hover { color: #9a3f12; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      background: var(--nav);
+      color: var(--nav-ink);
+      padding: 1.25rem 1rem 2rem;
+      border-right: 1px solid #0d141c;
+    }
+
+    aside .brand {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #9db0c2;
+      margin-bottom: 0.35rem;
+    }
+
+    aside h1 {
+      font-size: 1.15rem;
+      margin: 0 0 1rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .search {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border-radius: 8px;
+      border: 1px solid #2a3a4a;
+      background: #0f1822;
+      color: var(--nav-ink);
+      font: inherit;
+      margin-bottom: 0.75rem;
+    }
+    .search:focus { outline: 2px solid var(--accent); border-color: transparent; }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+    }
+    .filters button {
+      border: 1px solid #334556;
+      background: transparent;
+      color: #c5d2de;
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+    .filters button.active,
+    .filters button:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .toc { list-style: none; margin: 0; padding: 0; }
+    .toc a {
+      display: block;
+      color: #b8c6d4;
+      text-decoration: none;
+      padding: 0.35rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.86rem;
+    }
+    .toc a:hover, .toc a:focus { background: #243445; color: #fff; }
+    .toc .id {
+      display: inline-block;
+      min-width: 2.2rem;
+      color: #7f93a6;
+      font-variant-numeric: tabular-nums;
+    }
+    .toc .gated { color: #e0b15a; }
+
+    main {
+      padding: 2rem clamp(1rem, 3vw, 2.5rem) 4rem;
+      max-width: 980px;
+    }
+
+    .hero {
+      background: var(--bg-elev);
+      border: 1px solid var(--line);
+      border-radius: calc(var(--radius) + 2px);
+      box-shadow: var(--shadow);
+      padding: 1.5rem 1.6rem;
+      margin-bottom: 1.5rem;
+    }
+    .hero h2 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(1.5rem, 2.4vw, 2rem);
+    }
+    .hero p { margin: 0; color: var(--muted); max-width: 62ch; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1.1rem;
+    }
+    .meta-card {
+      background: #faf8f4;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.7rem 0.85rem;
+    }
+    .meta-card dt {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+    .meta-card dd { margin: 0; font-size: 0.92rem; word-break: break-word; }
+
+    section.block {
+      background: var(--bg-elev);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.25rem 1.4rem 1.4rem;
+      margin-bottom: 1.1rem;
+    }
+    section.block h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.25rem;
+      padding-bottom: 0.55rem;
+      border-bottom: 1px solid var(--line);
+    }
+    section.block h3 {
+      margin: 1.1rem 0 0.4rem;
+      font-size: 0.95rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .flow {
+      scroll-margin-top: 1rem;
+    }
+    .flow-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+    .flow-head h2 { border: 0; padding: 0; margin: 0; flex: 1 1 auto; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+    }
+    .badge.ci-yes { background: var(--ok-bg); color: var(--ok); }
+    .badge.ci-no { background: var(--warn-bg); color: var(--warn); }
+    .badge.cat { background: var(--accent-soft); color: #7a3410; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 0.4rem 0 0.6rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.55rem 0.65rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      background: #faf8f4;
+    }
+    tr:hover td { background: #fbfaf7; }
+
+    ol.steps, ul.alts {
+      margin: 0.35rem 0 0.5rem;
+      padding-left: 1.2rem;
+    }
+    ol.steps li, ul.alts li { margin: 0.28rem 0; }
+
+    code, .path {
+      font-family: var(--mono);
+      font-size: 0.84em;
+      background: var(--code-bg);
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+    }
+    pre {
+      background: #15202b;
+      color: #e8eef4;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      overflow: auto;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+
+    .mermaid {
+      background: #faf8f4;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin: 0.75rem 0;
+      overflow: auto;
+    }
+
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+      padding: 0.7rem 0.9rem;
+      border-radius: 0 8px 8px 0;
+      margin: 0.75rem 0;
+      font-size: 0.92rem;
+    }
+
+    .auto-grid {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 0.35rem 0.75rem;
+      font-size: 0.9rem;
+      margin-top: 0.35rem;
+    }
+    .auto-grid dt { color: var(--muted); }
+    .auto-grid dd { margin: 0; }
+
+    .hidden { display: none !important; }
+
+    footer.doc-foot {
+      margin-top: 1.5rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside {
+        position: relative;
+        height: auto;
+        max-height: none;
+      }
+      .toc { columns: 2; column-gap: 1rem; }
+    }
+    @media (max-width: 560px) {
+      .toc { columns: 1; }
+    }
+
+    @media print {
+      aside { display: none; }
+      .layout { grid-template-columns: 1fr; }
+      section.block, .hero { box-shadow: none; break-inside: avoid; }
+      body { background: #fff; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">OneDirectBuy</div>
+      <h1>Website Flows</h1>
+      <input class="search" id="q" type="search" placeholder="Filter flows…" aria-label="Filter flows" />
+      <div class="filters" role="group" aria-label="Category filters">
+        <button type="button" data-filter="all" class="active">All</button>
+        <button type="button" data-filter="guest">Guest</button>
+        <button type="button" data-filter="buyer">Buyer</button>
+        <button type="button" data-filter="seller">Seller</button>
+        <button type="button" data-filter="admin">Admin</button>
+        <button type="button" data-filter="cross">Cross-cut</button>
+        <button type="button" data-filter="gated">Gated</button>
+      </div>
+      <nav aria-label="Table of contents">
+        <ul class="toc" id="toc">
+          <li><a href="#overview"><span class="id">—</span> Overview</a></li>
+          <li><a href="#how-to-read"><span class="id">—</span> How to read</a></li>
+          <li><a href="#actors"><span class="id">—</span> Actors</a></li>
+          <li><a href="#flow-index"><span class="id">—</span> Flow index</a></li>
+          <li><a href="#journey-map"><span class="id">—</span> Journey map</a></li>
+          <li data-flow data-cats="guest" data-gated="0"><a href="#flow-1"><span class="id">1</span> Homepage &amp; Nav</a></li>
+          <li data-flow data-cats="guest buyer" data-gated="0"><a href="#flow-2"><span class="id">2</span> Search &amp; Shop</a></li>
+          <li data-flow data-cats="guest buyer" data-gated="0"><a href="#flow-3"><span class="id">3</span> Vehicle Fitment</a></li>
+          <li data-flow data-cats="guest buyer" data-gated="0"><a href="#flow-4"><span class="id">4</span> Product Detail</a></li>
+          <li data-flow data-cats="guest buyer" data-gated="0"><a href="#flow-5"><span class="id">5</span> Cart</a></li>
+          <li data-flow data-cats="guest buyer" data-gated="0"><a href="#flow-6"><span class="id">6</span> Auth (public)</a></li>
+          <li data-flow data-cats="buyer" data-gated="1"><a href="#flow-6-1"><span class="id gated">6.1</span> Buyer Account</a></li>
+          <li data-flow data-cats="buyer" data-gated="1"><a href="#flow-6-2"><span class="id gated">6.2</span> Purchase Journey</a></li>
+          <li data-flow data-cats="guest buyer" data-gated="0"><a href="#flow-7"><span class="id">7</span> Checkout</a></li>
+          <li data-flow data-cats="guest" data-gated="0"><a href="#flow-8"><span class="id">8</span> Legal &amp; SEO</a></li>
+          <li data-flow data-cats="seller guest" data-gated="0"><a href="#flow-9"><span class="id">9</span> Seller Onboarding</a></li>
+          <li data-flow data-cats="seller admin" data-gated="0"><a href="#flow-10"><span class="id">10</span> Seller/Admin</a></li>
+          <li data-flow data-cats="admin" data-gated="1"><a href="#flow-10-1"><span class="id gated">10.1</span> Admin Login</a></li>
+          <li data-flow data-cats="cross guest" data-gated="0"><a href="#flow-11"><span class="id">11</span> Responsive &amp; A11y</a></li>
+          <li data-flow data-cats="buyer" data-gated="1"><a href="#flow-12"><span class="id gated">12</span> Address Book</a></li>
+          <li><a href="#portal-gaps"><span class="id">—</span> Portal gaps</a></li>
+          <li><a href="#routes"><span class="id">—</span> Route map</a></li>
+          <li><a href="#env"><span class="id">—</span> Env vars</a></li>
+          <li><a href="#related"><span class="id">—</span> Related files</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="hero" id="overview">
+        <h2>OneDirectBuy Website Flows</h2>
+        <p>
+          Senior reference for every storefront flow covered by this automation suite —
+          what the website does, who acts, and how automation maps to each journey.
+        </p>
+        <dl class="meta-grid">
+          <div class="meta-card"><dt>Base URL</dt><dd><code>https://onedirectbuy.com</code></dd></div>
+          <div class="meta-card"><dt>Override</dt><dd><code>ONEDIRECTBUY_BASE_URL</code></dd></div>
+          <div class="meta-card"><dt>Flow catalog</dt><dd><code>flows.config.json</code></dd></div>
+          <div class="meta-card"><dt>Step catalog</dt><dd><code>server/data/flow-steps.json</code></dd></div>
+          <div class="meta-card"><dt>Specs</dt><dd><code>tests/OneDirectBuy/</code></dd></div>
+          <div class="meta-card"><dt>Markdown twin</dt><dd><a href="ONEDIRECTBUY_FLOWS.md">ONEDIRECTBUY_FLOWS.md</a></dd></div>
+        </dl>
+      </header>
+
+      <section class="block" id="how-to-read">
+        <h2>How to read this document</h2>
+        <p>Each flow section follows the same template:</p>
+        <ol class="steps">
+          <li><strong>Purpose</strong> — business intent on the live site</li>
+          <li><strong>Actors</strong> — Guest, Buyer, Seller applicant, or Admin identity on the storefront</li>
+          <li><strong>Entry points &amp; routes</strong> — URLs and chrome that start the journey</li>
+          <li><strong>Happy path</strong> — numbered product steps</li>
+          <li><strong>Alternate / negative paths</strong> — empty states, validation, 404s, bad credentials</li>
+          <li><strong>Preconditions</strong> — secrets / CI enablement when gated</li>
+          <li><strong>Automation</strong> — flow ID, specs, run command</li>
+        </ol>
+        <div class="callout">
+          <strong>Storefront vs portal:</strong> Most flows below are public or buyer-facing on OneDirectBuy.
+          Seller catalog inventory, bulk uploads, brand approval, and similar admin-portal work live in
+          <strong>OneChannel</strong> and are tracked as skips — see <a href="#portal-gaps">Out-of-scope / portal gaps</a>.
+        </div>
+      </section>
+
+      <section class="block" id="actors">
+        <h2>Actors</h2>
+        <table>
+          <thead><tr><th>Actor</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Guest</strong></td><td>Unauthenticated shopper. Can browse, search, fit vehicles, add to cart, open checkout shell, apply as seller, read policies.</td></tr>
+            <tr><td><strong>Buyer</strong></td><td>Authenticated shopper (<code>ONEDIRECTBUY_BUYER_*</code>). Account dashboard, addresses, wishlist, orders, full Stripe purchase.</td></tr>
+            <tr><td><strong>Seller applicant</strong></td><td>Guest or logged-in user on Become a Vendor / seller application (storefront). Full seller workspace is not on this site.</td></tr>
+            <tr><td><strong>Admin (storefront identity)</strong></td><td>Uses admin/buyer credentials to reach account chrome and storefront management surfaces. Not a full OneChannel admin portal suite.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="block" id="flow-index">
+        <h2>Flow index</h2>
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Flow</th><th>Category</th><th>Auth</th><th>CI</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>1</strong></td><td><a href="#flow-1">Guest Chrome (Homepage &amp; Navigation)</a></td><td>Guest</td><td>No</td><td>Yes</td></tr>
+            <tr><td><strong>2</strong></td><td><a href="#flow-2">Search &amp; Shop Listing</a></td><td>Guest / Buyer</td><td>No</td><td>Yes</td></tr>
+            <tr><td><strong>3</strong></td><td><a href="#flow-3">Vehicle Fitment</a></td><td>Guest / Buyer</td><td>No</td><td>Yes</td></tr>
+            <tr><td><strong>4</strong></td><td><a href="#flow-4">Product Detail</a></td><td>Guest / Buyer</td><td>Optional (wishlist)</td><td>Yes</td></tr>
+            <tr><td><strong>5</strong></td><td><a href="#flow-5">Cart</a></td><td>Guest / Buyer</td><td>No</td><td>Yes</td></tr>
+            <tr><td><strong>6</strong></td><td><a href="#flow-6">Auth — Login &amp; Registration (public)</a></td><td>Guest</td><td>Partial</td><td>Yes</td></tr>
+            <tr><td><strong>6.1</strong></td><td><a href="#flow-6-1">Buyer Authenticated Account</a></td><td>Buyer</td><td>Yes</td><td>No (gated)</td></tr>
+            <tr><td><strong>6.2</strong></td><td><a href="#flow-6-2">Buyer Purchase Journey (Stripe)</a></td><td>Buyer</td><td>Yes + Stripe</td><td>No (gated)</td></tr>
+            <tr><td><strong>7</strong></td><td><a href="#flow-7">Checkout</a></td><td>Guest / Buyer</td><td>No</td><td>Yes</td></tr>
+            <tr><td><strong>8</strong></td><td><a href="#flow-8">Legal &amp; SEO</a></td><td>Guest</td><td>No</td><td>Yes</td></tr>
+            <tr><td><strong>9</strong></td><td><a href="#flow-9">Seller Storefront &amp; Onboarding</a></td><td>Seller / Guest</td><td>Optional</td><td>Yes</td></tr>
+            <tr><td><strong>10</strong></td><td><a href="#flow-10">Seller / Admin Backends</a></td><td>Seller / Admin</td><td>Mixed</td><td>Yes</td></tr>
+            <tr><td><strong>10.1</strong></td><td><a href="#flow-10-1">Admin Backend Login</a></td><td>Admin</td><td>Yes</td><td>No (gated)</td></tr>
+            <tr><td><strong>11</strong></td><td><a href="#flow-11">Responsive UI &amp; Accessibility</a></td><td>Cross-cutting</td><td>No</td><td>Yes</td></tr>
+            <tr><td><strong>12</strong></td><td><a href="#flow-12">Buyer Address Book</a></td><td>Buyer</td><td>Yes</td><td>No (gated)</td></tr>
+          </tbody>
+        </table>
+        <h3>Run a single flow</h3>
+        <pre><code># Example: Cart (flow 5)
+npx cross-env CI_TESTS_CONFIG=flows.config.json node scripts/run-ci-tests.js flow:5</code></pre>
+        <p>Toggle <code>enabled</code> in <code>flows.config.json</code> (local) or <code>ci-tests.config.json</code> (CI). Secrets: <a href="CI_SECRETS.md">CI_SECRETS.md</a>.</p>
+      </section>
+
+      <section class="block" id="journey-map">
+        <h2>End-to-end journey map</h2>
+        <div class="mermaid">
+flowchart TD
+  home[Homepage / Nav] --> search[Search and Shop]
+  home --> fitment[Vehicle Fitment]
+  search --> pdp[Product Detail]
+  fitment --> pdp
+  pdp --> cart[Cart]
+  cart --> checkout[Checkout shell]
+  home --> auth[Login / Register]
+  auth --> account[Buyer Account]
+  account --> address[Address Book]
+  cart --> purchase[Purchase Journey]
+  purchase --> stripe[Stripe sandbox]
+  stripe --> orders[Account Orders]
+  home --> seller[Seller Storefront]
+  seller --> onboard[Seller Application]
+  home --> legal[Legal and SEO]
+  home --> a11y[Responsive and A11y]
+  account --> adminSurf[Admin storefront checks]
+        </div>
+        <p><strong>Primary shopper path:</strong> Homepage → Search / Fitment → PDP → Cart → (Login) → Checkout → Payment → Orders.</p>
+        <p><strong>Seller path (public):</strong> Homepage → Sell on OneDirectBuy → Application → Fee / prohibited / terms policies → Store directory.</p>
+      </section>
+
+      <!-- FLOW 1 -->
+      <section class="block flow" id="flow-1" data-cats="guest" data-gated="0" data-search="guest chrome homepage navigation shop department mobile">
+        <div class="flow-head">
+          <h2>Flow 1 — Guest Chrome (Homepage &amp; Navigation)</h2>
+          <span class="badge cat">Guest</span>
+          <span class="badge ci-yes">CI enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Establish the marketplace shell: branding, hero, header shortcuts, department navigation, footer legal links, and mobile chrome so a guest can reach every major surface.</p>
+        <h3>Actors</h3>
+        <p>Guest</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Entry</th><th>Route / control</th></tr></thead>
+          <tbody>
+            <tr><td>Homepage</td><td><code>/</code></td></tr>
+            <tr><td>Shop all</td><td><code>/shop</code></td></tr>
+            <tr><td>Sell</td><td><code>/vendor/become-a-vendor</code></td></tr>
+            <tr><td>Order tracking</td><td><code>/account/order-tracking</code></td></tr>
+            <tr><td>Privacy / Terms / Contact</td><td><code>/info/privacy-policy</code>, <code>/info/terms-of-service</code>, <code>/info/contact-us</code></td></tr>
+            <tr><td>Category example</td><td><code>/category/exterior</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Open homepage; title and H1 establish OneDirectBuy marketplace identity.</li>
+          <li>Hero promotes <strong>Find Parts That Fit Your Vehicle</strong>.</li>
+          <li>Confirm store benefits row, header search (category + box + Search), and account / wishlist / cart shortcuts.</li>
+          <li>Open <strong>Shop by Department</strong>, expand categories, navigate to Exterior.</li>
+          <li>Use header/footer: All products → <code>/shop</code>, Sell → vendor landing, Track order → order tracking.</li>
+          <li>Open Privacy, Terms, Contact; Help Center opens in-page Conversations assistant.</li>
+          <li>From <code>/shop</code>, logo returns home; breadcrumb Home works.</li>
+          <li>On mobile, bottom bar exposes Menu / Categories / Vehicle / Search / Cart; Menu → Shop.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Cookie consent and assistant overlays may cover chrome; dismiss before interacting.</li>
+          <li>Upstream 502/503 retries are infra, not product defects.</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p>None (guest). Homepage should load within ~15s at full desktop width.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>1</code></dd>
+          <dt>Specs</dt><dd><code>Homepage.spec.js</code>, <code>Navigation.spec.js</code></dd>
+          <dt>Helpers</dt><dd><code>oneDirectBuyNav.js</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-026*, 027–029, 038–040, 506</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 2 -->
+      <section class="block flow" id="flow-2" data-cats="guest buyer" data-gated="0" data-search="search shop listing filters sort pagination add to cart">
+        <div class="flow-head">
+          <h2>Flow 2 — Search &amp; Shop Listing</h2>
+          <span class="badge cat">Guest / Buyer</span>
+          <span class="badge ci-yes">CI enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Let shoppers find products by keyword or category, refine with filters/sort/pagination, open a PDP, and add to cart from a listing card.</p>
+        <h3>Actors</h3>
+        <p>Guest (same UI for Buyer)</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Entry</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>Header search</td><td><code>/search?keyword=…</code></td></tr>
+            <tr><td>Shop all</td><td><code>/shop</code></td></tr>
+            <tr><td>Category sidebar</td><td>e.g. Exterior under Categories</td></tr>
+            <tr><td>Product from results</td><td><code>/product/{slug}</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Type a keyword in <strong>Search products</strong>, submit Search → results heading.</li>
+          <li>On <code>/shop</code>, confirm <strong>Products found</strong> count and product cards (link, price, image).</li>
+          <li>Filter: By Price ($0–$20,000), By Brands, Availability (In stock), By Rating.</li>
+          <li>Sort: price low→high / high→low, latest, popularity.</li>
+          <li>Paginate with Previous / Next when available.</li>
+          <li>Open first product from search or shop.</li>
+          <li><strong>Add To Cart</strong> from a product card when in stock.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Empty keyword → empty/validation messaging on search.</li>
+          <li>Misspelled keyword still loads the search results page (may be empty or fuzzy).</li>
+          <li>Re-opening <code>/shop</code> restores the full listing count after filters.</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p>None. Default ATC keyword often <code>filter</code> (<code>ONEDIRECTBUY_ATC_KEYWORD</code>).</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>2</code></dd>
+          <dt>Specs</dt><dd><code>Search.spec.js</code>, <code>CategoryProductListing.spec.js</code></dd>
+          <dt>Helpers</dt><dd><code>searchProducts</code>, <code>waitForShopProducts</code>, <code>shopSortSelect</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-030–037, 041–053, 507</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 3 -->
+      <section class="block flow" id="flow-3" data-cats="guest buyer" data-gated="0" data-search="vehicle fitment ymm vin garage my vehicles">
+        <div class="flow-head">
+          <h2>Flow 3 — Vehicle Fitment</h2>
+          <span class="badge cat">Guest / Buyer</span>
+          <span class="badge ci-yes">CI enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Help auto-parts shoppers declare a vehicle (Year/Make/Model or VIN) so they can shop parts that fit; includes mobile Vehicle entry and SKU/OEM-style search.</p>
+        <h3>Actors</h3>
+        <p>Guest / Buyer</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Entry</th><th>Control / route</th></tr></thead>
+          <tbody>
+            <tr><td>Homepage hero</td><td>Find Parts That Fit Your Vehicle</td></tr>
+            <tr><td>Select Vehicle</td><td>My Vehicles garage panel</td></tr>
+            <tr><td>Add Vehicle</td><td>Year / Make / Model + Find Parts</td></tr>
+            <tr><td>VIN</td><td>VIN tab → 17-char input + Look up VIN</td></tr>
+            <tr><td>Mobile</td><td>Bottom <strong>Vehicle</strong> → My Vehicles / Add</td></tr>
+            <tr><td>SKU search</td><td>Header search e.g. <code>60431</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Homepage hero promotes fitment.</li>
+          <li><strong>Select Vehicle</strong> expands <strong>My Vehicles</strong>.</li>
+          <li><strong>Add Vehicle</strong> → Year / Make / Model; <strong>Find Parts</strong> enables after all three.</li>
+          <li>Switch to VIN tab; enter 17 characters and use Look up VIN.</li>
+          <li>Search by SKU/OEM keyword and land on results.</li>
+          <li>On 390px viewport, open Vehicle from the bottom bar.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Incomplete YMM leaves Find Parts disabled.</li>
+          <li>Invalid VIN length should not proceed as a successful lookup (UI validation).</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p>None. Garage state may persist in browser storage across reloads.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>3</code></dd>
+          <dt>Specs</dt><dd><code>AutoPartsFitment.spec.js</code></dd>
+          <dt>Helpers</dt><dd><code>oneDirectBuyFitment.js</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-091–094, 109–110</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 4 -->
+      <section class="block flow" id="flow-4" data-cats="guest buyer" data-gated="0" data-search="product detail pdp wishlist buy now gallery sold by">
+        <div class="flow-head">
+          <h2>Flow 4 — Product Detail (PDP)</h2>
+          <span class="badge cat">Guest / Buyer</span>
+          <span class="badge ci-yes">CI enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Present a sellable SKU: media, identity (SKU/brand/stock/seller), purchase actions, policy links, tabs, and related products; handle missing product URLs cleanly.</p>
+        <h3>Actors</h3>
+        <p>Guest; Buyer for authenticated wishlist path</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Entry</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>From shop/search</td><td><code>/product/{slug}</code></td></tr>
+            <tr><td>Bad / deleted slug</td><td>404 “Ohh! Page not found”</td></tr>
+            <tr><td>Wishlist</td><td><code>/account/wishlist</code> (auth)</td></tr>
+            <tr><td>Return policy</td><td><code>/info/return-refund</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Open an in-stock product: H1 title + price.</li>
+          <li>Gallery: main image or View larger.</li>
+          <li>Confirm SKU#, Brand, stock, Ships from, <strong>Sold by</strong>.</li>
+          <li>Adjust quantity; <strong>Add to cart</strong> → Cart Updated notice.</li>
+          <li><strong>Buy Now</strong> visible; wishlist control visible for guests.</li>
+          <li>Open Description / Specification tabs; Related products links.</li>
+          <li>Return &amp; Refund policy link reachable.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Invalid or deleted product slug → not-found page.</li>
+          <li>Wishlist deep-link may require buyer credentials.</li>
+          <li>Stock mismatch (shown In stock but ATC fails) is a known journey hazard (see Flow 6.2).</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p>Guest for core PDP. <code>ONEDIRECTBUY_BUYER_*</code> for ODB-UC-064 wishlist reachability.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>4</code></dd>
+          <dt>Specs</dt><dd><code>ProductDetail.spec.js</code></dd>
+          <dt>Helpers</dt><dd><code>openFirstProductFromShop</code>, <code>openProductFromSearch</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-056–075, 406, 508, 064</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 5 -->
+      <section class="block flow" id="flow-5" data-cats="guest buyer" data-gated="0" data-search="cart quantity remove coupon checkout subtotal">
+        <div class="flow-head">
+          <h2>Flow 5 — Cart</h2>
+          <span class="badge cat">Guest / Buyer</span>
+          <span class="badge ci-yes">CI enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Maintain a shopping cart: add lines, change quantity, remove, persist across reload, merge after guest→register, show subtotal, proceed to checkout, apply coupons.</p>
+        <h3>Actors</h3>
+        <p>Guest / Buyer</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Entry</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>Cart</td><td><code>/account/shopping-cart</code></td></tr>
+            <tr><td>From shop ATC</td><td>Product card → cart</td></tr>
+            <tr><td>Checkout CTA</td><td>→ <code>/account/checkout</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Add a product from shop; open cart and see line items.</li>
+          <li>Increase quantity; confirm qty update.</li>
+          <li>Reload; lines persist.</li>
+          <li>Order summary shows Subtotal and <strong>Proceed to checkout</strong>.</li>
+          <li>Optional: apply valid coupon from <code>ONEDIRECTBUY_TEST_COUPON</code>.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Empty cart: “Your cart is empty” + Continue shopping.</li>
+          <li>Remove last line → empty state.</li>
+          <li>Guest cart retained after registration path.</li>
+          <li>Invalid/expired coupon → error notice.</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p>None for core cart. Coupon tests need <code>ONEDIRECTBUY_TEST_COUPON</code>.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>5</code></dd>
+          <dt>Specs</dt><dd><code>Cart.spec.js</code></dd>
+          <dt>Helpers</dt><dd><code>waitForCartReady</code>, ATC helpers in <code>oneDirectBuyNav.js</code></dd>
+          <dt>Run</dt><dd><code>npm run test:cart</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-112–118, 121, 124–125</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 6 -->
+      <section class="block flow" id="flow-6" data-cats="guest buyer" data-gated="0" data-search="auth login register forgot password account">
+        <div class="flow-head">
+          <h2>Flow 6 — Auth (Login &amp; Buyer Account) — public</h2>
+          <span class="badge cat">Guest</span>
+          <span class="badge ci-yes">CI enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Expose sign-in and registration without requiring secrets for UI checks; optionally prove credential login when buyer secrets exist. Gate protected pages (orders) behind login for guests.</p>
+        <h3>Actors</h3>
+        <p>Guest; Buyer when secrets set</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Entry</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>Login</td><td><code>/account/login</code></td></tr>
+            <tr><td>Register</td><td><code>/account/register</code></td></tr>
+            <tr><td>Protected sample</td><td><code>/account/orders</code> → redirects to login for guest</td></tr>
+            <tr><td>Post-login</td><td><code>/account/my-account</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Open login: Welcome back, email/password, Sign in.</li>
+          <li>Confirm <strong>Forgot password?</strong> link.</li>
+          <li>Open register: Conditions of Use + Privacy Notice; Full name / email / passwords / Create.</li>
+          <li>Create account with a unique email → land in account (when registration succeeds).</li>
+          <li>With secrets: Sign in → <code>/account/my-account</code>.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Bad credentials → sign-in failed notice.</li>
+          <li>Duplicate email on register → already exists notice.</li>
+          <li>Guest hitting <code>/account/orders</code> → login, no order table.</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p>Public UI: none. Successful login/create: <code>ONEDIRECTBUY_BUYER_*</code> (or unique email for create).</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>6</code></dd>
+          <dt>Specs</dt><dd><code>Login.spec.js</code>, <code>BuyerAccount.spec.js</code></dd>
+          <dt>Helpers</dt><dd><code>oneDirectBuyAuth.js</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-015, 007, 005*, 006, 385, 001–003, 475</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 6.1 -->
+      <section class="block flow" id="flow-6-1" data-cats="buyer" data-gated="1" data-search="buyer authenticated account dashboard logout profile">
+        <div class="flow-head">
+          <h2>Flow 6.1 — Buyer Authenticated Account</h2>
+          <span class="badge cat">Buyer</span>
+          <span class="badge ci-no">CI gated</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>After login, verify account dashboard, profile, addresses entry, password/profile copy, and logout.</p>
+        <h3>Actors</h3>
+        <p>Buyer</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Entry</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>Dashboard</td><td><code>/account/my-account</code></td></tr>
+            <tr><td>Profile</td><td><code>/account/user-information</code></td></tr>
+            <tr><td>Addresses</td><td><code>/account/addresses</code></td></tr>
+            <tr><td>Logout</td><td>Returns to login Welcome back</td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Log in; dashboard shows account chrome + Logout.</li>
+          <li>Open Account information.</li>
+          <li>Open Your Addresses.</li>
+          <li>Confirm password/profile copy on user-information.</li>
+          <li>Logout → login screen.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Missing secrets → suite skipped.</li>
+          <li>Session expiry mid-flow → redirect to login.</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p><code>ONEDIRECTBUY_BUYER_EMAIL</code>, <code>ONEDIRECTBUY_BUYER_PASSWORD</code>. Flow <strong>disabled</strong> in config until secrets are wired in CI.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>6.1</code></dd>
+          <dt>Specs</dt><dd><code>BuyerAccountAuthenticated.spec.js</code></dd>
+          <dt>Enabled</dt><dd><code>false</code> by default</dd>
+          <dt>Key steps</dt><dd>ODB-UC-005-auth, 009, 010, 014, 021</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 6.2 -->
+      <section class="block flow" id="flow-6-2" data-cats="buyer" data-gated="1" data-search="purchase journey stripe payment order place checkout">
+        <div class="flow-head">
+          <h2>Flow 6.2 — Buyer Purchase Journey (Stripe)</h2>
+          <span class="badge cat">Buyer</span>
+          <span class="badge ci-no">CI gated</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Single serial happy path from login through paid order: prove the revenue path works end-to-end with Stripe sandbox.</p>
+        <h3>Actors</h3>
+        <p>Buyer</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Step</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>Login / dashboard</td><td><code>/account/my-account</code></td></tr>
+            <tr><td>Search / shop → PDP</td><td><code>/search?keyword=…</code> or <code>/shop</code> → <code>/product/…</code></td></tr>
+            <tr><td>Cart</td><td><code>/account/shopping-cart</code></td></tr>
+            <tr><td>Checkout</td><td><code>/account/checkout</code></td></tr>
+            <tr><td>Success</td><td><code>/account/payment-success</code> (or order-success / orders)</td></tr>
+            <tr><td>Orders</td><td><code>/account/orders</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Assert site reachable (infra gate).</li>
+          <li>Buyer logs in and reaches account.</li>
+          <li>Clear cart if needed; add in-stock product; cart shows line + checkout CTA.</li>
+          <li>Proceed to checkout with non-zero total.</li>
+          <li>Fill or select shipping address.</li>
+          <li>Place order with Stripe test card → confirmation.</li>
+          <li>Order appears under Account → Orders.</li>
+        </ol>
+        <div class="mermaid">
+sequenceDiagram
+  participant Buyer
+  participant Site
+  participant Stripe
+  Buyer->>Site: Login
+  Buyer->>Site: Add product to cart
+  Buyer->>Site: Checkout shipping
+  Buyer->>Stripe: Sandbox card payment
+  Stripe-->>Site: Payment success
+  Buyer->>Site: Verify order in Orders
+        </div>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Site unreachable → journey aborted (<code>J01-0-blocked</code>); remaining steps not product bugs.</li>
+          <li>Product shows In stock but ATC reports out of stock (<code>J01-2b</code>).</li>
+          <li>Place order incomplete → order-history check skipped (<code>J01-6-skipped</code>).</li>
+          <li>Failed required soft step stops the rest of the journey (no cascade noise).</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <table>
+          <thead><tr><th>Variable</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td><code>ONEDIRECTBUY_BUYER_EMAIL</code> / <code>_PASSWORD</code></td><td>Login</td></tr>
+            <tr><td><code>ONEDIRECTBUY_STRIPE_TEST_CARD</code></td><td>Default <code>4242424242424242</code></td></tr>
+            <tr><td><code>ONEDIRECTBUY_STRIPE_TEST_EXP</code></td><td>e.g. <code>12 / 34</code></td></tr>
+            <tr><td><code>ONEDIRECTBUY_STRIPE_TEST_CVC</code></td><td>e.g. <code>123</code></td></tr>
+            <tr><td><code>ONEDIRECTBUY_STRIPE_TEST_ZIP</code></td><td>e.g. <code>34746</code></td></tr>
+            <tr><td><code>ONEDIRECTBUY_ATC_KEYWORD</code></td><td>Product search seed</td></tr>
+          </tbody>
+        </table>
+        <p>Flow <strong>disabled</strong> by default. Timeout budget ~6 minutes.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>6.2</code></dd>
+          <dt>Specs</dt><dd><code>BuyerPurchaseJourney.spec.js</code></dd>
+          <dt>Helpers</dt><dd><code>buyerPurchaseJourney.js</code>, address + auth helpers</dd>
+          <dt>Key steps</dt><dd>J01-0 … J01-6 (+ blocked/skipped advisories)</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 7 -->
+      <section class="block flow" id="flow-7" data-cats="guest buyer" data-gated="0" data-search="checkout shipping address payment success empty cart">
+        <div class="flow-head">
+          <h2>Flow 7 — Checkout</h2>
+          <span class="badge cat">Guest / Buyer</span>
+          <span class="badge ci-yes">CI enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Validate the checkout shell for guests: contact &amp; shipping, required fields, order summary with lines, empty-cart checkout, and payment-success page reachability (without requiring a live paid order in this flow).</p>
+        <h3>Actors</h3>
+        <p>Guest / Buyer</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Entry</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>Checkout</td><td><code>/account/checkout</code></td></tr>
+            <tr><td>Empty cart checkout</td><td>Same URL with no lines</td></tr>
+            <tr><td>Payment success</td><td><code>/account/payment-success</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>With items in cart, open checkout: Information + Contact &amp; Shipping.</li>
+          <li>Required shipping fields + Save address CTA.</li>
+          <li>Order panel shows line item and Total $.</li>
+          <li>Open payment-success confirmation page (route-level check).</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Empty cart: “No Product.” and Total $0.00.</li>
+          <li>Save address without Name keeps required Name focused / validation.</li>
+          <li>Full paid placement lives in Flow <strong>6.2</strong>, not here.</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p>None for shell checks. Line-item checkout assumes a prior ATC.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>7</code></dd>
+          <dt>Specs</dt><dd><code>Checkout.spec.js</code></dd>
+          <dt>Helpers</dt><dd><code>gotoCheckout</code> / cart→checkout in <code>oneDirectBuyNav.js</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-128–133, 138, 143</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 8 -->
+      <section class="block flow" id="flow-8" data-cats="guest" data-gated="0" data-search="legal seo privacy terms sitemap 404 contact canonical">
+        <div class="flow-head">
+          <h2>Flow 8 — Legal &amp; SEO</h2>
+          <span class="badge cat">Guest</span>
+          <span class="badge ci-yes">CI enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Publish policy pages, policies hub, HTML sitemap, contact, copyright, product canonicals, XML sitemap health, and a usable 404 experience.</p>
+        <h3>Actors</h3>
+        <p>Guest</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Page</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>Privacy</td><td><code>/info/privacy-policy</code></td></tr>
+            <tr><td>Terms</td><td><code>/info/terms-of-service</code></td></tr>
+            <tr><td>Shipping</td><td><code>/info/shipping-policy</code></td></tr>
+            <tr><td>Return &amp; Refund</td><td><code>/info/return-refund</code></td></tr>
+            <tr><td>Fee schedule</td><td><code>/info/fee-schedule</code></td></tr>
+            <tr><td>Fulfillment</td><td><code>/info/fulfillment-terms</code></td></tr>
+            <tr><td>Prohibited products</td><td><code>/info/prohibited-restricted-products-policy</code></td></tr>
+            <tr><td>Policies hub</td><td><code>/info/policies</code></td></tr>
+            <tr><td>HTML sitemap</td><td><code>/info/sitemap</code></td></tr>
+            <tr><td>Contact</td><td><code>/info/contact-us</code></td></tr>
+            <tr><td>XML sitemap</td><td><code>/sitemap.xml</code></td></tr>
+            <tr><td>404 sample</td><td><code>/this-page-does-not-exist-404-test</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Open each <code>/info/*</code> policy; correct H1.</li>
+          <li>Policies hub shows card links.</li>
+          <li>HTML sitemap heading + link toward XML.</li>
+          <li>Privacy page shows © year.</li>
+          <li>Contact-us heading present.</li>
+          <li>PDP canonical points at onedirectbuy.com.</li>
+          <li>GET <code>/sitemap.xml</code> returns non-5xx.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Unknown route → “Ohh! Page not found” with Homepage link.</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p>None.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>8</code></dd>
+          <dt>Specs</dt><dd><code>LegalPages.spec.js</code>, <code>ErrorHandlingSeo.spec.js</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-375–384, 458, 460–461, 469, 510</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 9 -->
+      <section class="block flow" id="flow-9" data-cats="seller guest" data-gated="0" data-search="seller storefront onboarding become vendor application stores">
+        <div class="flow-head">
+          <h2>Flow 9 — Seller Storefront &amp; Onboarding</h2>
+          <span class="badge cat">Seller / Guest</span>
+          <span class="badge ci-yes">CI enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Buyer-facing store directory and vendor acquisition: browse stores, open store detail / Sold by on PDP, Start Selling application, and seller-related policy pages.</p>
+        <h3>Actors</h3>
+        <p>Guest; optional logged-in buyer for Sell + Store list chrome</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Entry</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>Stores directory</td><td><code>/stores</code> (fallback from <code>/vendor/store-list</code>)</td></tr>
+            <tr><td>Store detail</td><td><code>/store/{id}</code></td></tr>
+            <tr><td>Become a vendor</td><td><code>/vendor/become-a-vendor</code></td></tr>
+            <tr><td>Application</td><td><code>/vendor/seller-application</code></td></tr>
+            <tr><td>Fee / prohibited / ToS</td><td><code>/info/fee-schedule</code>, <code>/info/prohibited-restricted-products-policy</code>, <code>/info/terms-of-service</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Open store list: Search vendor + Visit Store.</li>
+          <li>Filter vendors by search.</li>
+          <li>Open store detail: Contact Seller + products.</li>
+          <li>On PDP, confirm <strong>Sold by</strong>.</li>
+          <li>Sell landing: Start Selling Today → application form (contact + business fields).</li>
+          <li>FAQ / Seller Requirements on landing.</li>
+          <li>Fee schedule, prohibited products, terms load as seller agreement stand-ins.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li><code>/vendor/store-list</code> may 404; automation falls back to <code>/stores</code>.</li>
+          <li>Full seller portal after approval is <strong>not</strong> on this storefront (see Flow 10 / portal gaps).</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p>None for public onboarding. Authenticated Sell chrome needs buyer secrets.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>9</code></dd>
+          <dt>Specs</dt><dd><code>SellerStorefront.spec.js</code>, <code>SellerOnboarding.spec.js</code></dd>
+          <dt>Helpers</dt><dd><code>oneDirectBuySeller.js</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-200, 364, 201, 066, 047, 183–197, 379–381</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 10 -->
+      <section class="block flow" id="flow-10" data-cats="seller admin" data-gated="0" data-search="seller admin messaging orders promotions csv catalog backend">
+        <div class="flow-head">
+          <h2>Flow 10 — Seller / Admin Backends (storefront + coverage)</h2>
+          <span class="badge cat">Seller / Admin</span>
+          <span class="badge ci-yes">CI enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Cover seller-adjacent <strong>storefront</strong> behaviors (messaging entry, order tracking, coupons, store search, buyer orders shell) and keep seller.csv use-case IDs referenced. Catalog/inventory backend cases are explicitly skipped pending OneChannel automation.</p>
+        <h3>Actors</h3>
+        <p>Guest, Buyer, Admin identity (storefront only)</p>
+        <h3>Storefront surfaces (exercised)</h3>
+        <table>
+          <thead><tr><th>Area</th><th>Behavior</th><th>Routes</th></tr></thead>
+          <tbody>
+            <tr><td>Messaging</td><td>Contact Seller → Conversations</td><td><code>/store/…</code>, Conversations panel</td></tr>
+            <tr><td>Orders</td><td>Guest order tracking form</td><td><code>/account/order-tracking</code></td></tr>
+            <tr><td>Orders</td><td>Authenticated orders shell</td><td><code>/account/orders</code></td></tr>
+            <tr><td>Promotions</td><td>Coupon field + invalid code</td><td><code>/account/shopping-cart</code></td></tr>
+            <tr><td>Admin-ish browse</td><td>Store search, Sell vs buyer chrome</td><td><code>/stores</code>, Sell landing, my-account</td></tr>
+            <tr><td>Coverage</td><td>seller.csv load + ID references</td><td><code>SellerCsvCoverage.spec.js</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path (storefront)</h3>
+        <ol class="steps">
+          <li>From store page, Contact Seller opens Conversations.</li>
+          <li>Guest order tracking: Order ID + Track Your Order.</li>
+          <li>Logged-in buyer: my-account and <code>/account/orders</code> shell.</li>
+          <li>Cart coupon Apply; invalid coupon notice.</li>
+          <li>Search vendor on <code>/stores</code>; Sell landing still reachable alongside buyer chrome.</li>
+          <li>seller.csv loads ≥60 ODB-UC rows; every ID appears in a <code>Seller*.spec.js</code>.</li>
+        </ol>
+        <h3>Alternate / negative paths / portal honesty</h3>
+        <ul class="alts">
+          <li>Seller <strong>reply</strong> in portal, seller order notifications, approve/reject seller apps, and catalog/inventory/bulk ops are <strong>skipped</strong> — require OneChannel / seller portal.</li>
+          <li>See <a href="#portal-gaps">Out-of-scope / portal gaps</a> for the tracked backend-only ID list.</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p>Buyer secrets for authenticated order/messaging shells. Seller portal credentials not required for storefront slices.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>10</code></dd>
+          <dt>Specs</dt><dd>SellerMessaging, SellerOrders, SellerPromotions, SellerAdminManagement, SellerCatalogBackend, SellerCsvCoverage</dd>
+          <dt>Helpers</dt><dd><code>oneDirectBuySeller.js</code>, <code>sellerUseCases.js</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-323*, 066-msg, 169, 167–180, 396*, 364–365, 476, csv coverage</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 10.1 -->
+      <section class="block flow" id="flow-10-1" data-cats="admin" data-gated="1" data-search="admin backend login dashboard stores orders">
+        <div class="flow-head">
+          <h2>Flow 10.1 — Admin Backend Login</h2>
+          <span class="badge cat">Admin</span>
+          <span class="badge ci-no">CI gated</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>With admin/buyer credentials, confirm storefront account access after login: dashboard, stores, search, orders, tracking, and Sell landing — <strong>not</strong> a full admin CMS suite.</p>
+        <h3>Actors</h3>
+        <p>Admin (falls back to buyer credentials)</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Entry</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>Dashboard</td><td><code>/account/my-account</code></td></tr>
+            <tr><td>Stores</td><td><code>/stores</code></td></tr>
+            <tr><td>Orders</td><td><code>/account/orders</code></td></tr>
+            <tr><td>Tracking</td><td><code>/account/order-tracking</code></td></tr>
+            <tr><td>Sell</td><td><code>/vendor/become-a-vendor</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Log in; dashboard + Logout.</li>
+          <li>Dashboard / Orders nav links.</li>
+          <li>Store list visible; search for a keyword (e.g. bearing).</li>
+          <li>Orders list or empty state; Order Tracking form.</li>
+          <li>Sell on OneDirect Buy landing still reachable.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Missing secrets → skipped.</li>
+          <li>Does not automate OneChannel approve/reject seller workflows.</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p><code>ONEDIRECTBUY_ADMIN_*</code> or buyer fallback. Flow <strong>disabled</strong> by default.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>10.1</code></dd>
+          <dt>Specs</dt><dd><code>AdminBackend.spec.js</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-357–358, 364-admin, 365-admin, 371–374, 476-admin</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 11 -->
+      <section class="block flow" id="flow-11" data-cats="cross guest" data-gated="0" data-search="responsive accessibility mobile keyboard alt a11y">
+        <div class="flow-head">
+          <h2>Flow 11 — Responsive UI &amp; Accessibility</h2>
+          <span class="badge cat">Cross-cutting</span>
+          <span class="badge ci-yes">CI enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Cross-cutting quality: mobile homepage/shop/PDP chrome, keyboard focus, image alt text, and labeled login validation.</p>
+        <h3>Actors</h3>
+        <p>Guest</p>
+        <h3>Entry points &amp; routes</h3>
+        <p>Same primary routes as Flows 1–2, 4, 6 at viewport <strong>390×844</strong> and desktop.</p>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Mobile: Welcome + bottom bar; Menu → Home / Shop / Vendor / Blogs.</li>
+          <li>PDP H1 visible on mobile; shop shows Products found + links.</li>
+          <li>Desktop: Tab focuses a visible control on homepage.</li>
+          <li>First shop product image has <code>alt</code>.</li>
+          <li>Login: Email / Password / Sign in labeled; empty Sign in shows Please input messages.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Assistant overlay can hide roles on mobile; dismiss before Menu/Vehicle assertions.</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p>None.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>11</code></dd>
+          <dt>Specs</dt><dd><code>ResponsiveAccessibility.spec.js</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-491*, 492, 495, 499, 501–503</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 12 -->
+      <section class="block flow" id="flow-12" data-cats="buyer" data-gated="1" data-search="address book shipping crud default delete">
+        <div class="flow-head">
+          <h2>Flow 12 — Buyer Address Book</h2>
+          <span class="badge cat">Buyer</span>
+          <span class="badge ci-no">CI gated</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Guests cannot manage addresses without login; authenticated buyers can add, edit, set default, and delete shipping addresses used at checkout.</p>
+        <h3>Actors</h3>
+        <p>Guest (gate), Buyer (CRUD)</p>
+        <h3>Entry points &amp; routes</h3>
+        <table>
+          <thead><tr><th>Entry</th><th>Route</th></tr></thead>
+          <tbody>
+            <tr><td>Address book</td><td><code>/account/addresses</code></td></tr>
+            <tr><td>Add</td><td><code>/account/addresses/add</code></td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Guest opens addresses or add → redirected to Welcome back login.</li>
+          <li>Buyer opens add form: Name, Address line 1, Country, default checkbox.</li>
+          <li>Save new address → list.</li>
+          <li>Edit (e.g. city) → Save.</li>
+          <li>Set default → Default badge.</li>
+          <li>Delete address → line removed from list.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Missing secrets → authenticated describes skipped.</li>
+          <li>Validation on required shipping fields mirrors checkout (Name, etc.).</li>
+        </ul>
+        <h3>Preconditions</h3>
+        <p><code>ONEDIRECTBUY_BUYER_*</code>. Flow <strong>disabled</strong> by default. Test address data: Kissimmee FL helper defaults in <code>oneDirectBuyAddress.js</code>.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>12</code></dd>
+          <dt>Specs</dt><dd><code>BuyerAddress.spec.js</code></dd>
+          <dt>Helpers</dt><dd><code>oneDirectBuyAddress.js</code></dd>
+          <dt>Key steps</dt><dd>ODB-UC-010-guest*, 132-addr, 010–013</dd>
+        </dl>
+      </section>
+
+      <section class="block" id="portal-gaps">
+        <h2>Out-of-scope / portal gaps</h2>
+        <p>These use cases are <strong>tracked in automation as skips</strong>. They require an authenticated <strong>OneChannel Admin / seller portal</strong>, not the public OneDirectBuy storefront:</p>
+        <table>
+          <thead><tr><th>ID</th><th>Capability</th></tr></thead>
+          <tbody>
+            <tr><td>ODB-UC-077</td><td>Variant-level inventory per seller</td></tr>
+            <tr><td>ODB-UC-081–083</td><td>Price / sale price / negative price guards</td></tr>
+            <tr><td>ODB-UC-087–088</td><td>UPC/GTIN/MPN + invalid UPC</td></tr>
+            <tr><td>ODB-UC-104, 106–107</td><td>ACES / PIES upload + invalid PIES</td></tr>
+            <tr><td>ODB-UC-203–204</td><td>Brand approval / new brand</td></tr>
+            <tr><td>ODB-UC-215, 219–221, 227–228</td><td>Product create/review/images/specs/edit</td></tr>
+            <tr><td>ODB-UC-232–234, 242</td><td>Bulk CSV / price / inventory + export</td></tr>
+            <tr><td>ODB-UC-248</td><td>Required category attributes</td></tr>
+            <tr><td>ODB-UC-251–253</td><td>Inventory qty add/reduce/negative guard</td></tr>
+            <tr><td>ODB-UC-293</td><td>Approve buyer return</td></tr>
+            <tr><td>ODB-UC-317, 320</td><td>Seller rating / respond to review</td></tr>
+            <tr><td>ODB-UC-330</td><td>Seller approval notification</td></tr>
+            <tr><td>ODB-UC-509, 512</td><td>Large bulk upload perf / recovery</td></tr>
+          </tbody>
+        </table>
+        <p>Also commonly skipped on storefront-only runs: seller portal messaging replies, seller order notification backends, admin approve/reject of seller applications.</p>
+        <div class="callout">
+          When <code>ONEDIRECTBUY_SELLER_*</code> and portal routes exist, automate those in a separate project or extend Flow 10 — do not pretend they are OneDirectBuy.com pages.
+        </div>
+      </section>
+
+      <section class="block" id="routes">
+        <h2>Quick reference — route map</h2>
+        <table>
+          <thead><tr><th>Area</th><th>Paths</th></tr></thead>
+          <tbody>
+            <tr><td>Home / browse</td><td><code>/</code>, <code>/shop</code>, <code>/search?keyword=…</code>, <code>/category/{slug}</code>, <code>/product/{slug}</code></td></tr>
+            <tr><td>Account / auth</td><td><code>/account/login</code>, <code>/account/register</code>, <code>/account/my-account</code>, <code>/account/orders</code>, <code>/account/order-tracking</code>, <code>/account/shopping-cart</code>, <code>/account/checkout</code>, <code>/account/payment-success</code>, <code>/account/addresses</code>, <code>/account/addresses/add</code>, <code>/account/user-information</code>, <code>/account/wishlist</code></td></tr>
+            <tr><td>Seller / vendor</td><td><code>/vendor/become-a-vendor</code>, <code>/vendor/seller-application</code>, <code>/vendor/store-list</code> → <code>/stores</code>, <code>/store/{id}</code></td></tr>
+            <tr><td>Legal / info</td><td><code>/info/privacy-policy</code>, <code>/info/terms-of-service</code>, <code>/info/shipping-policy</code>, <code>/info/return-refund</code>, <code>/info/fee-schedule</code>, <code>/info/fulfillment-terms</code>, <code>/info/prohibited-restricted-products-policy</code>, <code>/info/policies</code>, <code>/info/sitemap</code>, <code>/info/contact-us</code></td></tr>
+            <tr><td>SEO / errors</td><td><code>/sitemap.xml</code>, intentional 404 paths</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="block" id="env">
+        <h2>Quick reference — environment variables</h2>
+        <table>
+          <thead><tr><th>Variable</th><th>Used by</th></tr></thead>
+          <tbody>
+            <tr><td><code>ONEDIRECTBUY_BASE_URL</code></td><td>All navigation</td></tr>
+            <tr><td><code>ONEDIRECTBUY_BUYER_EMAIL</code> / <code>_PASSWORD</code></td><td>Flows 6 (login), 6.1, 6.2, 10 (auth slices), 12, 10.1 fallback</td></tr>
+            <tr><td><code>ONEDIRECTBUY_ADMIN_EMAIL</code> / <code>_PASSWORD</code></td><td>Flow 10.1</td></tr>
+            <tr><td><code>ONEDIRECTBUY_SELLER_EMAIL</code> / <code>_PASSWORD</code></td><td>Future seller portal (not storefront-critical today)</td></tr>
+            <tr><td><code>ONEDIRECTBUY_ATC_KEYWORD</code></td><td>Cart / purchase product seed (default <code>filter</code>)</td></tr>
+            <tr><td><code>ONEDIRECTBUY_TEST_COUPON</code></td><td>Cart / promotions coupon apply</td></tr>
+            <tr><td><code>ONEDIRECTBUY_STRIPE_TEST_*</code></td><td>Flow 6.2 place order</td></tr>
+          </tbody>
+        </table>
+        <p>Never commit <code>.env</code>. See <a href="CI_SECRETS.md">CI_SECRETS.md</a> for GitHub Actions wiring.</p>
+      </section>
+
+      <section class="block" id="related">
+        <h2>Related files</h2>
+        <table>
+          <thead><tr><th>File</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td><code>flows.config.json</code></td><td>Local flow enablement + test file lists</td></tr>
+            <tr><td><code>ci-tests.config.json</code></td><td>CI file enablement + suite membership</td></tr>
+            <tr><td><code>scripts/run-ci-tests.js</code></td><td>Runner (<code>flow:N</code>, smoke, regression, all)</td></tr>
+            <tr><td><code>scripts/extract-flow-steps.js</code></td><td>Regenerates <code>flow-steps.json</code> from soft-check IDs</td></tr>
+            <tr><td><code>docs/CI_SECRETS.md</code></td><td>Secrets and gated specs</td></tr>
+            <tr><td><a href="ONEDIRECTBUY_FLOWS.md">ONEDIRECTBUY_FLOWS.md</a></td><td>Markdown source twin of this HTML</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <footer class="doc-foot">
+        OneDirectBuy Website Flows · HTML documentation · Open locally or print to PDF · Source: automation catalog in this repo
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "neutral",
+      securityLevel: "loose",
+      flowchart: { curve: "basis" },
+    });
+
+    const q = document.getElementById("q");
+    const filters = document.querySelectorAll(".filters button");
+    const flows = document.querySelectorAll("section.flow");
+    const tocItems = document.querySelectorAll("#toc [data-flow]");
+    let activeFilter = "all";
+
+    function apply() {
+      const term = (q.value || "").trim().toLowerCase();
+      flows.forEach((section) => {
+        const cats = (section.dataset.cats || "").split(/\s+/);
+        const gated = section.dataset.gated === "1";
+        const hay = (
+          (section.dataset.search || "") +
+          " " +
+          section.textContent
+        ).toLowerCase();
+        let ok = true;
+        if (activeFilter === "gated") ok = gated;
+        else if (activeFilter !== "all") ok = cats.includes(activeFilter);
+        if (term && !hay.includes(term)) ok = false;
+        section.classList.toggle("hidden", !ok);
+      });
+      tocItems.forEach((li) => {
+        const cats = (li.dataset.cats || "").split(/\s+/);
+        const gated = li.dataset.gated === "1";
+        const text = li.textContent.toLowerCase();
+        let ok = true;
+        if (activeFilter === "gated") ok = gated;
+        else if (activeFilter !== "all") ok = cats.includes(activeFilter);
+        if (term && !text.includes(term)) ok = false;
+        li.classList.toggle("hidden", !ok);
+      });
+    }
+
+    q.addEventListener("input", apply);
+    filters.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filters.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeFilter = btn.dataset.filter;
+        apply();
+      });
+    });
+  </script>
+</body>
+</html>

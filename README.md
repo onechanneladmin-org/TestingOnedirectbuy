@@ -31,7 +31,10 @@ tests/
   fixtures/          # uiAwareTest.js
 lib/                 # shared framework utilities
 reporters/           # custom Playwright reporters
+docs/                # flow docs + CI secrets
 ```
+
+**Website flows:** see [docs/ONEDIRECTBUY_FLOWS.html](docs/ONEDIRECTBUY_FLOWS.html) (interactive HTML) or [docs/ONEDIRECTBUY_FLOWS.md](docs/ONEDIRECTBUY_FLOWS.md) for the full catalog of storefront journeys (actors, steps, routes, automation mapping).
 
 ## CI
 
