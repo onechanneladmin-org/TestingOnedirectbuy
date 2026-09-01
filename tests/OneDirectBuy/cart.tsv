@@ -1,0 +1,17 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-113	Cart	Guest Buyer	Add item to cart	Guest buyer adds an item to the cart.	P0	Yes	Working
+ODB-UC-114	Cart	Guest Buyer	View cart	Guest buyer opens the cart and sees line items.	P0	Yes	Working
+ODB-UC-115	Cart	Guest Buyer	Update quantity	Guest buyer updates item quantity in the cart.	P0	Yes	Working
+ODB-UC-116	Cart	Guest Buyer	Remove item	Guest buyer removes an item from the cart.	P0	Yes	Working
+ODB-UC-117	Cart	Guest Buyer	Cart persists after refresh	Cart contents remain after a page refresh.	P1	Yes	Working
+ODB-UC-118	Cart	Buyer	Guest cart merges after login	A guest cart merges into the buyer cart after login.	P0	Yes	Working
+ODB-UC-119	Cart	Buyer	Duplicate item handling	Adding the same item again is handled without a broken cart.	P1	Yes	Working
+ODB-UC-120	Cart	Buyer	Stock validation before checkout	Cart validates stock before the buyer proceeds to checkout.	P0	Yes	Working
+ODB-UC-121	Cart	Buyer	Subtotal calculation	Cart shows a calculated subtotal.	P0	Yes	Working
+ODB-UC-122	Cart	Buyer	Tax estimate	Cart shows a tax estimate.	P1	Yes	Working
+ODB-UC-123	Cart	Buyer	Shipping estimate	Cart shows a shipping estimate.	P1	Yes	Working
+ODB-UC-124	Cart	Buyer	Apply coupon	Buyer applies a valid coupon to the cart.	P0	Yes	Working
+ODB-UC-125	Cart	Buyer	Invalid coupon	An invalid coupon is rejected.	P0	Yes	Working
+ODB-UC-126	Cart	Buyer	Remove coupon	Buyer can remove an applied coupon.	P1	Yes	Working
+ODB-UC-127	Cart	Buyer	Multi-seller cart grouping	Cart groups items by seller.	P0	Yes	Not Required
+ODB-UC-128	Cart	Buyer	Cart recovery	A saved cart can be recovered after login.	P1	Yes	Working

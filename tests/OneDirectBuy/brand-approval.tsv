@@ -1,0 +1,13 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-203	Brand Approval	Seller	Request existing brand approval	Seller requests permission to sell an existing brand.	P0	Yes	Working
+ODB-UC-204	Brand Approval	Seller	Request new brand creation	Seller submits a new brand for review.	P0	Yes	Working
+ODB-UC-205	Brand Approval	Seller	Upload brand authorization	Seller uploads brand authorization documents.	P0	Yes	Later versions to include
+ODB-UC-206	Brand Approval	Seller	Missing brand proof validation	The system blocks a request without brand proof.	P0	Yes	Later versions to include
+ODB-UC-207	Brand Approval	Admin	Approve brand selling request	Admin approves a seller to sell an existing brand.	P0	Yes	Working
+ODB-UC-208	Brand Approval	Admin	Reject brand request	Admin rejects a brand selling request.	P0	Yes	Later versions to include
+ODB-UC-209	Brand Approval	Admin	Approve new brand	Admin approves a new brand so it can be used.	P0	Yes	Working
+ODB-UC-210	Brand Approval	Admin	Merge duplicate brand	Admin merges duplicate brand records.	P1	Yes	Working
+ODB-UC-211	Brand Approval	Seller	View brand request status	Seller can see pending or approved brand requests.	P1	Yes	Later versions to include
+ODB-UC-212	Brand Approval	Seller	Apply for more brands	An approved seller can apply for additional brands.	P1	Yes	Later versions to include
+ODB-UC-213	Brand Approval	Seller	Block unapproved brand listing	Seller cannot list products for an unapproved brand.	P0	Yes	Later versions to include
+ODB-UC-214	Brand Approval	Admin	Request brand info	Admin can request more brand information from a seller.	P1	Yes	Later versions to include

@@ -1,8 +1,10 @@
 import { test, expect } from "../helpers/softTest.js";
 import {
+  filterListingByCategory,
   gotoOneDirectBuy,
   searchProducts,
   shopSortSelect,
+  typeForSearchSuggestions,
   waitForShopProducts,
 } from "../helpers/oneDirectBuyNav.js";
 
@@ -76,6 +78,27 @@ test.describe("OneDirectBuy — Search", () => {
     );
   });
 
+  test("ODB-UC-033: search suggestions appear while typing", async ({
+    page,
+    soft,
+  }) => {
+    await soft(
+      "ODB-UC-033",
+      "Header search shows category, brand, or product suggestions",
+      async () => {
+        await gotoOneDirectBuy(page, "/");
+        await typeForSearchSuggestions(page, "bearing");
+        await expect(
+          page
+            .locator(".ps-search-suggestions__label")
+            .filter({ hasText: /CATEGORIES|BRANDS|PRODUCTS|SUGGESTIONS/i })
+            .or(page.locator("a.ps-search-suggestion"))
+            .first(),
+        ).toBeVisible({ timeout: 10_000 });
+      },
+    );
+  });
+
   test("ODB-UC-034: shop category sidebar filters listing", async ({
     page,
     soft,
@@ -83,14 +106,7 @@ test.describe("OneDirectBuy — Search", () => {
     await soft("ODB-UC-034", "Click Exterior in Categories sidebar", async () => {
       await gotoOneDirectBuy(page, "/shop");
       await waitForShopProducts(page);
-      const exterior = page
-        .getByRole("heading", { name: /^Categories$/i })
-        .locator("..")
-        .getByRole("link", { name: /^Exterior$/i })
-        .or(page.getByRole("link", { name: /^Exterior$/i }))
-        .first();
-      await exterior.click();
-      await page.waitForURL(/\/category\/exterior|\/shop/i, { timeout: 20_000 });
+      await filterListingByCategory(page, "Exterior");
       await expect(
         page
           .getByText(/\d+ Products found/i)

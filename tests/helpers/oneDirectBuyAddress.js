@@ -1,7 +1,8 @@
 import { expect } from "@playwright/test";
 import {
   fillInputField,
-  gotoAuthenticatedPage,
+  ensureLoggedInBuyer,
+  loginBuyer,
   ONE_DIRECT_BUY_BUYER_CREDENTIALS,
 } from "./oneDirectBuyAuth.js";
 import { gotoOneDirectBuy, dismissCookieBanner } from "./oneDirectBuyNav.js";
@@ -29,15 +30,27 @@ export async function expectGuestAddressesRedirect(page) {
   ).toBeVisible({ timeout: 15_000 });
 }
 
-/** Open authenticated address list (`Your Addresses`). */
+/** Open authenticated address list (`Your Addresses` or new Address hub). */
 export async function openAddressesPage(page) {
-  await gotoAuthenticatedPage(
-    page,
-    "/account/addresses",
-    ONE_DIRECT_BUY_BUYER_CREDENTIALS,
-  );
+  await ensureLoggedInBuyer(page);
+  await gotoOneDirectBuy(page, "/account/addresses");
+
+  if (page.url().includes("/account/login")) {
+    await loginBuyer(
+      page,
+      ONE_DIRECT_BUY_BUYER_CREDENTIALS.email,
+      ONE_DIRECT_BUY_BUYER_CREDENTIALS.password,
+    );
+    await gotoOneDirectBuy(page, "/account/addresses");
+  }
+
+  await expect(page).not.toHaveURL(/\/account\/login/, { timeout: 15_000 });
   await expect(
-    page.getByRole("heading", { name: /Your Addresses/i }),
+    page
+      .getByRole("heading", { name: /^Your Addresses$/i })
+      .or(page.getByRole("link", { name: /add address/i }))
+      .or(page.getByRole("button", { name: /add address/i }))
+      .first(),
   ).toBeVisible({ timeout: 30_000 });
 }
 
@@ -150,20 +163,55 @@ export async function clickSaveAddress(page) {
   await save.first().click();
 }
 
-/** Add a shipping address via /account/addresses/add. */
+/** Add a shipping address via the address book Add address CTA. */
 export async function addShippingAddress(page, data) {
-  await gotoAuthenticatedPage(
-    page,
-    "/account/addresses/add",
-    ONE_DIRECT_BUY_BUYER_CREDENTIALS,
-  );
+  await openAddressesPage(page);
+  const addCta = page
+    .getByRole("link", { name: /add address/i })
+    .or(page.getByRole("button", { name: /add address/i }));
+  if (await addCta.first().isVisible({ timeout: 8_000 }).catch(() => false)) {
+    await addCta.first().click();
+  }
+
+  await page
+    .waitForURL(/\/account\/addresses\/add/, { timeout: 10_000 })
+    .catch(() => {});
+
+  const nameField = page
+    .getByPlaceholder("Full name")
+    .or(page.getByRole("textbox", { name: /^Name/i }));
+  if (
+    !/\/account\/addresses\/add/.test(page.url()) &&
+    !(await nameField.first().isVisible({ timeout: 5_000 }).catch(() => false))
+  ) {
+    await gotoOneDirectBuy(page, "/account/addresses/add");
+    if (page.url().includes("/account/login")) {
+      await loginBuyer(
+        page,
+        ONE_DIRECT_BUY_BUYER_CREDENTIALS.email,
+        ONE_DIRECT_BUY_BUYER_CREDENTIALS.password,
+      );
+      await gotoOneDirectBuy(page, "/account/addresses/add");
+    }
+  }
+
   await expect(
     page
-      .getByRole("heading", { name: /Shipping Address|Add address|Add Address/i })
-      .or(page.getByRole("textbox", { name: /^Name \*$/i })),
+      .getByPlaceholder("Full name")
+      .or(page.getByRole("textbox", { name: /^Name/i }))
+      .first(),
   ).toBeVisible({ timeout: 30_000 });
 
   await fillAddressForm(page, data);
+
+  if (data.setDefault) {
+    const box = page.getByRole("checkbox", { name: /^Set as default address$/i });
+    await expect(box).toBeVisible({ timeout: 10_000 });
+    if (!(await box.isChecked())) {
+      await box.check();
+    }
+  }
+
   await clickSaveAddress(page);
 
   const okButton = page.getByRole("button", { name: /^OK$/i });
@@ -171,8 +219,10 @@ export async function addShippingAddress(page, data) {
     await okButton.click();
   }
 
-  await page.waitForURL(/\/account\/addresses(?!\/add)/, { timeout: 30_000 });
+  await page
+    .waitForURL(/\/account\/addresses(?!\/add)/, { timeout: 20_000 })
+    .catch(() => {});
   await expect(
     page.getByText(data.line1).or(page.getByText(data.label)).first(),
-  ).toBeVisible({ timeout: 15_000 });
+  ).toBeVisible({ timeout: 20_000 });
 }

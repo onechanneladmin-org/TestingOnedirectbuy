@@ -1,0 +1,21 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-183	Seller Onboarding	Guest Seller	Start seller application	A guest seller can start the seller application.	P0	Yes	Working
+ODB-UC-184	Seller Onboarding	Seller	Submit seller application	Seller can submit a business application.	P0	Yes	Working
+ODB-UC-185	Seller Onboarding	Seller	Validate seller fields	The system validates required seller application fields.	P0	Yes	Working
+ODB-UC-186	Seller Onboarding	Seller	Upload business documents	Seller can upload business documents such as a W-9.	P0	Yes	Working
+ODB-UC-187	Seller Onboarding	Seller	Invalid document upload	The system blocks an invalid document upload.	P0	Yes	Working
+ODB-UC-188	Seller Onboarding	Admin	Review seller application	Admin can review a seller application.	P0	Yes	Working
+ODB-UC-189	Seller Onboarding	Admin	Approve seller	Admin can approve a seller.	P0	Yes	Working
+ODB-UC-190	Seller Onboarding	Admin	Reject seller	Admin can reject a seller.	P0	Yes	Working
+ODB-UC-191	Seller Onboarding	Admin	Request more information	Admin can request more information from a seller.	P0	Yes	Not Required
+ODB-UC-192	Seller Onboarding	Seller	Resubmit seller application	Seller can update and resubmit an application.	P0	Yes	Working
+ODB-UC-193	Seller Onboarding	Seller	Access seller dashboard	An approved seller can open the seller dashboard.	P0	Yes	Working
+ODB-UC-194	Seller Onboarding	Seller	Block pending seller selling	A pending or rejected seller cannot sell.	P0	Yes	Working
+ODB-UC-195	Seller Onboarding	Admin	Suspend seller	Admin can suspend a seller.	P0	Yes	Working
+ODB-UC-196	Seller Onboarding	Admin	Reactivate seller	Admin can reactivate a seller.	P0	Yes	Working
+ODB-UC-197	Seller Agreement	Seller	Accept seller agreement	Seller accepts the marketplace seller agreement.	P0	Yes	Working
+ODB-UC-198	Seller Storefront	Seller	Create storefront	Seller can create a public storefront.	P1	Yes	Working
+ODB-UC-199	Seller Storefront	Seller	Edit storefront	Seller can edit logo, banner, or store details.	P1	Yes	Working
+ODB-UC-200	Seller Storefront	Buyer	View seller storefront	Buyer can open a seller storefront.	P1	Yes	Working
+ODB-UC-201	Seller Storefront	Buyer	View seller products	Buyer can view products on a seller store.	P1	Yes	Working
+ODB-UC-202	Seller Storefront	Admin	Disable storefront	Admin can disable a storefront.	P1	Yes	Working

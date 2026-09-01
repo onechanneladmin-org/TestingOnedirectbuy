@@ -1,9 +1,11 @@
 import { test } from "../helpers/softTest.js";
 
 /**
- * Seller catalog, inventory, fitment upload, and bulk operations from main.csv / seller.csv.
- * These flows require an authenticated seller workspace (OneChannel Admin / seller portal),
- * which is not mounted on the public OneDirectBuy storefront.
+ * Remaining seller catalog/inventory skips from seller.csv (OneChannel).
+ * Product add/images/specs/resubmit/edit/bulk live in ProductCatalog.spec.js (Flow 25).
+ * Catalog export/attributes live in CatalogImportExport.spec.js (Flow 26).
+ * Inventory add/reduce/negative live in SellerInventory.spec.js (Flow 27).
+ * Brand request (203–204) lives in BrandApproval.spec.js.
  */
 const BACKEND_ONLY_CASES = [
   ["ODB-UC-077", "Variant-level inventory per seller"],
@@ -15,22 +17,6 @@ const BACKEND_ONLY_CASES = [
   ["ODB-UC-104", "Upload ACES fitment file"],
   ["ODB-UC-106", "Upload PIES file"],
   ["ODB-UC-107", "Invalid PIES file rejection"],
-  ["ODB-UC-203", "Request existing brand approval"],
-  ["ODB-UC-204", "Request new brand creation"],
-  ["ODB-UC-215", "Add new product for review"],
-  ["ODB-UC-219", "Upload product images"],
-  ["ODB-UC-220", "Invalid product image rejection"],
-  ["ODB-UC-221", "Add product specifications"],
-  ["ODB-UC-227", "Resubmit rejected product"],
-  ["ODB-UC-228", "Edit approved product"],
-  ["ODB-UC-232", "Bulk product CSV upload"],
-  ["ODB-UC-233", "Bulk price update by file"],
-  ["ODB-UC-234", "Bulk inventory update by file"],
-  ["ODB-UC-242", "Export seller catalog"],
-  ["ODB-UC-248", "Required category attribute validation"],
-  ["ODB-UC-251", "Add inventory quantity"],
-  ["ODB-UC-252", "Reduce inventory quantity"],
-  ["ODB-UC-253", "Prevent negative inventory"],
   ["ODB-UC-293", "Approve buyer return request"],
   ["ODB-UC-317", "Submit seller rating after order"],
   ["ODB-UC-320", "Respond to buyer review"],

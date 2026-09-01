@@ -1,0 +1,13 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-041	Category	Guest Buyer	Open category page	Buyer opens the shop or category listing and sees products.	P0	Yes	Working
+ODB-UC-042	Category	Guest Buyer	Listing content	Listing shows a product count and product links.	P0	Yes	Working
+ODB-UC-043	Category	Guest Buyer	Product cards	Product cards show title, price, and image.	P0	Yes	Working
+ODB-UC-044	Category	Guest Buyer	Filter by price	Buyer sees a price range filter on the listing.	P1	Yes	Working
+ODB-UC-045	Category	Guest Buyer	Filter by brand	Buyer filters the listing by brand.	P1	Yes	Working
+ODB-UC-046	Category	Guest Buyer	Filter in-stock	Buyer can limit results to in-stock products.	P1	Yes	Working
+ODB-UC-048	Category	Guest Buyer	Filter by rating	Buyer can filter listing results by rating.	P2	Yes	Working
+ODB-UC-049	Category	Guest Buyer	Clear listing filters	Buyer can return to the full shop listing after filtering.	P1	Yes	Working
+ODB-UC-050	Category	Guest Buyer	Listing pagination	Buyer moves through product listing pages.	P1	Yes	Working
+ODB-UC-051	Category	Guest Buyer	Open product from listing	Buyer opens a product page from a listing card.	P0	Yes	Working
+ODB-UC-052	Category	Guest Buyer	Add to cart from listing	Buyer adds a product to cart from the listing page.	P0	Yes	Working
+ODB-UC-053	Category	Guest Buyer	Sort listing	Buyer changes Sort items on the listing.	P1	Yes	Working

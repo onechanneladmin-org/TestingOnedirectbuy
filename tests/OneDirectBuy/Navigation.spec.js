@@ -1,5 +1,6 @@
 import { test, expect } from "../helpers/softTest.js";
 import {
+  breadcrumbHomeLink,
   clickLogoHome,
   gotoOneDirectBuy,
   openDepartmentCategory,
@@ -221,11 +222,7 @@ test.describe("OneDirectBuy — Navigation", () => {
   }) => {
     await soft("ODB-UC-040", "Home breadcrumb from /shop", async () => {
       await gotoOneDirectBuy(page, "/shop");
-      const home = page
-        .getByRole("navigation", { name: /Breadcrumb/i })
-        .getByRole("link", { name: /^Home$/i })
-        .or(page.getByRole("link", { name: /^Home$/i }));
-      await home.first().click();
+      await breadcrumbHomeLink(page).click();
       await expect(page).toHaveURL(/\/($|\?)/);
       await expect(
         page.getByRole("heading", {

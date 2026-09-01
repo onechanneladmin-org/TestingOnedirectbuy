@@ -1,0 +1,24 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-215	Product Catalog	Seller	Add new product	Seller submits a new product for review.	P0	Yes	Working
+ODB-UC-216	Product Catalog	Seller	Add offer to existing product	Seller adds an offer to an existing product.	P0	Yes	Test pending
+ODB-UC-217	Product Catalog	Seller	Duplicate product detection	The system detects a duplicate product.	P0	Yes	Later versions to include
+ODB-UC-218	Product Catalog	Seller	Required product field validation	The system validates required product fields.	P0	Yes	Test pending
+ODB-UC-219	Product Catalog	Seller	Upload product images	Seller uploads product images.	P0	Yes	Working
+ODB-UC-220	Product Catalog	Seller	Invalid product image	The system rejects an invalid product image.	P0	Yes	Working
+ODB-UC-221	Product Catalog	Seller	Add product specs	Seller adds product specifications.	P1	Yes	Working
+ODB-UC-222	Product Catalog	Seller	Add product documents	Seller uploads product documents.	P1	Yes	Working
+ODB-UC-223	Product Catalog	Admin	Review new product	Admin reviews a submitted product.	P0	Yes	Working
+ODB-UC-224	Product Catalog	Admin	Approve product	An approved product becomes visible in the store.	P0	Yes	Working
+ODB-UC-225	Product Catalog	Admin	Reject product	Admin rejects a product with a reason.	P0	Yes	Working
+ODB-UC-226	Product Catalog	Admin	Request product changes	Admin requests the seller to update a product.	P0	Yes	Working
+ODB-UC-227	Product Catalog	Seller	Resubmit rejected product	Seller corrects a rejected product and resubmits.	P0	Yes	Working
+ODB-UC-228	Product Catalog	Seller	Edit approved product	Seller edits an approved product.	P1	Yes	Working
+ODB-UC-229	Product Catalog	Seller	Deactivate product offer	Seller hides an active product offer.	P1	Yes	Working
+ODB-UC-230	Product Catalog	Admin	Block prohibited product	Admin blocks a prohibited product.	P0	Yes	Working
+ODB-UC-231	Product Catalog	Admin	Assign correct category	Admin changes a product category.	P1	Yes	Working
+ODB-UC-232	Product Catalog	Seller	Bulk product upload	Seller uploads products by CSV or Excel.	P1	Yes	Working
+ODB-UC-233	Product Catalog	Seller	Bulk price update	Seller updates prices in bulk by file.	P1	Yes	Working
+ODB-UC-234	Product Catalog	Seller	Bulk inventory update	Seller updates inventory in bulk by file.	P1	Yes	Working
+ODB-UC-235	Product Moderation	System	Flag banned product content	The system flags banned product content.	P0	Yes	New Functionality
+ODB-UC-236	Product Moderation	Admin	Approve flagged product	Admin approves flagged product content.	P1	Yes	Working
+ODB-UC-237	Product Moderation	Admin	Reject misleading product claims	Admin rejects misleading product claims.	P0	Yes	New Functionality

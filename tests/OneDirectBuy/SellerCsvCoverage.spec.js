@@ -25,7 +25,14 @@ test.describe("OneDirectBuy — seller.csv source validation", () => {
       const sellerDir = path.join(process.cwd(), "tests/OneDirectBuy");
       const specText = fs
         .readdirSync(sellerDir)
-        .filter((name) => name.startsWith("Seller") && name.endsWith(".spec.js"))
+        .filter(
+          (name) =>
+            name.endsWith(".spec.js") &&
+            (name.startsWith("Seller") ||
+              name === "BrandApproval.spec.js" ||
+              name === "ProductCatalog.spec.js" ||
+              name === "CatalogImportExport.spec.js"),
+        )
         .map((name) => fs.readFileSync(path.join(sellerDir, name), "utf8"))
         .join("\n");
 

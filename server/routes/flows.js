@@ -20,6 +20,7 @@ router.get("/", async (_req, res, next) => {
         name: f.name,
         enabled: f.enabled,
         tests: f.tests,
+        catalog: f.catalog || "",
         stepsTotal: (f.steps || []).length,
         steps: (f.steps || []).map((s) => ({
           stepId: s.stepId,
@@ -27,6 +28,13 @@ router.get("/", async (_req, res, next) => {
           order: s.order,
           specFile: s.specFile,
           dependsOn: s.dependsOn || null,
+          module: s.module || "",
+          actor: s.actor || "",
+          useCase: s.useCase || "",
+          description: s.description || "",
+          priority: s.priority || "",
+          automation: s.automation || "",
+          currentStatus: s.currentStatus || "",
         })),
       })),
     });

@@ -4,13 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>OneDirectBuy — Flow Control</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/ui/styles.css" />
+    <link rel="stylesheet" href="/ui/styles.css?v=5" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
@@ -50,6 +44,15 @@
           <button type="button" class="chip" data-filter="enabled">Enabled</button>
           <button type="button" class="chip" data-filter="disabled">Off</button>
         </div>
+        <label class="rail-search">
+          <span class="visually-hidden">Search flows</span>
+          <input
+            id="flowSearch"
+            type="search"
+            placeholder="Search flows…"
+            autocomplete="off"
+          />
+        </label>
         <ul id="flowList" class="flow-list" role="listbox" aria-label="Test flows"></ul>
       </aside>
 
@@ -71,6 +74,7 @@
                 <input type="checkbox" id="headedMode" />
                 Headed browser
               </label>
+              <span id="runBadge" class="status-pill idle">idle</span>
               <button type="button" class="btn primary" id="btnRun">
                 <span class="btn-pulse" aria-hidden="true"></span>
                 Run flow
@@ -78,7 +82,18 @@
             </div>
           </header>
 
-          <div class="detail-grid">
+          <div id="runProgress" class="progress-block hidden">
+            <div class="progress-meta">
+              <span id="progressLabel">0 / 0 steps</span>
+              <span id="progressPct">0%</span>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <p class="mono muted" id="occurrenceId">—</p>
+          </div>
+
+          <div class="detail-grid" id="listLayout">
             <div class="panel">
               <div class="panel-head">
                 <h3>Step catalog</h3>
@@ -90,25 +105,44 @@
             <div class="panel live-panel">
               <div class="panel-head">
                 <h3>Live run</h3>
-                <span id="runBadge" class="status-pill idle">idle</span>
               </div>
               <div id="liveEmpty" class="live-empty">
                 No active occurrence. Hit <strong>Run flow</strong> to start.
                 A new terminal window will open for Playwright; step status streams into MongoDB for this panel.
               </div>
               <div id="liveBody" class="live-body hidden">
-                <div class="progress-block">
-                  <div class="progress-meta">
-                    <span id="progressLabel">0 / 0 steps</span>
-                    <span id="progressPct">0%</span>
-                  </div>
-                  <div class="progress-track" aria-hidden="true">
-                    <div id="progressFill" class="progress-fill"></div>
-                  </div>
-                  <p class="mono muted" id="occurrenceId">—</p>
-                </div>
                 <ul id="liveSteps" class="live-steps"></ul>
               </div>
+            </div>
+          </div>
+
+          <div id="sheetLayout" class="panel sheet-panel hidden">
+            <div class="panel-head">
+              <h3>Use cases</h3>
+              <span id="sheetRowCount" class="badge">0</span>
+            </div>
+            <p id="sheetIdleHint" class="muted sheet-hint">
+              Catalog from the sheet. Hit <strong>Run flow</strong> to fill Test Status and Issues.
+            </p>
+            <div class="sheet-scroll">
+              <table class="use-case-sheet" id="useCaseSheet">
+                <thead>
+                  <tr>
+                    <th>Use Case ID</th>
+                    <th>Module</th>
+                    <th>Actor</th>
+                    <th>Use Case</th>
+                    <th>Description</th>
+                    <th>Priority</th>
+                    <th>Automation</th>
+                    <th>Current Onedirectbuy Status</th>
+                    <th>testedby</th>
+                    <th class="issues">Issues</th>
+                    <th class="status-cell">Test Status</th>
+                  </tr>
+                </thead>
+                <tbody id="useCaseSheetBody"></tbody>
+              </table>
             </div>
           </div>
 
@@ -136,6 +170,6 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="/ui/app.js" type="module"></script>
+    <script src="/ui/app.js?v=5" type="module"></script>
   </body>
 </html>

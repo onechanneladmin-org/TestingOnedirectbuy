@@ -213,3 +213,169 @@ export async function openVehicleFromMobileBar(page) {
 
   await expect(garage.first()).toBeVisible({ timeout: DEFAULT_TIMEOUT });
 }
+
+/** Optional trim/engine fields on Add New Vehicle. */
+export function trimField(page) {
+  return page
+    .getByRole("textbox", { name: /Trim \(optional\)/i })
+    .or(page.getByRole("combobox", { name: /Trim/i }))
+    .first();
+}
+
+export function engineField(page) {
+  return page
+    .getByRole("textbox", { name: /Engine \(optional\)/i })
+    .or(page.getByRole("combobox", { name: /Engine/i }))
+    .first();
+}
+
+export async function clickFindParts(page) {
+  const find = page
+    .getByRole("button", { name: /^Find Parts$/i })
+    .or(page.getByRole("button", { name: /^Find !$/i }))
+    .first();
+  await expect(find).toBeEnabled({ timeout: 15_000 });
+  await find.click();
+}
+
+export async function saveVehicleFromForm(page) {
+  const save = page.getByRole("button", { name: /^Save Vehicle$/i });
+  await expect(save).toBeEnabled({ timeout: 15_000 });
+  await save.click();
+}
+
+export async function openLicensePlateTab(page) {
+  await openAddNewVehicleForm(page);
+  const tab = page.getByRole("tab", {
+    name: /Look up by (license )?plate|License plate/i,
+  });
+  if (!(await tab.isVisible({ timeout: 5_000 }).catch(() => false))) {
+    throw new Error("License plate lookup tab is not available on Add New Vehicle.");
+  }
+  await tab.click();
+}
+
+export async function submitVinLookup(page, vin) {
+  await openVinLookupTab(page);
+  const box = page.getByRole("textbox", { name: /VIN \(17 characters\)/i });
+  await box.fill(vin);
+  await page.getByRole("button", { name: /^Look up VIN$/i }).click();
+}
+
+export function fitmentBadge(page) {
+  return page.getByText(
+    /Fits your vehicle|This (part|product) fits|Does not fit|Not compatible|Fitment/i,
+  );
+}
+
+export function fitsVehicleMessage(page) {
+  return page.getByText(
+    /Fits (your )?vehicle|This (part|product) fits|Compatible with your vehicle/i,
+  );
+}
+
+export function doesNotFitMessage(page) {
+  return page.getByText(
+    /Does not fit|won'?t fit|will not fit|not compatible|incompatible with your vehicle/i,
+  );
+}
+
+export function compatibilityCopy(page) {
+  return page.getByText(
+    /compatible|fitment|fits these vehicles|vehicle (fit|compatibility)|this part fits/i,
+  );
+}
+
+/** Select YMM on Add New Vehicle, then Find Parts. */
+export async function applyYmmAndFindParts(page, preferred = { year: "2020" }) {
+  await openAddNewVehicleForm(page);
+  const picked = await fillVehicleYearMakeModel(page, preferred);
+  await clickFindParts(page);
+  return picked;
+}
+
+/** Select YMM and Save Vehicle into the device garage. */
+export async function saveYmmVehicleToGarage(page, preferred = { year: "2020" }) {
+  await openAddNewVehicleForm(page);
+  const picked = await fillVehicleYearMakeModel(page, preferred);
+  await saveVehicleFromForm(page);
+  await expect(
+    page.getByRole("heading", { name: /^My Vehicles$/i }),
+  ).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/No saved vehicles yet/i)).toBeHidden({
+    timeout: 15_000,
+  });
+  return picked;
+}
+
+export function garageVehicleButtons(page) {
+  return page
+    .getByRole("button")
+    .filter({ hasText: /\d{4}/ })
+    .filter({ hasNotText: /^Select Vehicle$/i });
+}
+
+export async function useFirstSavedVehicle(page) {
+  await openMyVehiclesPanel(page);
+  const card = garageVehicleButtons(page).first();
+  await expect(card).toBeVisible({ timeout: 15_000 });
+  await card.click();
+}
+
+export async function removeFirstSavedVehicle(page) {
+  await openMyVehiclesPanel(page);
+  const remove = page
+    .getByRole("button", { name: /^(Remove|Delete)$/i })
+    .or(page.getByRole("button", { name: /remove vehicle|delete vehicle/i }))
+    .first();
+  if (!(await remove.isVisible({ timeout: 5_000 }).catch(() => false))) {
+    throw new Error("No Remove/Delete control on a saved garage vehicle.");
+  }
+  await remove.click();
+}
+
+export async function setDefaultSavedVehicle(page) {
+  await openMyVehiclesPanel(page);
+  const def = page
+    .getByRole("button", { name: /set as default|make default|^default$/i })
+    .first();
+  if (!(await def.isVisible({ timeout: 5_000 }).catch(() => false))) {
+    throw new Error("No Set as default control on a saved garage vehicle.");
+  }
+  await def.click();
+}
+
+export async function clearSelectedVehicle(page) {
+  const clear = page
+    .getByRole("button", {
+      name: /clear (selected )?vehicle|change vehicle|^clear$/i,
+    })
+    .first();
+  if (await clear.isVisible({ timeout: 4_000 }).catch(() => false)) {
+    await clear.click();
+    return;
+  }
+  await openMyVehiclesPanel(page);
+  const inGarage = page
+    .getByRole("button", {
+      name: /clear (selected )?vehicle|deselect|change vehicle/i,
+    })
+    .first();
+  if (!(await inGarage.isVisible({ timeout: 5_000 }).catch(() => false))) {
+    throw new Error("No Clear selected vehicle control in header or garage.");
+  }
+  await inGarage.click();
+}
+
+export function vinLookupError(page) {
+  return page.getByText(
+    /invalid vin|could not (decode|find)|vin (not found|is invalid)|unable to (decode|look up)/i,
+  );
+}
+
+export function vinDecodedVehicle(page) {
+  return page
+    .getByText(/\d{4}\s+\w+/)
+    .or(page.getByRole("button", { name: /use this vehicle|select (this )?vehicle|save vehicle/i }))
+    .or(page.getByText(/decoded|vehicle found|we found your vehicle/i));
+}

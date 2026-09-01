@@ -1,0 +1,17 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-167	Buyer Orders	Buyer	View order history	Buyer views their order history.	P0	Yes	Working
+ODB-UC-168	Buyer Orders	Buyer	View order details	Buyer opens an order to see details.	P0	Yes	Working
+ODB-UC-169	Buyer Orders	Buyer	Track shipment	Buyer tracks a shipment.	P0	Yes	Working
+ODB-UC-170	Buyer Orders	Buyer	Cancel pending order	Buyer can cancel a pending order.	P0	Yes	Working
+ODB-UC-171	Buyer Orders	Buyer	Prevent shipped cancellation	A shipped order cannot be cancelled.	P0	Yes	Working
+ODB-UC-172	Buyer Orders	Buyer	Download invoice	Buyer can download an invoice.	P1	Yes	Working
+ODB-UC-173	Buyer Orders	Buyer	Reorder	Buyer can reorder products from a past order.	P1	Yes	Working
+ODB-UC-174	Buyer Orders	Buyer	Contact seller from order	Buyer can contact the seller from the order page.	P1	Yes	Working
+ODB-UC-175	Buyer Orders	Buyer	Shipment status update	Buyer sees shipment status updates.	P0	Yes	Working
+ODB-UC-176	Buyer Orders	Buyer	Delivered status	Buyer sees when an order is delivered.	P0	Yes	Working
+ODB-UC-177	Multi-Seller Orders	Buyer	Place multi-seller order	Buyer can check out items from more than one seller.	P0	Yes	Working
+ODB-UC-178	Multi-Seller Orders	System	Create seller sub-orders	The system splits a parent order into seller sub-orders.	P0	Yes	New Functionality
+ODB-UC-179	Multi-Seller Orders	Seller	Seller sees own sub-order	A seller sees only their own sub-order.	P0	Yes	Working
+ODB-UC-180	Multi-Seller Orders	Buyer	Buyer sees combined order	Buyer sees the full combined order.	P0	Yes	Working
+ODB-UC-181	Multi-Seller Orders	Buyer	Partial shipment	Buyer sees a partial shipment when one seller ships first.	P0	Yes	Test pending
+ODB-UC-182	Multi-Seller Orders	Admin	Admin views full order	Admin can view the full order with all sub-orders.	P0	Yes	Working

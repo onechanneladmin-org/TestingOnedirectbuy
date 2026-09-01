@@ -304,10 +304,18 @@ function main() {
     console.log(`  - ${file}`);
   }
 
-  const workers =
+  let workers =
     process.env.PW_WORKERS !== undefined && process.env.PW_WORKERS !== ""
       ? process.env.PW_WORKERS
       : String(config.workers ?? 4);
+  // Shared buyer account cannot login from two browsers at once.
+  if (
+    (process.env.PW_WORKERS === undefined || process.env.PW_WORKERS === "") &&
+    String(suite).startsWith("flow:") &&
+    selectedFlows?.[0]?.workers
+  ) {
+    workers = String(selectedFlows[0].workers);
+  }
   const retries =
     process.env.PW_RETRIES !== undefined && process.env.PW_RETRIES !== ""
       ? process.env.PW_RETRIES

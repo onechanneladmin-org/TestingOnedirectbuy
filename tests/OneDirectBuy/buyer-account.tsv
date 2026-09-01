@@ -1,0 +1,14 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-001	Buyer Account	Guest Buyer	Register new buyer account	Buyer creates account with name, email, and password.	P0	Yes	Working
+ODB-UC-002	Buyer Account	Guest Buyer	Prevent duplicate registration	System blocks registration with an email that already exists.	P0	Yes	Working
+ODB-UC-003	Buyer Account	Guest Buyer	Validate required signup fields	System shows validation when required signup fields are missing or invalid.	P0	Yes	Working
+ODB-UC-005	Buyer Account	Buyer	Login with valid credentials	Buyer logs in successfully with valid email and password.	P0	Yes	Working
+ODB-UC-006	Buyer Account	Buyer	Invalid login handling	System rejects wrong email or password and stays on login.	P0	Yes	Working
+ODB-UC-008	Buyer Account	Buyer	Reset password	Buyer requests a password reset from the login page.	P0	Yes	Working
+ODB-UC-009	Buyer Account	Buyer	Update profile details	Buyer updates name and other profile details on account information.	P1	Yes	Working
+ODB-UC-010	Buyer Account	Buyer	Add shipping address	Buyer adds a new shipping address to the address book.	P0	Yes	Working
+ODB-UC-011	Buyer Account	Buyer	Edit shipping address	Buyer edits a saved shipping address.	P1	Yes	Working
+ODB-UC-012	Buyer Account	Buyer	Delete shipping address	Buyer removes a saved shipping address.	P1	Yes	Working
+ODB-UC-013	Buyer Account	Buyer	Set default address	Buyer marks one saved address as the default.	P1	Yes	Working
+ODB-UC-014	Buyer Account	Buyer	Logout	Buyer logs out and is returned to the login screen.	P0	Yes	Working
+ODB-UC-015	Buyer Account	Guest Buyer	Block protected account access	Logged-out user is redirected to login when opening account pages.	P0	Yes	Working

@@ -1,29 +1,41 @@
 import { test, expect } from "../helpers/softTest.js";
+import { gotoOneDirectBuy } from "../helpers/oneDirectBuyNav.js";
 import {
-  gotoOneDirectBuy,
-  openKnownProductDetail,
+  ensureLoggedInBuyer,
+  hasBuyerCredentials,
+} from "../helpers/oneDirectBuyAuth.js";
+import {
+  openGuestPdp,
+  openPdpTab,
+  pdpBuyNow,
+  pdpPrice,
+  pdpQtyDown,
+  pdpQtyInput,
+  pdpQtyUp,
+  pdpShippingEstimate,
+  pdpTab,
+  pdpTitle,
+  pdpVariantControls,
+  pdpWishlist,
   productAddToCartControl,
-} from "../helpers/oneDirectBuyNav.js";
-import { ensureLoggedInBuyer } from "../helpers/oneDirectBuyAuth.js";
+} from "../helpers/oneDirectBuyPdp.js";
 
 const DESKTOP = { width: 1920, height: 1080 };
 
-test.describe("OneDirectBuy — Product Detail", () => {
+test.describe("OneDirectBuy — Product Detail (guest)", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(DESKTOP);
-    await openKnownProductDetail(page, "bearing");
+    await openGuestPdp(page, "bearing");
   });
 
-  test("ODB-UC-056: product page loads with full product information", async ({
+  test("ODB-UC-056: product page loads with title and price", async ({
     page,
     soft,
   }) => {
     await soft("ODB-UC-056", "H1 title + price visible on /product/", async () => {
       await expect(page).toHaveURL(/\/product\//);
-      await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
-      await expect(
-        page.getByRole("heading", { name: /\$\s*\d+/ }).first(),
-      ).toBeVisible();
+      await expect(pdpTitle(page)).toBeVisible();
+      await expect(pdpPrice(page)).toBeVisible();
     });
   });
 
@@ -40,39 +52,57 @@ test.describe("OneDirectBuy — Product Detail", () => {
     });
   });
 
-  test("ODB-UC-058: title, SKU, brand, price, stock, seller", async ({
-    page,
-    soft,
-  }) => {
-    await soft("ODB-UC-058", "SKU# / Brand / In stock / Ships from / Sold by", async () => {
-      await expect(page.getByRole("heading", { level: 1 })).toContainText(/SKU#/i);
-      await expect(page.getByText(/Brand\s*:/i).first()).toBeVisible();
-      await expect(page.getByText(/^In stock$/i).first()).toBeVisible();
-      await expect(page.getByText(/Ships from\s*:/i).first()).toBeVisible();
-      await expect(page.getByText(/Sold by\s*:/i).first()).toBeVisible();
-      await expect(
-        page.getByRole("heading", { name: /\$\s*\d+/ }).first(),
-      ).toBeVisible();
+  test("ODB-UC-058: price and SKU are displayed", async ({ page, soft }) => {
+    await soft("ODB-UC-058", "SKU and price visible on PDP", async () => {
+      await expect(pdpPrice(page)).toBeVisible();
+      await expect(page.getByText(/SKU[:#]/i).first()).toBeVisible({
+        timeout: 10_000,
+      });
     });
   });
 
-  test("ODB-UC-060: buyer increases quantity via up control", async ({
-    page,
-    soft,
-  }) => {
-    await soft("ODB-UC-060", "Quantity up (.up) control is usable", async () => {
-      const up = page.locator("button.up").first();
-      const down = page.locator("button.down").first();
-      await expect(up).toBeVisible({ timeout: 10_000 });
-      await expect(down).toBeVisible();
-      await up.click({ force: true });
-      const qty = page
-        .locator(".ps-product__shopping input, .form-group--number input")
-        .or(page.getByRole("textbox"))
-        .first();
-      const value = await qty.inputValue().catch(() => "");
-      // Value may stay "1" if readonly UI, but control must remain interactive
+  test("ODB-UC-059: buyer can select a product variant", async ({ page, soft }) => {
+    await soft("ODB-UC-059", "Size/color/option controls on PDP", async () => {
+      if (
+        !(await pdpVariantControls(page)
+          .first()
+          .isVisible({ timeout: 8_000 })
+          .catch(() => false))
+      ) {
+        throw new Error(
+          "No variant selector (size/color/option) on this product detail page.",
+        );
+      }
+    });
+  });
+
+  test("ODB-UC-060: buyer can change quantity", async ({ page, soft }) => {
+    await soft("ODB-UC-060", "Quantity up/down controls are usable", async () => {
+      await expect(pdpQtyUp(page)).toBeVisible({ timeout: 10_000 });
+      await expect(pdpQtyDown(page)).toBeVisible();
+      await pdpQtyUp(page).click({ force: true });
+      const value = await pdpQtyInput(page).inputValue().catch(() => "");
       expect(value === "" || /^\d+$/.test(value)).toBeTruthy();
+    });
+  });
+
+  test("ODB-UC-061: quantity above stock is blocked", async ({ page, soft }) => {
+    await soft("ODB-UC-061", "Excess quantity is rejected or capped", async () => {
+      const up = pdpQtyUp(page);
+      await expect(up).toBeVisible({ timeout: 10_000 });
+      for (let i = 0; i < 12; i++) {
+        await up.click({ force: true });
+      }
+      await productAddToCartControl(page).click();
+      const blocked = page.locator(".ant-notification-notice, .ant-form-item-explain-error").filter({
+        hasText: /stock|available|maximum|qty|quantity|not enough/i,
+      });
+      if (await blocked.first().isVisible({ timeout: 8_000 }).catch(() => false)) {
+        return;
+      }
+      throw new Error(
+        "No over-stock validation after raising quantity and adding to cart (qty input may be disabled).",
+      );
     });
   });
 
@@ -87,23 +117,60 @@ test.describe("OneDirectBuy — Product Detail", () => {
     });
   });
 
-  test("ODB-UC-063: Buy Now control is available", async ({ page, soft }) => {
-    await soft("ODB-UC-063", "Buy Now link is visible", async () => {
-      await expect(page.getByRole("link", { name: /^Buy Now$/i })).toBeVisible({
-        timeout: 10_000,
+  test("ODB-UC-063: Buy Now starts checkout or login", async ({ page, soft }) => {
+    await soft("ODB-UC-063", "Buy Now leaves PDP for checkout or login", async () => {
+      const buy = pdpBuyNow(page);
+      await expect(buy).toBeVisible({ timeout: 10_000 });
+      await buy.click();
+      await expect(page).toHaveURL(/checkout|login|shopping-cart|buynow|buy-now/i, {
+        timeout: 20_000,
       });
     });
   });
 
-  test("ODB-UC-065: guest wishlist control is present", async ({ page, soft }) => {
-    await soft("ODB-UC-065", "Wishlist button visible for guest", async () => {
-      await expect(page.locator("button.wishlist-btn").first()).toBeVisible({
-        timeout: 10_000,
+  test("ODB-UC-065: guest wishlist prompts login", async ({ page, soft }) => {
+    await soft("ODB-UC-065", "Guest wishlist click asks for login", async () => {
+      const wish = pdpWishlist(page);
+      await expect(wish).toBeVisible({ timeout: 10_000 });
+      await wish.click();
+      const loginUi = page
+        .getByRole("heading", { name: /^Welcome back$/i })
+        .or(page.getByRole("button", { name: /^Sign in$/i }));
+      const onLogin = /\/account\/login/i.test(page.url());
+      if (
+        onLogin ||
+        (await loginUi.first().isVisible({ timeout: 8_000 }).catch(() => false))
+      ) {
+        return;
+      }
+      throw new Error("Guest wishlist did not prompt login.");
+    });
+  });
+
+  test("ODB-UC-066: seller information is displayed", async ({ page, soft }) => {
+    await soft("ODB-UC-066", "Sold by seller name on PDP", async () => {
+      await expect(page.getByText(/Sold by\s*:/i).first()).toBeVisible({
+        timeout: 15_000,
       });
     });
   });
 
-  test("ODB-UC-068: return policy link visible", async ({ page, soft }) => {
+  test("ODB-UC-067: shipping estimate is available", async ({ page, soft }) => {
+    await soft("ODB-UC-067", "ZIP/shipping estimate control on PDP", async () => {
+      if (
+        !(await pdpShippingEstimate(page)
+          .first()
+          .isVisible({ timeout: 8_000 })
+          .catch(() => false))
+      ) {
+        throw new Error(
+          "No shipping estimate or ZIP lookup on the product detail page.",
+        );
+      }
+    });
+  });
+
+  test("ODB-UC-068: return policy is shown", async ({ page, soft }) => {
     await soft("ODB-UC-068", "Return & Refund Policy link", async () => {
       await expect(
         page
@@ -112,6 +179,16 @@ test.describe("OneDirectBuy — Product Detail", () => {
           })
           .first(),
       ).toBeVisible({ timeout: 10_000 });
+    });
+  });
+
+  test("ODB-UC-069: product reviews section is available", async ({
+    page,
+    soft,
+  }) => {
+    await soft("ODB-UC-069", "Reviews tab on PDP", async () => {
+      await openPdpTab(page, /Reviews/i);
+      await expect(pdpTab(page, /Reviews/i)).toBeVisible();
     });
   });
 
@@ -124,36 +201,23 @@ test.describe("OneDirectBuy — Product Detail", () => {
     });
   });
 
-  test("ODB-UC-072: Description and Specification tabs", async ({ page, soft }) => {
-    await soft("ODB-UC-072-a", "Description tab + About this item", async () => {
+  test("ODB-UC-072: product specifications are available", async ({
+    page,
+    soft,
+  }) => {
+    await soft("ODB-UC-072", "Specification tab selectable", async () => {
       await expect(page.getByRole("tab", { name: /^Description$/i })).toBeVisible();
-      await expect(
-        page.getByRole("heading", { name: /^About this item$/i }),
-      ).toBeVisible();
-    });
-
-    await soft("ODB-UC-072-b", "Specification tab selectable", async () => {
-      const tab = page.getByRole("tab", { name: /^Specification$/i });
-      await tab.click();
-      await expect(tab).toBeVisible();
+      await openPdpTab(page, /^Specification$/i);
+      await expect(pdpTab(page, /^Specification$/i)).toBeVisible();
     });
   });
 
-  test("ODB-UC-074: invalid product URL shows 404", async ({ page, soft }) => {
-    await soft("ODB-UC-074", "Ohh! Page not found for bad product slug", async () => {
-      await gotoOneDirectBuy(page, "/product/invalid-inactive-product-id-99999");
-      await expect(
-        page.getByRole("heading", { name: /Ohh! Page not found/i }),
-      ).toBeVisible({ timeout: 15_000 });
-    });
-  });
-
-  test("ODB-UC-075: deleted product URL shows 404", async ({ page, soft }) => {
-    await soft("ODB-UC-075", "404 for deleted product slug", async () => {
-      await gotoOneDirectBuy(page, "/product/deleted-product-test-404");
-      await expect(
-        page.getByRole("heading", { name: /Ohh! Page not found/i }),
-      ).toBeVisible({ timeout: 15_000 });
+  test("ODB-UC-073: A+ content is not required", async ({ page, soft }) => {
+    await soft("ODB-UC-073", "A+ / brand-story module absent (Automation No)", async () => {
+      const aplus = page.getByText(/A\+\s*content|from the brand|brand story/i);
+      if (await aplus.first().isVisible({ timeout: 4_000 }).catch(() => false)) {
+        throw new Error("A+ content is present; sheet marks this as Automation No.");
+      }
     });
   });
 
@@ -180,25 +244,71 @@ test.describe("OneDirectBuy — Product Detail", () => {
       ).toBeVisible({ timeout: 20_000 });
     });
   });
+});
 
-  test("ODB-UC-064: logged-in buyer can open wishlist", async ({ page, soft }) => {
-    await soft("ODB-UC-064", "Wishlist reachable when buyer credentials set", async () => {
-      try {
-        await ensureLoggedInBuyer(page);
-      } catch {
-        test.info().annotations.push({
-          type: "note",
-          description: "Buyer credentials not configured — wishlist login path skipped",
-        });
-        return;
-      }
-      await openKnownProductDetail(page, "bearing");
-      const wishlistBtn = page.locator("button.wishlist-btn").first();
-      if (await wishlistBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
-        await wishlistBtn.click();
-      }
+test.describe("OneDirectBuy — Product Detail (missing products)", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+  });
+
+  test("ODB-UC-074: inactive product URL is not buyable", async ({ page, soft }) => {
+    await soft("ODB-UC-074", "Ohh! Page not found for bad product slug", async () => {
+      await gotoOneDirectBuy(page, "/product/invalid-inactive-product-id-99999");
+      await expect(
+        page.getByRole("heading", { name: /Ohh! Page not found/i }),
+      ).toBeVisible({ timeout: 15_000 });
+    });
+  });
+
+  test("ODB-UC-075: deleted product URL shows 404", async ({ page, soft }) => {
+    await soft("ODB-UC-075", "404 for deleted product slug", async () => {
+      await gotoOneDirectBuy(page, "/product/deleted-product-test-404");
+      await expect(
+        page.getByRole("heading", { name: /Ohh! Page not found/i }),
+      ).toBeVisible({ timeout: 15_000 });
+    });
+  });
+});
+
+test.describe("OneDirectBuy — Product Detail (authenticated)", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    if (!hasBuyerCredentials()) {
+      test.skip(true, "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD");
+    }
+  });
+
+  test("ODB-UC-064: logged-in buyer can add to wishlist", async ({
+    page,
+    soft,
+  }) => {
+    await soft("ODB-UC-064", "Wishlist from PDP while authenticated", async () => {
+      await ensureLoggedInBuyer(page);
+      await openGuestPdp(page, "bearing");
+      const wish = pdpWishlist(page);
+      await expect(wish).toBeVisible({ timeout: 10_000 });
+      await wish.click();
+      await expect(page).not.toHaveURL(/\/account\/login/, { timeout: 10_000 });
       await gotoOneDirectBuy(page, "/account/wishlist");
       await expect(page).toHaveURL(/wishlist/);
+    });
+  });
+
+  test("ODB-UC-070: buyer can submit a product question", async ({
+    page,
+    soft,
+  }) => {
+    await soft("ODB-UC-070", "Questions & Answers form on PDP", async () => {
+      await ensureLoggedInBuyer(page);
+      await openGuestPdp(page, "bearing");
+      await openPdpTab(page, /Questions/i);
+      const ask = page
+        .getByRole("textbox", { name: /question|ask/i })
+        .or(page.getByPlaceholder(/question|ask/i))
+        .or(page.getByRole("button", { name: /ask|submit question|post question/i }));
+      if (!(await ask.first().isVisible({ timeout: 8_000 }).catch(() => false))) {
+        throw new Error("Product question form is not implemented on Questions & Answers.");
+      }
     });
   });
 });

@@ -1,0 +1,18 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-150	Payments	Buyer	Credit card payment	Buyer pays using a credit card.	P0	Yes	Working
+ODB-UC-151	Payments	Buyer	Payment failure handling	A failed payment is shown to the buyer.	P0	Yes	Working
+ODB-UC-152	Payments	Buyer	Payment timeout handling	A payment timeout does not complete the order.	P0	Yes	Working
+ODB-UC-153	Payments	Buyer	Retry failed payment	Buyer can retry after a failed payment.	P0	Yes	Working
+ODB-UC-154	Payments	Admin	View transaction	Admin can view processed payment transactions.	P1	Yes	New Functionality
+ODB-UC-155	Refunds	Admin	Full refund	Admin issues a full refund.	P0	Yes	New Functionality
+ODB-UC-156	Refunds	Admin	Partial refund	Admin issues a partial refund.	P0	Yes	New Functionality
+ODB-UC-157	Refunds	Admin	Refund amount validation	System blocks an invalid refund amount.	P0	Yes	New Functionality
+ODB-UC-158	Payments	System	Payment webhook success	A successful payment webhook is processed.	P0	Yes	New Functionality
+ODB-UC-159	Payments	System	Failed webhook retry	A failed payment webhook is retried.	P0	Yes	New Functionality
+ODB-UC-160	Wallet	Buyer	Save payment method	Buyer saves a card to the wallet.	P1	Yes	New Functionality
+ODB-UC-161	Wallet	Buyer	Use saved payment method	Buyer pays with a saved card.	P1	Yes	New Functionality
+ODB-UC-162	Wallet	Buyer	Delete payment method	Buyer removes a saved card.	P1	Yes	New Functionality
+ODB-UC-163	Wallet	Buyer	Set default payment method	Buyer sets a default saved card.	P2	Yes	New Functionality
+ODB-UC-164	Store Credit	Admin	Issue store credit	Admin issues store credit to a buyer.	P2	Yes	New Functionality
+ODB-UC-165	Store Credit	Buyer	Apply store credit	Buyer applies store credit at checkout.	P2	Yes	New Functionality
+ODB-UC-166	Store Credit	Buyer	Partial credit payment	Buyer pays part of the total with store credit.	P2	Yes	New Functionality

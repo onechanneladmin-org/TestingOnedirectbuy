@@ -98,10 +98,62 @@ export function shopSortSelect(page) {
     .first();
 }
 
+/** Header keyword field (desktop chrome). */
+export function headerSearchInput(page) {
+  return page.getByRole("textbox", { name: /Search products/i });
+}
+
+/** Live autocomplete panel under the header search box. */
+export function searchSuggestionPanel(page) {
+  return page.locator(
+    ".ps-panel--search-result.active, .ps-search-suggestions, a.ps-search-suggestion",
+  );
+}
+
+/**
+ * Type in header search until category/brand/product suggestions appear.
+ * Live UI: `.ps-panel--search-result.active` with SUGGESTIONS / CATEGORIES / PRODUCTS.
+ */
+export async function typeForSearchSuggestions(page, keyword = "bearing") {
+  await dismissCookieBanner(page);
+  const box = headerSearchInput(page);
+  await expect(box).toBeVisible({ timeout: DEFAULT_TIMEOUT });
+  await box.click();
+  await box.fill("");
+  await box.pressSequentially(keyword, { delay: 35 });
+  await expect(searchSuggestionPanel(page).first()).toBeVisible({
+    timeout: 12_000,
+  });
+}
+
+/** Click a category link in the shop/search listing sidebar. */
+export async function filterListingByCategory(page, categoryName = "Exterior") {
+  await dismissCookieBanner(page);
+  const link = page
+    .getByRole("heading", { name: /^Categories$/i })
+    .locator("..")
+    .getByRole("link", { name: new RegExp(`^${categoryName}$`, "i") })
+    .or(page.getByRole("link", { name: new RegExp(`^${categoryName}$`, "i") }))
+    .first();
+  await expect(link).toBeVisible({ timeout: 15_000 });
+  await link.click();
+  await page.waitForURL(/\/category\/|\/shop|\/search/i, { timeout: 20_000 });
+  await dismissCookieBanner(page);
+}
+
+/** Breadcrumb Home control on listing pages. */
+export function breadcrumbHomeLink(page) {
+  return page
+    .getByRole("navigation", { name: /Breadcrumb/i })
+    .getByRole("link", { name: /^Home$/i })
+    .or(page.getByRole("link", { name: /^Home$/i }))
+    .first();
+}
+
 /** Run a header keyword search like a shopper (type + Search). */
 export async function searchProducts(page, keyword) {
   await dismissCookieBanner(page);
-  const box = page.getByRole("textbox", { name: /Search products/i });
+  const box = headerSearchInput(page);
   await expect(box).toBeVisible({ timeout: DEFAULT_TIMEOUT });
   await box.fill(keyword);
   await Promise.all([
@@ -291,6 +343,43 @@ export function cartIncreaseQtyButton(page) {
     .getByRole("button", { name: /^Increase quantity$/i })
     .or(page.getByRole("button", { name: /^Increase quantity$/i }))
     .first();
+}
+
+export function cartCouponInput(page) {
+  return page.getByRole("textbox", { name: /^Coupon$/i });
+}
+
+export function cartApplyCouponButton(page) {
+  return page.getByRole("button", { name: /^Apply$/i });
+}
+
+export function cartRemoveCouponButton(page) {
+  return page
+    .getByRole("button", { name: /remove coupon|^Remove$/i })
+    .or(page.getByRole("link", { name: /remove coupon/i }))
+    .first();
+}
+
+export function cartLineProductLinks(page) {
+  return page.locator(
+    '.ps-cart-line a[href*="/product/"], .ps-shopping-cart a[href*="/product/"]',
+  );
+}
+
+export function cartTaxLine(page) {
+  return page.getByText(/^Tax$|^Estimated tax$|^Tax estimate$/i);
+}
+
+export function cartShippingLine(page) {
+  return page.getByText(
+    /^Shipping$|^Estimated shipping$|^Shipping estimate$|^Delivery$/i,
+  );
+}
+
+export function cartSellerGroup(page) {
+  return page.getByText(
+    /items from this seller|grouped by seller|sold by the same seller|multi-?seller cart/i,
+  );
 }
 
 /** Add a shop product then open /account/checkout. */

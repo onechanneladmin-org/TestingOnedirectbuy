@@ -16,6 +16,13 @@ const StepResultSchema = new mongoose.Schema(
     error: { type: String, default: "" },
     marker: { type: String, default: "" },
     severity: { type: String, default: "" },
+    module: { type: String, default: "" },
+    actor: { type: String, default: "" },
+    useCase: { type: String, default: "" },
+    description: { type: String, default: "" },
+    priority: { type: String, default: "" },
+    automation: { type: String, default: "" },
+    currentStatus: { type: String, default: "" },
   },
   { _id: false },
 );

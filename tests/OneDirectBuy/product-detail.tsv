@@ -1,0 +1,21 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-056	Product Detail	Guest Buyer	View product detail page	Product page loads with title and price.	P0	Yes	Working
+ODB-UC-057	Product Detail	Guest Buyer	Product image gallery	Buyer can view the product image gallery.	P1	Yes	Working
+ODB-UC-058	Product Detail	Guest Buyer	Product price and SKU display	Price and SKU are visible on the product page.	P0	Yes	Working
+ODB-UC-059	Product Detail	Guest Buyer	Product variant selection	Buyer can select a product variant such as size or color.	P0	Yes	Working
+ODB-UC-060	Product Detail	Guest Buyer	Quantity selection	Buyer can change quantity on the product page.	P0	Yes	Working
+ODB-UC-061	Product Detail	Guest Buyer	Quantity above stock validation	System blocks quantity greater than available stock.	P0	Yes	Working
+ODB-UC-062	Product Detail	Guest Buyer	Add product to cart	Buyer adds the product to cart from the detail page.	P0	Yes	Working
+ODB-UC-063	Product Detail	Guest Buyer	Buy Now	Buy Now starts checkout or asks the guest to sign in.	P1	Yes	Working
+ODB-UC-064	Product Detail	Buyer	Add to wishlist	Logged-in buyer can add the product to wishlist.	P1	Yes	Working
+ODB-UC-065	Product Detail	Guest Buyer	Wishlist login prompt	Guest is prompted to log in when using wishlist.	P1	Yes	Working
+ODB-UC-066	Product Detail	Guest Buyer	Seller information display	Seller name and Sold by details display on the product page.	P0	Yes	Working
+ODB-UC-067	Product Detail	Guest Buyer	Shipping estimate	Buyer can check a shipping estimate, typically by ZIP code.	P0	Yes	Working
+ODB-UC-068	Product Detail	Guest Buyer	Return policy display	Return policy is linked or shown on the product page.	P1	Yes	Working
+ODB-UC-069	Product Detail	Guest Buyer	Product reviews display	Product reviews section is available on the product page.	P1	Yes	Working
+ODB-UC-070	Product Detail	Buyer	Submit product question	Logged-in buyer can submit a product question.	P2	Yes	Working
+ODB-UC-071	Product Detail	Guest Buyer	Related products	Related products are shown on the product page.	P2	Yes	Working
+ODB-UC-072	Product Detail	Guest Buyer	Product specifications	Specification details are available on the product page.	P1	Yes	Working
+ODB-UC-073	Product Detail	Guest Buyer	A+ content display	Rich A+ brand content displays on the product page.	P2	No	Working
+ODB-UC-074	Product Detail	Guest Buyer	Inactive product handling	Inactive product URLs do not show a buyable product page.	P0	Yes	Working
+ODB-UC-075	Product Detail	Guest Buyer	Deleted product handling	Deleted product URLs show a not-found page.	P0	Yes	Working

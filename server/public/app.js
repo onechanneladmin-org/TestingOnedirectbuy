@@ -1,6 +1,7 @@
 const state = {
   flows: [],
   filter: "all",
+  search: "",
   selectedFlowId: null,
   occurrenceId: null,
   pollTimer: null,
@@ -45,22 +46,42 @@ async function api(path, opts = {}) {
 }
 
 function filteredFlows() {
+  const q = state.search.trim().toLowerCase();
   return state.flows.filter((f) => {
-    if (state.filter === "enabled") return f.enabled;
-    if (state.filter === "disabled") return !f.enabled;
-    return true;
+    if (state.filter === "enabled" && !f.enabled) return false;
+    if (state.filter === "disabled" && f.enabled) return false;
+    if (!q) return true;
+    const hay = [
+      f.name,
+      String(f.flowId),
+      f.catalog,
+      ...(f.tests || []),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return hay.includes(q);
   });
 }
 
-function renderFlowList() {
-  const list = $("flowList");
-  const flows = filteredFlows();
-  $("flowCount").textContent = `${flows.length} shown · ${state.flows.length} total`;
+function isSheetFlow(f) {
+  return Boolean(f.catalog) || (f.steps || []).some((s) => s.module || s.useCase);
+}
 
-  list.innerHTML = flows
-    .map((f) => {
-      const active = f.flowId === state.selectedFlowId ? "active" : "";
-      return `
+function flowIdSortKey(id) {
+  const n = Number.parseFloat(id);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function sheetGroupOrder(f) {
+  const named = String(f.name || "").match(/^(\d+)\./);
+  if (named) return Number(named[1]);
+  return flowIdSortKey(f.flowId);
+}
+
+function flowItemHtml(f) {
+  const active = String(f.flowId) === String(state.selectedFlowId) ? "active" : "";
+  return `
         <li>
           <button type="button" class="flow-item ${active}" data-id="${escapeAttr(f.flowId)}">
             <span class="name">${escapeHtml(f.name)}</span>
@@ -71,12 +92,120 @@ function renderFlowList() {
             </span>
           </button>
         </li>`;
-    })
-    .join("");
+}
+
+function renderFlowList() {
+  const list = $("flowList");
+  const flows = filteredFlows();
+  $("flowCount").textContent = `${flows.length} shown · ${state.flows.length} total`;
+
+  if (!flows.length) {
+    list.innerHTML = `<li class="flow-empty muted">No flows match that search.</li>`;
+    return;
+  }
+
+  const sheet = flows
+    .filter(isSheetFlow)
+    .sort((a, b) => sheetGroupOrder(a) - sheetGroupOrder(b));
+  const other = flows
+    .filter((f) => !isSheetFlow(f))
+    .sort((a, b) => flowIdSortKey(a.flowId) - flowIdSortKey(b.flowId));
+
+  const section = (label, items) => {
+    if (!items.length) return "";
+    return `<li class="rail-group">${escapeHtml(label)}</li>${items
+      .map(flowItemHtml)
+      .join("")}`;
+  };
+
+  list.innerHTML = `${section("Sheet modules", sheet)}${section("Other flows", other)}`;
 
   list.querySelectorAll(".flow-item").forEach((btn) => {
     btn.addEventListener("click", () => selectFlow(btn.dataset.id));
   });
+}
+
+function hasSheetCatalog(flow) {
+  return (flow?.steps || []).some((s) => s.module || s.useCase || s.priority);
+}
+
+function sheetStatusLabel(status) {
+  if (!status || status === "pending") return "";
+  if (status === "passed") return "pass";
+  if (status === "failed" || status === "blocked") return "fail";
+  if (status === "skipped") return "skip";
+  return status;
+}
+
+function cleanIssueText(raw) {
+  return String(raw || "")
+    .replace(/\u001b\[[0-9;]*m/g, "")
+    .replace(/\x1B\[[0-9;]*m/g, "")
+    .replace(/\[(?:\d{1,3};)*\d{1,3}m/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function issuesForRow(stepId, occ) {
+  const issues = occ?.liveIssues || [];
+  const matched = issues.filter((issue) => {
+    const id = String(issue.id || issue.step || "");
+    return id === stepId || id.startsWith(`${stepId}-`) || id.startsWith(`${stepId}:`);
+  });
+  if (matched.length) {
+    return cleanIssueText(
+      matched
+        .map((i) => i.evidence || i.message || i.title || i.marker || "issue")
+        .join(" · "),
+    ).slice(0, 280);
+  }
+  const step = (occ?.steps || []).find((s) => s.stepId === stepId);
+  if (step?.error) return cleanIssueText(step.error).slice(0, 280);
+  const label = sheetStatusLabel(step?.status);
+  if (label === "pass") return "no issue";
+  return "";
+}
+
+function renderUseCaseSheet(flow, occ) {
+  const body = $("useCaseSheetBody");
+  if (!body) return;
+  const steps = flow?.steps || [];
+  $("sheetRowCount").textContent = String(steps.length);
+  const running = Boolean(occ);
+  const testedBy = running ? "automation" : "";
+
+  body.innerHTML = steps
+    .map((s) => {
+      const live = (occ?.steps || []).find((x) => x.stepId === s.stepId);
+      const status = live?.status || "pending";
+      const statusLabel = sheetStatusLabel(status);
+      const issues = occ ? issuesForRow(s.stepId, occ) : "";
+      return `
+        <tr data-step="${escapeAttr(s.stepId)}">
+          <td class="mono">${escapeHtml(s.stepId)}</td>
+          <td>${escapeHtml(s.module || "")}</td>
+          <td>${escapeHtml(s.actor || "")}</td>
+          <td>${escapeHtml(s.useCase || s.title || "")}</td>
+          <td class="desc">${escapeHtml(s.description || "")}</td>
+          <td>${escapeHtml(s.priority || "")}</td>
+          <td>${escapeHtml(s.automation || "Yes")}</td>
+          <td>${escapeHtml(s.currentStatus || "")}</td>
+          <td>${escapeHtml(testedBy)}</td>
+          <td class="issues"><span class="issues-text" title="${escapeAttr(
+            issues,
+          )}">${escapeHtml(issues)}</span></td>
+          <td class="status-cell"><span class="sheet-status ${escapeAttr(status)}">${escapeHtml(
+            statusLabel,
+          )}</span></td>
+        </tr>`;
+    })
+    .join("");
+}
+
+function showFlowLayout(flow) {
+  const sheet = hasSheetCatalog(flow);
+  $("listLayout").classList.toggle("hidden", sheet);
+  $("sheetLayout").classList.toggle("hidden", !sheet);
 }
 
 function selectFlow(flowId) {
@@ -98,10 +227,15 @@ function selectFlow(flowId) {
     flow.enabled ? "enabled" : "disabled in config"
   }`;
   $("stepCatalogCount").textContent = String(flow.steps?.length || 0);
+  showFlowLayout(flow);
 
-  $("stepCatalog").innerHTML = (flow.steps || [])
-    .map(
-      (s) => `
+  if (hasSheetCatalog(flow)) {
+    renderUseCaseSheet(flow, null);
+    $("sheetIdleHint").classList.remove("hidden");
+  } else {
+    $("stepCatalog").innerHTML = (flow.steps || [])
+      .map(
+        (s) => `
       <li>
         <div>
           <span class="sid">${escapeHtml(s.stepId)}${
@@ -110,8 +244,9 @@ function selectFlow(flowId) {
           ${escapeHtml(s.title)}
         </div>
       </li>`,
-    )
-    .join("");
+      )
+      .join("");
+  }
 }
 
 function setLiveIdle() {
@@ -119,14 +254,21 @@ function setLiveIdle() {
   $("runBadge").textContent = "idle";
   $("liveEmpty").classList.remove("hidden");
   $("liveBody").classList.add("hidden");
+  $("runProgress").classList.add("hidden");
   $("btnLoadReport").disabled = true;
   $("reportBody").innerHTML =
     '<p class="muted">Report appears when the occurrence finishes.</p>';
+  const flow = state.flows.find((f) => String(f.flowId) === state.selectedFlowId);
+  if (flow && hasSheetCatalog(flow)) {
+    $("sheetIdleHint").classList.remove("hidden");
+    renderUseCaseSheet(flow, null);
+  }
 }
 
 function renderOccurrence(occ) {
   $("liveEmpty").classList.add("hidden");
   $("liveBody").classList.remove("hidden");
+  $("runProgress").classList.remove("hidden");
 
   const status = occ.status || "idle";
   $("runBadge").className = `status-pill ${status}`;
@@ -144,12 +286,17 @@ function renderOccurrence(occ) {
   $("btnLoadReport").disabled = !terminal;
   $("btnRun").disabled = status === "running" || status === "queued";
 
-  $("liveSteps").innerHTML = (occ.steps || [])
-    .map((s) => {
-      const err = s.error
-        ? `<span class="err">${escapeHtml(String(s.error).slice(0, 220))}</span>`
-        : "";
-      return `
+  const flow = state.flows.find((f) => String(f.flowId) === String(occ.flowId));
+  if (flow && hasSheetCatalog(flow)) {
+    $("sheetIdleHint").classList.add("hidden");
+    renderUseCaseSheet(flow, occ);
+  } else {
+    $("liveSteps").innerHTML = (occ.steps || [])
+      .map((s) => {
+        const err = s.error
+          ? `<span class="err">${escapeHtml(String(s.error).slice(0, 220))}</span>`
+          : "";
+        return `
         <li>
           <span class="dot ${escapeAttr(s.status)}"></span>
           <div>
@@ -161,8 +308,9 @@ function renderOccurrence(occ) {
           </div>
           <span class="st">${escapeHtml(s.status)}</span>
         </li>`;
-    })
-    .join("");
+      })
+      .join("");
+  }
 
   // Live issues from DB (source of truth during the run)
   const liveIssues = occ.liveIssues || [];
@@ -392,6 +540,11 @@ function bindUi() {
       state.filter = chip.dataset.filter;
       renderFlowList();
     });
+  });
+
+  $("flowSearch").addEventListener("input", () => {
+    state.search = $("flowSearch").value;
+    renderFlowList();
   });
 }
 

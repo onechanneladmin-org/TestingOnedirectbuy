@@ -1,0 +1,22 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-129	Checkout	Guest Buyer	Guest checkout	Guest buyer can complete checkout without an account.	P0	Yes	Working
+ODB-UC-130	Checkout	Guest Buyer	Guest checkout blocked	Guest checkout is blocked when the store requires login.	P0	Yes	Not Required
+ODB-UC-131	Checkout	Buyer	Checkout with saved address	Buyer selects a saved address at checkout.	P0	Yes	Working
+ODB-UC-132	Checkout	Buyer	Add address during checkout	Buyer adds a new shipping address during checkout.	P0	Yes	Working
+ODB-UC-133	Checkout	Buyer	Shipping field validation	Checkout blocks when required shipping fields are missing.	P0	Yes	Working
+ODB-UC-134	Checkout	Buyer	Select shipping method	Buyer selects an available shipping method.	P0	Yes	Working
+ODB-UC-135	Checkout	Buyer	Shipping unavailable	Checkout blocks when shipping is unavailable.	P0	Yes	New Functionality
+ODB-UC-136	Checkout	Buyer	Billing same as shipping	Billing address can match shipping.	P1	Yes	Working
+ODB-UC-137	Checkout	Buyer	Different billing address	Buyer can enter a separate billing address.	P1	Yes	Working
+ODB-UC-138	Checkout	Buyer	Review order totals	Checkout shows items, discounts, tax, and total.	P0	Yes	Working
+ODB-UC-139	Checkout	Buyer	Place order with card	Buyer can pay with a card.	P0	Yes	Working
+ODB-UC-140	Checkout	Buyer	Declined payment	A declined card is handled without completing the order.	P0	Yes	Working
+ODB-UC-141	Checkout	Buyer	Duplicate order prevention	Double-clicking Place order does not create two orders.	P0	Yes	Working
+ODB-UC-142	Checkout	Buyer	Inventory reservation	Inventory is reduced when the order is placed.	P0	Yes	Working
+ODB-UC-143	Checkout	Buyer	Order confirmation page	Buyer sees an order confirmation after payment.	P0	Yes	Working
+ODB-UC-144	Checkout	Buyer	Order confirmation email	Buyer receives an order confirmation email.	P0	Yes	Working
+ODB-UC-145	Checkout	Seller	Seller order notification	Seller is notified of a new order.	P0	Yes	Working
+ODB-UC-146	Checkout	Admin	Admin order visibility	Admin can see the new order.	P0	Yes	Working
+ODB-UC-147	Checkout	Buyer	State tax calculation	Tax calculates based on shipping state.	P0	Yes	New Functionality
+ODB-UC-148	Checkout	Buyer	Tax exemption checkout	A tax-exempt buyer can check out without tax.	P0	Yes	New Functionality
+ODB-UC-149	Checkout	Buyer	Payment interruption recovery	Buyer can retry after a payment interruption.	P0	Yes	Working

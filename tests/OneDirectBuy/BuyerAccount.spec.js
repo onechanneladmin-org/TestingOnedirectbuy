@@ -5,6 +5,7 @@ import {
   uniqueTestEmail,
   hasBuyerCredentials,
   ONE_DIRECT_BUY_BUYER_CREDENTIALS,
+  expectGuestRedirectToLogin,
 } from "../helpers/oneDirectBuyAuth.js";
 
 const DESKTOP = { width: 1920, height: 1080 };
@@ -40,7 +41,7 @@ test.describe("OneDirectBuy — Buyer Account (public)", () => {
   });
 
   test("ODB-UC-003: register form fields are present", async ({ page, soft }) => {
-    await soft("ODB-UC-003", "Full name / email / passwords / Create CTA", async () => {
+    await soft("ODB-UC-003-fields", "Full name / email / passwords / Create CTA", async () => {
       await gotoOneDirectBuy(page, "/account/register");
       await dismissCookieBanner(page);
       await expect(page.getByRole("textbox", { name: /^Full name$/i })).toBeVisible();
@@ -57,6 +58,20 @@ test.describe("OneDirectBuy — Buyer Account (public)", () => {
     });
   });
 
+  test("ODB-UC-003: validate required signup fields", async ({ page, soft }) => {
+    await soft("ODB-UC-003", "Empty submit stays on register with validation", async () => {
+      await gotoOneDirectBuy(page, "/account/register");
+      await dismissCookieBanner(page);
+      await page.getByRole("button", { name: /Create your account/i }).click();
+      await expect(page).toHaveURL(/\/account\/register/);
+      const invalid = page.locator("input:invalid");
+      const antError = page.locator(
+        ".ant-form-item-explain-error, .ant-form-item-has-error, [role='alert']",
+      );
+      await expect(invalid.or(antError).first()).toBeVisible({ timeout: 8_000 });
+    });
+  });
+
   test("ODB-UC-001: register new buyer account", async ({ page, soft }) => {
     await soft("ODB-UC-001", "Create account with unique email reaches account", async () => {
       const email = uniqueTestEmail();
@@ -68,10 +83,9 @@ test.describe("OneDirectBuy — Buyer Account (public)", () => {
       });
       await page.getByRole("button", { name: /Create your account/i }).click();
       await expect(
-        page
-          .locator(".ant-notification-notice")
-          .filter({ hasText: /Registration successful|Login successful/i })
-          .or(page.getByText(/Hello|account dashboard|recent orders/i).first()),
+        page.locator(".ant-notification-notice").filter({
+          hasText: /Registration successful/i,
+        }),
       ).toBeVisible({ timeout: 45_000 });
     });
   });
@@ -102,15 +116,12 @@ test.describe("OneDirectBuy — Buyer Account (public)", () => {
     });
   });
 
-  test("ODB-UC-475: guest visiting orders redirects to login", async ({
+  test("ODB-UC-015: guest visiting orders redirects to login", async ({
     page,
     soft,
   }) => {
-    await soft("ODB-UC-475", "/account/orders as guest → login, no order table", async () => {
-      await page.context().clearCookies();
-      await gotoOneDirectBuy(page, "/account/orders");
-      await expect(page).toHaveURL(/\/account\/login/, { timeout: 20_000 });
-      await expect(page.getByRole("heading", { name: /^Welcome back$/i })).toBeVisible();
+    await soft("ODB-UC-015-orders", "/account/orders as guest → login, no order table", async () => {
+      await expectGuestRedirectToLogin(page, "/account/orders");
       await expect(page.locator("table")).toHaveCount(0);
     });
   });

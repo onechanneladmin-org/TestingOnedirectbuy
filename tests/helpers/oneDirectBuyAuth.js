@@ -119,75 +119,100 @@ export function accountDashboard(page) {
     .first();
 }
 
-/** Assert the session is authenticated. */
+/** Assert the session is authenticated via a gated account route (my-account is public). */
 export async function expectLoggedIn(page) {
   const successNotice = page.locator(".ant-notification-notice").filter({
     hasText: /Login successful|Registration successful/i,
   });
-  if (await successNotice.isVisible({ timeout: 5000 }).catch(() => false)) {
+  if (await successNotice.isVisible({ timeout: 8_000 }).catch(() => false)) {
     await page.waitForLoadState("networkidle").catch(() => {});
   }
 
-  if (!page.url().includes("/account/my-account")) {
-    await gotoOneDirectBuy(page, "/account/my-account");
-  }
-
-  await expect(page).not.toHaveURL(/\/account\/login$/, { timeout: 15_000 });
-
-  // Site may still show header Login while account sidebar is authenticated.
-  const dash = accountDashboard(page);
-  await expect(
-    dash
-      .getByText(/^Hello\b/i)
-      .or(dash.getByText(/account dashboard/i))
-      .or(dash.getByRole("heading", { name: /Hello|Dashboard|My Account/i }))
-      .or(page.getByRole("heading", { name: /^Hello\b/i }))
-      .first(),
-  ).toBeVisible({ timeout: 30_000 });
-
-  await expect(
-    page
-      .locator(".ps-widget--account-dashboard")
-      .getByText(/^Logout$/i)
-      .first(),
-  ).toBeVisible({ timeout: 15_000 });
+  await gotoOneDirectBuy(page, "/account/orders");
+  await expect(page).not.toHaveURL(/\/account\/login/, { timeout: 20_000 });
+  await expect(page).toHaveURL(/\/account\/orders/, { timeout: 15_000 });
 }
 
 const ACCOUNT_SIDEBAR_LINKS = {
   "/account/orders": /Orders/i,
   "/account/addresses": /Address/i,
-  "/account/user-information": /Account Information/i,
+  "/account/user-information": /Account Information|Account Details/i,
   "/account/wishlist": /Wishlist/i,
+  "/account/security": /Account security/i,
 };
 
 /** Navigate to a protected page and re-login if Firebase auth has not hydrated yet. */
 export async function gotoAuthenticatedPage(page, path, credentials) {
-  await loginBuyer(page, credentials.email, credentials.password);
+  await ensureLoggedInBuyer(page);
 
   const normalizedPath = path.replace(/\/$/, "") || path;
   const sidebarPattern = ACCOUNT_SIDEBAR_LINKS[normalizedPath];
 
+  async function recoverIfLoggedOut() {
+    if (!page.url().includes("/account/login")) return;
+    await loginBuyer(page, credentials.email, credentials.password);
+    await gotoOneDirectBuy(page, path);
+  }
+
   if (sidebarPattern) {
     await gotoOneDirectBuy(page, "/account/my-account");
+    await recoverIfLoggedOut();
     const sidebarLink = page
       .locator(".ps-widget--account-dashboard a, aside.ps-widget--account-dashboard a")
       .filter({ hasText: sidebarPattern })
       .first();
     if (await sidebarLink.isVisible({ timeout: 10_000 }).catch(() => false)) {
       await sidebarLink.click();
-      await expect(page).toHaveURL(new RegExp(normalizedPath.replace(/\//g, "\\/")), {
-        timeout: 30_000,
-      });
-      return;
+      await recoverIfLoggedOut();
+      const landed = await page
+        .waitForURL(new RegExp(normalizedPath.replace(/\//g, "\\/")), {
+          timeout: 8_000,
+        })
+        .then(() => true)
+        .catch(() => false);
+      if (landed && !page.url().includes("/account/login")) {
+        return;
+      }
     }
   }
 
   await gotoOneDirectBuy(page, path);
-  if (page.url().includes("/account/login")) {
-    await loginBuyer(page, credentials.email, credentials.password);
-    await gotoOneDirectBuy(page, path);
-  }
+  await recoverIfLoggedOut();
   await expect(page).not.toHaveURL(/\/account\/login$/, { timeout: 15_000 });
+}
+
+/** Open Account security (new hub) without requiring a specific URL. */
+export async function openAccountSecurityPage(page) {
+  await ensureLoggedInBuyer(page);
+  await gotoAuthenticatedPage(
+    page,
+    "/account/user-information",
+    ONE_DIRECT_BUY_BUYER_CREDENTIALS,
+  );
+  const securityLink = page
+    .getByRole("link", { name: /^Account security$/i })
+    .or(page.getByRole("button", { name: /^Account security$/i }));
+  if (await securityLink.first().isVisible({ timeout: 8_000 }).catch(() => false)) {
+    await securityLink.first().click();
+  } else {
+    await gotoOneDirectBuy(page, "/account/security");
+    if (page.url().includes("/account/login")) {
+      await loginBuyer(
+        page,
+        ONE_DIRECT_BUY_BUYER_CREDENTIALS.email,
+        ONE_DIRECT_BUY_BUYER_CREDENTIALS.password,
+      );
+      await gotoOneDirectBuy(page, "/account/security");
+    }
+  }
+  await expect(page).not.toHaveURL(/\/account\/login/, { timeout: 15_000 });
+  await expect(
+    page
+      .getByPlaceholder(/current password|new password/i)
+      .or(page.getByRole("heading", { name: /^Account security$/i }))
+      .or(page.getByRole("textbox", { name: /current password|new password/i }))
+      .first(),
+  ).toBeVisible({ timeout: 20_000 });
 }
 
 /** Click the account sidebar logout control (not the hidden header dropdown link). */
@@ -227,6 +252,11 @@ export async function loginBuyer(page, email, password) {
     .or(page.getByRole("button", { name: /^Login$/i }))
     .first()
     .click();
+  await expect(
+    page.locator(".ant-notification-notice").filter({
+      hasText: /Login successful/i,
+    }),
+  ).toBeVisible({ timeout: 20_000 });
   await expectLoggedIn(page);
 }
 
@@ -236,6 +266,11 @@ export async function logoutBuyer(page) {
   await expect(page).toHaveURL(/\/account\/login|\//, { timeout: 15_000 });
 }
 
+async function sessionIsAuthenticated(page) {
+  await gotoOneDirectBuy(page, "/account/orders");
+  return !page.url().includes("/account/login");
+}
+
 /** Ensure a logged-in buyer using configured credentials. */
 export async function ensureLoggedInBuyer(page) {
   if (!hasBuyerCredentials()) {
@@ -243,12 +278,25 @@ export async function ensureLoggedInBuyer(page) {
       "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD in .env"
     );
   }
+  if (await sessionIsAuthenticated(page)) {
+    return ONE_DIRECT_BUY_BUYER_CREDENTIALS;
+  }
   await loginBuyer(
     page,
     ONE_DIRECT_BUY_BUYER_CREDENTIALS.email,
     ONE_DIRECT_BUY_BUYER_CREDENTIALS.password
   );
   return ONE_DIRECT_BUY_BUYER_CREDENTIALS;
+}
+
+/** Logged-out visit to a protected account route → Welcome back login. */
+export async function expectGuestRedirectToLogin(page, path) {
+  await page.context().clearCookies();
+  await gotoOneDirectBuy(page, path);
+  await expect(page).toHaveURL(/\/account\/login/, { timeout: 20_000 });
+  await expect(
+    page.getByRole("heading", { name: /^Welcome back$/i }),
+  ).toBeVisible({ timeout: 15_000 });
 }
 
 /** Log in as admin (same storefront login; admin role verified on dashboard). */

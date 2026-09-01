@@ -1,0 +1,23 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-091	Auto Parts Fitment	Guest Buyer	Search by year, make, model	Buyer searches parts by year, make, and model.	P0	Yes	Working
+ODB-UC-092	Auto Parts Fitment	Guest Buyer	Search by engine/trim	Buyer can filter fitment by engine or trim.	P0	Yes	Working
+ODB-UC-093	Auto Parts Fitment	Guest Buyer	Product compatibility display	Product page shows vehicle compatibility.	P0	Yes	Working
+ODB-UC-094	Auto Parts Fitment	Guest Buyer	Fits vehicle message	Product shows that it fits the selected vehicle.	P0	Yes	Working
+ODB-UC-095	Auto Parts Fitment	Guest Buyer	Does not fit warning	Product warns when it does not fit the selected vehicle.	P0	Yes	Working
+ODB-UC-096	VIN Lookup	Guest Buyer	Valid VIN lookup	A valid VIN decodes to a vehicle.	P0	Yes	Working
+ODB-UC-097	VIN Lookup	Guest Buyer	Invalid VIN lookup	An invalid VIN shows an error.	P0	Yes	Working
+ODB-UC-098	License Plate Lookup	Guest Buyer	Plate lookup	Buyer can search fitment by license plate.	P1	Yes	Working
+ODB-UC-099	Garage	Buyer	Save vehicle to garage	Buyer saves a vehicle to the garage.	P1	Yes	Working
+ODB-UC-100	Garage	Buyer	Use saved vehicle	A saved garage vehicle can be applied.	P1	Yes	Working
+ODB-UC-101	Garage	Buyer	Remove saved vehicle	Buyer can remove a saved vehicle.	P1	Yes	Working
+ODB-UC-102	Garage	Buyer	Set default vehicle	Buyer can set a default garage vehicle.	P1	Yes	Working
+ODB-UC-103	Garage	Buyer	Clear selected vehicle	Buyer can clear the active vehicle.	P1	Yes	Working
+ODB-UC-104	Fitment Data	Seller	Upload ACES file	Seller uploads ACES fitment data.	P0	Yes	Working
+ODB-UC-105	Fitment Data	Seller	Invalid ACES file	System rejects an invalid ACES file.	P0	Yes	Not Required
+ODB-UC-106	PIES Data	Seller	Upload PIES file	Seller uploads PIES product attribute data.	P1	Yes	Working
+ODB-UC-107	PIES Data	Seller	Invalid PIES file	System rejects an invalid PIES file.	P1	Yes	Working
+ODB-UC-108	Fitment Data	Admin	Review fitment data	Admin reviews and approves fitment data.	P1	Yes	Not Required
+ODB-UC-109	Auto Parts Search	Buyer	OEM part number search	Buyer searches by OEM or SKU part number.	P1	Yes	Working
+ODB-UC-110	Auto Parts Search	Buyer	Interchange part search	Buyer searches by interchange part number.	P1	Yes	Later versions to include
+ODB-UC-111	Fitment SEO	System	Generate fitment SEO pages	System generates year/make/model fitment pages.	P2	Yes	New Functionality
+ODB-UC-112	Fitment Checkout	Buyer	Checkout fitment warning	Checkout warns if a cart item may not fit the vehicle.	P0	Yes	Working

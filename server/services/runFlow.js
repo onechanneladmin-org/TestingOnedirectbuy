@@ -44,6 +44,13 @@ async function startFlowRun(flowId, opts = {}) {
     error: "",
     marker: "",
     severity: "",
+    module: s.module || "",
+    actor: s.actor || "",
+    useCase: s.useCase || "",
+    description: s.description || "",
+    priority: s.priority || "",
+    automation: s.automation || "",
+    currentStatus: s.currentStatus || "",
   }));
 
   const exitFile = path.join(ROOT, "reports", `.flow-exit-${occurrenceId}.txt`);
@@ -532,6 +539,33 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   );
 }
 
+function isCatalogDriven(occurrence) {
+  return (occurrence.steps || []).some((s) => s.useCase || s.module);
+}
+
+/**
+ * ODB-UC-005-b → ODB-UC-005 when the parent row exists.
+ * @param {object[]} steps
+ * @param {string} stepId
+ */
+function findCatalogParent(steps, stepId) {
+  const exact = steps.find((s) => s.stepId === stepId);
+  if (exact) return exact;
+  const matches = steps.filter(
+    (s) =>
+      String(stepId).startsWith(`${s.stepId}-`) ||
+      String(stepId).startsWith(`${s.stepId}:`),
+  );
+  if (!matches.length) return null;
+  return matches.sort((a, b) => b.stepId.length - a.stepId.length)[0];
+}
+
+function mergeStepStatus(current, incoming) {
+  if (incoming === "failed" || incoming === "blocked") return incoming;
+  if (current === "failed" || current === "blocked") return current;
+  return incoming;
+}
+
 async function updateStep(occurrenceId, payload) {
   if (!payload?.stepId || !payload?.status) {
     const err = new Error("stepId and status are required");
@@ -540,62 +574,90 @@ async function updateStep(occurrenceId, payload) {
   }
 
   const now = new Date();
-  const occurrence = await RunningOccurrence.findOne({ occurrenceId });
-  if (!occurrence) {
-    const err = new Error(`Occurrence not found: ${occurrenceId}`);
-    err.status = 404;
-    throw err;
-  }
+  let lastErr = null;
 
-  let step = occurrence.steps.find((s) => s.stepId === payload.stepId);
-  if (!step) {
-    occurrence.steps.push({
-      stepId: payload.stepId,
-      title: payload.title || payload.stepId,
-      status: "pending",
-      order: occurrence.steps.length + 1,
-    });
-    step = occurrence.steps[occurrence.steps.length - 1];
-  }
+  for (let attempt = 0; attempt < 6; attempt++) {
+    try {
+      const occurrence = await RunningOccurrence.findOne({ occurrenceId });
+      if (!occurrence) {
+        const err = new Error(`Occurrence not found: ${occurrenceId}`);
+        err.status = 404;
+        throw err;
+      }
 
-  if (payload.title) step.title = payload.title;
-  step.status = payload.status;
+      const catalogFlow = isCatalogDriven(occurrence);
+      let step = occurrence.steps.find((s) => s.stepId === payload.stepId);
+      if (!step) {
+        step = findCatalogParent(occurrence.steps, payload.stepId);
+      }
+      if (!step) {
+        if (catalogFlow) {
+          // Extra probes (e.g. ODB-UC-021, ODB-UC-385) stay off the sheet.
+          return occurrence.toObject();
+        }
+        occurrence.steps.push({
+          stepId: payload.stepId,
+          title: payload.title || payload.stepId,
+          status: "pending",
+          order: occurrence.steps.length + 1,
+        });
+        step = occurrence.steps[occurrence.steps.length - 1];
+      }
 
-  if (payload.status === "running") {
-    step.startedAt = now;
-    step.finishedAt = null;
-    step.durationMs = null;
-    occurrence.currentStepId = payload.stepId;
-  } else if (["passed", "failed", "skipped", "blocked"].includes(payload.status)) {
-    if (!step.startedAt) step.startedAt = now;
-    step.finishedAt = now;
-    step.durationMs = Math.max(
-      0,
-      now.getTime() - new Date(step.startedAt).getTime(),
-    );
-    if (payload.error) step.error = String(payload.error).slice(0, 2000);
-    if (payload.marker) step.marker = payload.marker;
-    if (payload.severity) step.severity = payload.severity;
-    if (occurrence.currentStepId === payload.stepId) {
-      occurrence.currentStepId = null;
+      if (payload.title && !step.useCase) step.title = payload.title;
+      step.status = mergeStepStatus(step.status, payload.status);
+
+      if (payload.status === "running") {
+        if (!step.startedAt) step.startedAt = now;
+        step.finishedAt = null;
+        step.durationMs = null;
+        occurrence.currentStepId = step.stepId;
+      } else if (
+        ["passed", "failed", "skipped", "blocked"].includes(payload.status)
+      ) {
+        if (!step.startedAt) step.startedAt = now;
+        step.finishedAt = now;
+        step.durationMs = Math.max(
+          0,
+          now.getTime() - new Date(step.startedAt).getTime(),
+        );
+        if (payload.error) {
+          const prev = step.error ? `${step.error}\n` : "";
+          step.error = `${prev}${payload.error}`.slice(0, 2000);
+        }
+        if (payload.marker) step.marker = payload.marker;
+        if (payload.severity) step.severity = payload.severity;
+        if (occurrence.currentStepId === step.stepId) {
+          occurrence.currentStepId = null;
+        }
+      }
+
+      occurrence.stepsCompleted = occurrence.steps.filter((s) =>
+        ["passed", "failed", "skipped", "blocked"].includes(s.status),
+      ).length;
+      occurrence.stepsTotal = Math.max(
+        occurrence.stepsTotal || 0,
+        occurrence.steps.length,
+      );
+      occurrence.markModified("steps");
+      await occurrence.save();
+
+      console.log(
+        `[runFlow] step ${payload.status} ${payload.stepId} → ${step.stepId} (${occurrence.stepsCompleted}/${occurrence.stepsTotal}) occ=${occurrenceId.slice(0, 8)}`,
+      );
+
+      return occurrence.toObject();
+    } catch (err) {
+      lastErr = err;
+      const versionConflict =
+        err?.name === "VersionError" ||
+        /No matching document found for id/i.test(String(err?.message || err));
+      if (!versionConflict || attempt === 5) throw err;
+      await new Promise((r) => setTimeout(r, 40 * (attempt + 1)));
     }
   }
 
-  occurrence.stepsCompleted = occurrence.steps.filter((s) =>
-    ["passed", "failed", "skipped", "blocked"].includes(s.status),
-  ).length;
-  occurrence.stepsTotal = Math.max(
-    occurrence.stepsTotal || 0,
-    occurrence.steps.length,
-  );
-  occurrence.markModified("steps");
-  await occurrence.save();
-
-  console.log(
-    `[runFlow] step ${payload.status} ${payload.stepId} (${occurrence.stepsCompleted}/${occurrence.stepsTotal}) occ=${occurrenceId.slice(0, 8)}`,
-  );
-
-  return occurrence.toObject();
+  throw lastErr;
 }
 
 async function upsertReport(occurrenceId, body) {

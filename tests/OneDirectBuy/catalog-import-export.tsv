@@ -1,0 +1,14 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-238	Catalog Import	Seller	Download import template	Seller downloads an import template.	P1	Yes	Not Required
+ODB-UC-239	Catalog Import	Seller	Missing required columns	The system rejects a file that is missing required columns.	P1	Yes	Not Required
+ODB-UC-240	Catalog Import	Seller	Duplicate SKU import	The system flags a duplicate SKU on import.	P1	Yes	Not Required
+ODB-UC-241	Catalog Import	Seller	Partial import success	Valid rows import when some rows fail.	P1	Yes	Not Required
+ODB-UC-242	Catalog Export	Seller	Export seller catalog	Seller exports their own catalog.	P2	Yes	Working
+ODB-UC-243	Catalog Export	Admin	Export full catalog	Admin exports the master catalog.	P2	Yes	Not Required
+ODB-UC-244	Category Master	Admin	Create category	Admin creates a new category.	P1	Yes	Working
+ODB-UC-245	Category Master	Admin	Edit category	Admin edits a category.	P1	Yes	Working
+ODB-UC-246	Category Master	Admin	Disable category	A disabled category is hidden from listing.	P1	Yes	Working
+ODB-UC-247	Attribute Master	Admin	Create category attribute	Admin creates a required category attribute.	P1	Yes	Working
+ODB-UC-248	Attribute Master	Seller	Required attribute validation	A product cannot submit without a required category attribute.	P0	Yes	Working
+ODB-UC-249	Brand Master	Admin	Create brand manually	Admin creates a brand manually.	P1	Yes	Working
+ODB-UC-250	Brand Master	Admin	Disable brand	Sellers cannot list products for a disabled brand.	P1	Yes	Not Required

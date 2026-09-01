@@ -1,0 +1,16 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-026	Homepage	Guest Buyer	Load homepage	Homepage loads with marketplace layout, search chrome, and store benefits.	P0	Yes	Working
+ODB-UC-027	Navigation	Guest Buyer	Header navigation	Header menu links open shop, seller onboarding, and order tracking.	P0	Yes	Working
+ODB-UC-028	Navigation	Guest Buyer	Footer navigation	Footer policy, support, and help links open the correct pages.	P1	Yes	Working
+ODB-UC-029	Navigation	Guest Buyer	Category menu	Shop by Department dropdown opens a category listing.	P0	Yes	Working
+ODB-UC-030	Search	Guest Buyer	Search by keyword	Buyer searches a keyword and sees matching products.	P0	Yes	Working
+ODB-UC-031	Search	Guest Buyer	No results search	System displays a no-results message for an unmatched keyword.	P1	Yes	Working
+ODB-UC-032	Search	Guest Buyer	Spelling variation search	System still loads search results for a misspelled term.	P2	Yes	Working
+ODB-UC-033	Search	Guest Buyer	Search suggestions	Product, category, or brand suggestions appear as the buyer types.	P1	Yes	Working
+ODB-UC-034	Search	Guest Buyer	Filter by category	Search or shop results can be filtered by category.	P0	Yes	Working
+ODB-UC-035	Search	Guest Buyer	Sort by price	Results sort by price low to high and high to low.	P1	Yes	Working
+ODB-UC-036	Search	Guest Buyer	Sort by newest	Results sort by newest products.	P1	Yes	Working
+ODB-UC-037	Search	Guest Buyer	Open product from search	Buyer opens a product page from search results.	P0	Yes	Working
+ODB-UC-038	Navigation	Guest Buyer	Logo redirects home	Logo click returns the shopper to the homepage.	P2	Yes	Working
+ODB-UC-039	Navigation	Guest Buyer	Mobile menu	Mobile hamburger/bottom menu opens site navigation.	P1	Yes	Working
+ODB-UC-040	Navigation	Guest Buyer	Breadcrumb navigation	Breadcrumbs recover the previous listing or home.	P1	Yes	Working

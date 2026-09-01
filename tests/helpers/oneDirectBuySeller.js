@@ -104,3 +104,138 @@ export async function openSellerApplication(page) {
     page.getByRole("heading", { name: /Apply to sell on OneDirect Buy/i }),
   ).toBeVisible({ timeout: 30_000 });
 }
+
+const SELLER_CATALOG_PATHS = ["/vendor/products", "/vendor/dashboard"];
+
+/**
+ * True when a seller catalog/pricing/identifier workspace is on this storefront.
+ * Live OneDirectBuy public site does not mount OneChannel seller tools.
+ */
+export async function sellerCatalogWorkspaceVisible(page) {
+  for (const path of SELLER_CATALOG_PATHS) {
+    await gotoOneDirectBuy(page, path);
+    const catalogUi = page.getByText(
+      /create variant|product variants|sale price|UPC|GTIN|MPN|variant inventory/i,
+    );
+    if (await catalogUi.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function sellerPortalNotOnStorefrontError(feature) {
+  return `${feature} is not on the OneDirectBuy storefront (seller/admin catalog lives in OneChannel).`;
+}
+
+const SELLER_FITMENT_PATHS = [
+  "/vendor/products",
+  "/vendor/dashboard",
+  "/vendor/fitment",
+];
+
+/** True when ACES/PIES upload UI is mounted on this storefront. */
+export async function sellerFitmentUploadVisible(page) {
+  for (const path of SELLER_FITMENT_PATHS) {
+    await gotoOneDirectBuy(page, path);
+    const ui = page.getByText(
+      /ACES|PIES|fitment (file|upload|data)|upload (ACES|PIES)/i,
+    );
+    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const BRAND_APPROVAL_PATHS = [
+  "/vendor/brands",
+  "/vendor/brand-requests",
+  "/vendor/dashboard",
+  "/admin/brands",
+  "/admin/brand-approval",
+];
+
+/** True when brand-approval / brand-request UI is mounted on this storefront. */
+export async function brandApprovalWorkspaceVisible(page) {
+  for (const path of BRAND_APPROVAL_PATHS) {
+    await gotoOneDirectBuy(page, path);
+    const ui = page.getByText(
+      /brand approval|request (an? )?(existing )?brand|new brand|authorized brand|brand request/i,
+    );
+    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const PRODUCT_CATALOG_PATHS = [
+  "/vendor/products",
+  "/vendor/catalog",
+  "/vendor/dashboard",
+  "/admin/products",
+  "/admin/catalog",
+];
+
+/** True when seller/admin product catalog tools are on this storefront. */
+export async function sellerProductCatalogVisible(page) {
+  if (await sellerCatalogWorkspaceVisible(page)) return true;
+  for (const path of PRODUCT_CATALOG_PATHS) {
+    await gotoOneDirectBuy(page, path);
+    const ui = page.getByText(
+      /add (a )?(new )?product|create product|product images|product (specs|specifications)|bulk (product |price |inventory )?upload|review product|approve product/i,
+    );
+    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const CATALOG_MASTER_PATHS = [
+  "/vendor/import",
+  "/vendor/export",
+  "/vendor/catalog",
+  "/vendor/products",
+  "/admin/catalog",
+  "/admin/categories",
+  "/admin/attributes",
+  "/admin/brands",
+];
+
+/** True when catalog import/export or category/attribute/brand master UI is mounted. */
+export async function catalogMasterDataVisible(page) {
+  if (await sellerProductCatalogVisible(page)) return true;
+  for (const path of CATALOG_MASTER_PATHS) {
+    await gotoOneDirectBuy(page, path);
+    const ui = page.getByText(
+      /import template|catalog import|export (seller |full |master )?catalog|create category|edit category|disable category|category attribute|create brand/i,
+    );
+    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const SELLER_INVENTORY_PATHS = [
+  "/vendor/inventory",
+  "/vendor/products",
+  "/vendor/dashboard",
+];
+
+/** True when seller inventory / stock controls are mounted on this storefront. */
+export async function sellerInventoryVisible(page) {
+  if (await sellerCatalogWorkspaceVisible(page)) return true;
+  for (const path of SELLER_INVENTORY_PATHS) {
+    await gotoOneDirectBuy(page, path);
+    const ui = page.getByText(
+      /add (stock|inventory)|inventory quantity|on hand|warehouse stock|lead time|low stock/i,
+    );
+    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+      return true;
+    }
+  }
+  return false;
+}

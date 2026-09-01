@@ -1,0 +1,16 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-076	Product Variants	Seller	Create product variants	Seller creates size or color variants for a product.	P0	Yes	New Functionality
+ODB-UC-077	Product Variants	Seller	Variant-level inventory	Seller manages inventory separately per variant.	P0	Yes	Working
+ODB-UC-078	Product Variants	Buyer	Select variant	Buyer selects a specific variant on the product page.	P0	Yes	New Functionality
+ODB-UC-079	Product Variants	Buyer	Add selected variant to cart	The selected variant is the one added to cart.	P0	Yes	New Functionality
+ODB-UC-080	Product Variants	Buyer	Out-of-stock variant	Buyer cannot add an out-of-stock variant to cart.	P0	Yes	Not Required
+ODB-UC-081	Pricing	Seller	Update product price	Seller updates the regular product price.	P0	Yes	Working
+ODB-UC-082	Pricing	Seller	Prevent negative price	System blocks an invalid negative price.	P0	Yes	Working
+ODB-UC-083	Pricing	Seller	Add sale price	Seller adds a sale price lower than the regular price.	P1	Yes	Working
+ODB-UC-084	Pricing	Seller	Block invalid sale price	System blocks a sale price that is invalid versus regular price.	P1	Yes	Not Required
+ODB-UC-085	Pricing	System	Scheduled sale start	Sale price activates at the scheduled start time.	P1	Yes	Later versions to include
+ODB-UC-086	Pricing	System	Scheduled sale end	Sale price ends at the scheduled end time.	P1	Yes	Later versions to include
+ODB-UC-087	Product Identifiers	Seller	Add UPC/GTIN/MPN	Seller enters required product identifiers.	P0	Yes	Working
+ODB-UC-088	Product Identifiers	Seller	Invalid UPC validation	System rejects an invalid UPC or GTIN format.	P0	Yes	Working
+ODB-UC-089	Product Identifiers	Seller	GTIN exemption	Seller submits a GTIN exemption request.	P1	Yes	New Functionality
+ODB-UC-090	Product Identifiers	Admin	Review GTIN exemption	Admin approves or rejects a GTIN exemption.	P1	Yes	Working

@@ -1,26 +1,49 @@
 import { test, expect } from "../helpers/softTest.js";
 import {
-  gotoOneDirectBuy,
   addFirstProductToCartFromShop,
+  cartApplyCouponButton,
+  cartCouponInput,
+  cartIncreaseQtyButton,
+  cartLineProductLinks,
+  cartQuantityInput,
+  cartRemoveCouponButton,
+  cartRemoveItemButton,
+  cartSellerGroup,
+  cartShippingLine,
+  cartTaxLine,
   openCart,
   waitForCartReady,
-  cartRemoveItemButton,
-  cartQuantityInput,
-  cartIncreaseQtyButton,
 } from "../helpers/oneDirectBuyNav.js";
-import { registerBuyer } from "../helpers/oneDirectBuyAuth.js";
+import {
+  hasBuyerCredentials,
+  loginBuyer,
+  logoutBuyer,
+  ONE_DIRECT_BUY_BUYER_CREDENTIALS,
+} from "../helpers/oneDirectBuyAuth.js";
 
 const DESKTOP = { width: 1920, height: 1080 };
 
+async function requireBuyerLogin(page) {
+  if (!hasBuyerCredentials()) {
+    throw new Error(
+      "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD to verify this buyer cart case.",
+    );
+  }
+  await loginBuyer(
+    page,
+    ONE_DIRECT_BUY_BUYER_CREDENTIALS.email,
+    ONE_DIRECT_BUY_BUYER_CREDENTIALS.password,
+  );
+}
+
 test.describe("OneDirectBuy — Cart", () => {
-  // Shop load + add + cart page can exceed the default 90s under CI_FAST.
   test.describe.configure({ timeout: 180_000 });
 
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(DESKTOP);
   });
 
-  test("ODB-UC-113: buyer adds active product to cart", async ({ page, soft }) => {
+  test("ODB-UC-113: guest adds an item to cart", async ({ page, soft }) => {
     await soft("ODB-UC-113", "Add from shop then cart shows line items", async () => {
       await addFirstProductToCartFromShop(page);
       await openCart(page);
@@ -31,7 +54,7 @@ test.describe("OneDirectBuy — Cart", () => {
     });
   });
 
-  test("ODB-UC-114: buyer opens cart and sees items", async ({ page, soft }) => {
+  test("ODB-UC-114: guest views cart", async ({ page, soft }) => {
     await soft("ODB-UC-114", "Cart heading + item line after add", async () => {
       await addFirstProductToCartFromShop(page);
       await openCart(page);
@@ -44,10 +67,7 @@ test.describe("OneDirectBuy — Cart", () => {
     });
   });
 
-  test("ODB-UC-115: buyer updates item quantity in cart", async ({
-    page,
-    soft,
-  }) => {
+  test("ODB-UC-115: guest updates quantity", async ({ page, soft }) => {
     await soft("ODB-UC-115", "Increase quantity control updates qty", async () => {
       await addFirstProductToCartFromShop(page);
       await openCart(page);
@@ -62,11 +82,10 @@ test.describe("OneDirectBuy — Cart", () => {
     });
   });
 
-  test("ODB-UC-116: buyer removes item from cart", async ({ page, soft }) => {
+  test("ODB-UC-116: guest removes an item", async ({ page, soft }) => {
     await soft("ODB-UC-116", "Remove item → empty cart copy", async () => {
       await addFirstProductToCartFromShop(page);
       await openCart(page);
-      // Remove every line until empty (add helper may leave >1 lines).
       for (let i = 0; i < 8; i++) {
         const remove = cartRemoveItemButton(page);
         if (!(await remove.isVisible().catch(() => false))) break;
@@ -82,7 +101,7 @@ test.describe("OneDirectBuy — Cart", () => {
     });
   });
 
-  test("ODB-UC-117: cart persists after page refresh", async ({ page, soft }) => {
+  test("ODB-UC-117: cart persists after refresh", async ({ page, soft }) => {
     await soft("ODB-UC-117", "Reload keeps cart lines", async () => {
       await addFirstProductToCartFromShop(page);
       await openCart(page);
@@ -98,32 +117,70 @@ test.describe("OneDirectBuy — Cart", () => {
     });
   });
 
-  test("ODB-UC-118: guest cart merges after buyer registers", async ({
-    page,
-    soft,
-  }) => {
-    await soft("ODB-UC-118", "Guest cart still present after register", async () => {
+  test("ODB-UC-118: guest cart merges after login", async ({ page, soft }) => {
+    await soft("ODB-UC-118", "Guest cart still present after login", async () => {
       await addFirstProductToCartFromShop(page);
-      try {
-        await registerBuyer(page);
-      } catch {
-        test.info().annotations.push({
-          type: "note",
-          description: "Buyer registration unavailable — merge path skipped",
-        });
-        return;
-      }
       await openCart(page);
-      await expect(
-        page
-          .getByRole("heading", { name: /^Cart$/i })
-          .or(page.getByText(/\d+\s+items?/i))
-          .first(),
-      ).toBeVisible({ timeout: 15_000 });
+      const guestTitle = (
+        await cartLineProductLinks(page).first().innerText().catch(() => "")
+      ).trim();
+      await requireBuyerLogin(page);
+      await openCart(page);
+      await expect(page.getByText(/\d+\s+items?/i).first()).toBeVisible({
+        timeout: 20_000,
+      });
+      if (guestTitle) {
+        await expect(page.getByText(guestTitle).first()).toBeVisible({
+          timeout: 15_000,
+        });
+      } else {
+        await expect(cartLineProductLinks(page).first()).toBeVisible({
+          timeout: 15_000,
+        });
+      }
     });
   });
 
-  test("ODB-UC-121: cart subtotal and checkout CTA", async ({ page, soft }) => {
+  test("ODB-UC-119: duplicate item handling", async ({ page, soft }) => {
+    await soft("ODB-UC-119", "Adding the same product again updates the cart", async () => {
+      await addFirstProductToCartFromShop(page);
+      await addFirstProductToCartFromShop(page);
+      await openCart(page);
+      const qty = Number((await cartQuantityInput(page).inputValue()) || "0");
+      const lines = await cartLineProductLinks(page).count();
+      if (qty < 2 && lines < 2) {
+        throw new Error(
+          "Adding the same product twice did not increase quantity or add a second line.",
+        );
+      }
+    });
+  });
+
+  test("ODB-UC-120: stock validation before checkout", async ({ page, soft }) => {
+    await soft("ODB-UC-120", "Cart blocks a quantity above available stock", async () => {
+      await addFirstProductToCartFromShop(page);
+      await openCart(page);
+      const qty = cartQuantityInput(page);
+      await expect(qty).toBeVisible({ timeout: 15_000 });
+      await qty.fill("9999");
+      await qty.press("Enter");
+      const clamped = Number((await qty.inputValue()) || "9999");
+      const notice = page.getByText(
+        /only \d+|insufficient stock|not enough stock|exceeds available|maximum quantity|out of stock/i,
+      );
+      const sawNotice = await notice
+        .first()
+        .isVisible({ timeout: 6_000 })
+        .catch(() => false);
+      if (clamped >= 9999 && !sawNotice) {
+        throw new Error(
+          "Cart accepted quantity 9999 with no stock validation message.",
+        );
+      }
+    });
+  });
+
+  test("ODB-UC-121: subtotal calculation", async ({ page, soft }) => {
     await soft("ODB-UC-121", "Order summary Subtotal + Proceed to checkout", async () => {
       await addFirstProductToCartFromShop(page);
       await openCart(page);
@@ -141,40 +198,49 @@ test.describe("OneDirectBuy — Cart", () => {
     });
   });
 
-  test("ODB-UC-112: empty cart shows empty state", async ({ page, soft }) => {
-    await soft("ODB-UC-112", "Your cart is empty + Continue shopping", async () => {
-      await gotoOneDirectBuy(page, "/account/shopping-cart");
-      await waitForCartReady(page);
-      // Fresh context should be empty; if prior soft state left items, skip assert
-      const empty = await page
-        .getByText(/Your cart is empty/i)
-        .isVisible({ timeout: 5_000 })
-        .catch(() => false);
-      if (empty) {
-        await expect(page.getByText(/Your cart is empty/i)).toBeVisible();
-        await expect(
-          page.getByRole("link", { name: /Continue shopping/i }).first(),
-        ).toBeVisible();
-      } else {
-        await expect(
-          page.getByRole("heading", { name: /^Cart$/i }).first(),
-        ).toBeVisible();
+  test("ODB-UC-122: tax estimate", async ({ page, soft }) => {
+    await soft("ODB-UC-122", "Order summary shows a tax estimate", async () => {
+      await addFirstProductToCartFromShop(page);
+      await openCart(page);
+      if (
+        !(await cartTaxLine(page)
+          .first()
+          .isVisible({ timeout: 8_000 })
+          .catch(() => false))
+      ) {
+        throw new Error("Cart order summary has no tax estimate line.");
       }
     });
   });
 
-  test("ODB-UC-124: valid coupon applies to cart", async ({ page, soft }) => {
-    test.skip(
-      !process.env.ONEDIRECTBUY_TEST_COUPON,
-      "Set ONEDIRECTBUY_TEST_COUPON for coupon tests",
-    );
-    await soft("ODB-UC-124", "Apply env coupon code", async () => {
+  test("ODB-UC-123: shipping estimate", async ({ page, soft }) => {
+    await soft("ODB-UC-123", "Order summary shows a shipping estimate", async () => {
       await addFirstProductToCartFromShop(page);
       await openCart(page);
-      await page
-        .getByRole("textbox", { name: /^Coupon$/i })
-        .fill(process.env.ONEDIRECTBUY_TEST_COUPON);
-      await page.getByRole("button", { name: /^Apply$/i }).click();
+      if (
+        !(await cartShippingLine(page)
+          .first()
+          .isVisible({ timeout: 8_000 })
+          .catch(() => false))
+      ) {
+        throw new Error("Cart order summary has no shipping estimate line.");
+      }
+    });
+  });
+
+  test("ODB-UC-124: apply coupon", async ({ page, soft }) => {
+    await soft("ODB-UC-124", "Apply a valid coupon code", async () => {
+      await addFirstProductToCartFromShop(page);
+      await openCart(page);
+      await expect(cartCouponInput(page)).toBeVisible({ timeout: 20_000 });
+      const code = process.env.ONEDIRECTBUY_TEST_COUPON;
+      if (!code) {
+        throw new Error(
+          "Set ONEDIRECTBUY_TEST_COUPON to verify applying a valid coupon.",
+        );
+      }
+      await cartCouponInput(page).fill(code);
+      await cartApplyCouponButton(page).click();
       await expect(
         page.getByText(/discount|applied|coupon/i).first(),
       ).toBeVisible({ timeout: 15_000 });
@@ -185,14 +251,90 @@ test.describe("OneDirectBuy — Cart", () => {
     await soft("ODB-UC-125", "Invalid or expired coupon code notice", async () => {
       await addFirstProductToCartFromShop(page);
       await openCart(page);
-      await page.getByRole("textbox", { name: /^Coupon$/i }).fill("INVALIDCOUPON999");
-      await page.getByRole("button", { name: /^Apply$/i }).click();
+      await cartCouponInput(page).fill("INVALIDCOUPON999");
+      await cartApplyCouponButton(page).click();
       await expect(
         page
           .locator(".ant-notification-notice")
           .filter({ hasText: /Invalid or expired coupon code/i })
           .first(),
       ).toBeVisible({ timeout: 15_000 });
+    });
+  });
+
+  test("ODB-UC-126: remove coupon", async ({ page, soft }) => {
+    await soft("ODB-UC-126", "Buyer can remove an applied coupon", async () => {
+      await addFirstProductToCartFromShop(page);
+      await openCart(page);
+      const code = process.env.ONEDIRECTBUY_TEST_COUPON;
+      if (code) {
+        await cartCouponInput(page).fill(code);
+        await cartApplyCouponButton(page).click();
+        await page.waitForTimeout(1000);
+      }
+      if (
+        !(await cartRemoveCouponButton(page)
+          .isVisible({ timeout: 8_000 })
+          .catch(() => false))
+      ) {
+        throw new Error(
+          "No Remove coupon control on the cart (apply a valid coupon or expose remove).",
+        );
+      }
+      await cartRemoveCouponButton(page).click();
+    });
+  });
+
+  test("ODB-UC-127: multi-seller grouping is not required", async ({
+    page,
+    soft,
+  }) => {
+    await soft(
+      "ODB-UC-127",
+      "Multi-seller cart grouping absent (Not Required)",
+      async () => {
+        await addFirstProductToCartFromShop(page);
+        await openCart(page);
+        if (
+          await cartSellerGroup(page)
+            .first()
+            .isVisible({ timeout: 4_000 })
+            .catch(() => false)
+        ) {
+          throw new Error(
+            "Cart groups items by seller; sheet marks multi-seller grouping as Not Required.",
+          );
+        }
+      },
+    );
+  });
+
+  test("ODB-UC-128: cart recovery after login", async ({ page, soft }) => {
+    await soft("ODB-UC-128", "Account cart is restored after logout and login", async () => {
+      await addFirstProductToCartFromShop(page);
+      await requireBuyerLogin(page);
+      await openCart(page);
+      await expect(cartLineProductLinks(page).first()).toBeVisible({
+        timeout: 20_000,
+      });
+      const title = (
+        await cartLineProductLinks(page).first().innerText().catch(() => "")
+      ).trim();
+      await logoutBuyer(page);
+      await requireBuyerLogin(page);
+      await openCart(page);
+      if (title) {
+        await expect(page.getByText(title).first()).toBeVisible({
+          timeout: 20_000,
+        });
+      } else if (
+        !(await cartLineProductLinks(page)
+          .first()
+          .isVisible({ timeout: 10_000 })
+          .catch(() => false))
+      ) {
+        throw new Error("Cart was not recovered after logout and login.");
+      }
     });
   });
 });

@@ -5,8 +5,8 @@
   "flows": [
     {
       "id": 1,
-      "name": "Guest Chrome (Homepage & Navigation)",
-      "enabled": true,
+      "name": "Guest Chrome (merged into Flow 14 — Homepage, Navigation, and Search)",
+      "enabled": false,
       "tests": [
         "tests/OneDirectBuy/Homepage.spec.js",
         "tests/OneDirectBuy/Navigation.spec.js"
@@ -14,43 +14,44 @@
     },
     {
       "id": 2,
-      "name": "Search & Shop Listing",
-      "enabled": true,
-      "tests": [
-        "tests/OneDirectBuy/Search.spec.js",
-        "tests/OneDirectBuy/CategoryProductListing.spec.js"
-      ]
+      "name": "Category & Product Listing (merged into Flow 15 — sheet group 4)",
+      "enabled": false,
+      "tests": ["tests/OneDirectBuy/CategoryProductListing.spec.js"]
     },
     {
       "id": 3,
-      "name": "Vehicle Fitment",
-      "enabled": true,
+      "name": "Vehicle Fitment (merged into Flow 18 — sheet group 7)",
+      "enabled": false,
       "tests": ["tests/OneDirectBuy/AutoPartsFitment.spec.js"]
     },
     {
       "id": 4,
-      "name": "Product Detail",
-      "enabled": true,
+      "name": "Product Detail (merged into Flow 16 — sheet group 5)",
+      "enabled": false,
       "tests": ["tests/OneDirectBuy/ProductDetail.spec.js"]
     },
     {
       "id": 5,
-      "name": "Cart",
-      "enabled": true,
+      "name": "Cart (merged into Flow 19 — sheet group 8)",
+      "enabled": false,
       "tests": ["tests/OneDirectBuy/Cart.spec.js"]
     },
     {
       "id": 6,
-      "name": "Auth (Login & Buyer Account) — guest/public only until buyer secrets",
+      "name": "1. Buyer Registration, Login, and Account Management",
       "enabled": true,
+      "catalog": "tests/OneDirectBuy/buyer-account.tsv",
+      "workers": 1,
       "tests": [
         "tests/OneDirectBuy/Login.spec.js",
-        "tests/OneDirectBuy/BuyerAccount.spec.js"
+        "tests/OneDirectBuy/BuyerAccount.spec.js",
+        "tests/OneDirectBuy/BuyerAccountAuthenticated.spec.js",
+        "tests/OneDirectBuy/BuyerAddress.spec.js"
       ]
     },
     {
       "id": 6.1,
-      "name": "Buyer authenticated account (needs ONEDIRECTBUY_BUYER_* — off for now)",
+      "name": "Buyer authenticated account (merged into Flow 6 — off to avoid duplicate runs)",
       "enabled": false,
       "tests": ["tests/OneDirectBuy/BuyerAccountAuthenticated.spec.js"]
     },
@@ -62,8 +63,8 @@
     },
     {
       "id": 7,
-      "name": "Checkout",
-      "enabled": true,
+      "name": "Checkout (merged into Flow 20 — sheet group 9)",
+      "enabled": false,
       "tests": ["tests/OneDirectBuy/Checkout.spec.js"]
     },
     {
@@ -77,8 +78,8 @@
     },
     {
       "id": 9,
-      "name": "Seller Storefront & Onboarding",
-      "enabled": true,
+      "name": "Seller Storefront & Onboarding (merged into Flow 23 — sheet group 12)",
+      "enabled": false,
       "tests": [
         "tests/OneDirectBuy/SellerStorefront.spec.js",
         "tests/OneDirectBuy/SellerOnboarding.spec.js"
@@ -90,7 +91,6 @@
       "enabled": true,
       "tests": [
         "tests/OneDirectBuy/SellerMessaging.spec.js",
-        "tests/OneDirectBuy/SellerOrders.spec.js",
         "tests/OneDirectBuy/SellerPromotions.spec.js",
         "tests/OneDirectBuy/SellerAdminManagement.spec.js",
         "tests/OneDirectBuy/SellerCatalogBackend.spec.js",
@@ -111,9 +111,125 @@
     },
     {
       "id": 12,
-      "name": "Buyer Address Book (needs buyer secrets — off for now)",
+      "name": "Buyer Address Book (merged into Flow 6 — off to avoid duplicate runs)",
       "enabled": false,
       "tests": ["tests/OneDirectBuy/BuyerAddress.spec.js"]
+    },
+    {
+      "id": 13,
+      "name": "2. Buyer Verification and Account Security",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/buyer-verification.tsv",
+      "workers": 1,
+      "tests": [
+        "tests/OneDirectBuy/BuyerVerification.spec.js",
+        "tests/OneDirectBuy/BuyerAccountSecurity.spec.js"
+      ]
+    },
+    {
+      "id": 14,
+      "name": "3. Homepage, Navigation, and Search",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/homepage-nav-search.tsv",
+      "tests": [
+        "tests/OneDirectBuy/Homepage.spec.js",
+        "tests/OneDirectBuy/Navigation.spec.js",
+        "tests/OneDirectBuy/Search.spec.js"
+      ]
+    },
+    {
+      "id": 15,
+      "name": "4. Category and Product Listing Pages",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/category-listing.tsv",
+      "tests": ["tests/OneDirectBuy/CategoryProductListing.spec.js"]
+    },
+    {
+      "id": 16,
+      "name": "5. Product Detail Page",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/product-detail.tsv",
+      "tests": ["tests/OneDirectBuy/ProductDetail.spec.js"]
+    },
+    {
+      "id": 17,
+      "name": "6. Product Variants, Pricing, and Identifiers",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/product-variants-pricing.tsv",
+      "tests": ["tests/OneDirectBuy/ProductVariantsPricing.spec.js"]
+    },
+    {
+      "id": 18,
+      "name": "7. Auto Parts Fitment, ACES, PIES, VIN, and Garage",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/fitment-vin-garage.tsv",
+      "tests": ["tests/OneDirectBuy/AutoPartsFitment.spec.js"]
+    },
+    {
+      "id": 19,
+      "name": "8. Cart Functionality",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/cart.tsv",
+      "tests": ["tests/OneDirectBuy/Cart.spec.js"]
+    },
+    {
+      "id": 20,
+      "name": "9. Checkout Flow",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/checkout.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/Checkout.spec.js"]
+    },
+    {
+      "id": 21,
+      "name": "10. Payments, Refunds, Wallet, and Store Credit",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/payments-refunds-wallet.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/PaymentsRefundsWallet.spec.js"]
+    },
+    {
+      "id": 22,
+      "name": "11. Buyer Orders and Multi-Seller Orders",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/buyer-orders.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/BuyerOrders.spec.js"]
+    },
+    {
+      "id": 23,
+      "name": "12. Seller Registration, Onboarding, and Storefront",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/seller-onboarding-storefront.tsv",
+      "tests": ["tests/OneDirectBuy/SellerOnboardingStorefront.spec.js"]
+    },
+    {
+      "id": 24,
+      "name": "13. Brand Approval Workflow",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/brand-approval.tsv",
+      "tests": ["tests/OneDirectBuy/BrandApproval.spec.js"]
+    },
+    {
+      "id": 25,
+      "name": "14. Product Approval and Catalog Management",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/product-catalog.tsv",
+      "tests": ["tests/OneDirectBuy/ProductCatalog.spec.js"]
+    },
+    {
+      "id": 26,
+      "name": "15. Catalog Import, Export, and Master Data",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/catalog-import-export.tsv",
+      "tests": ["tests/OneDirectBuy/CatalogImportExport.spec.js"]
+    },
+    {
+      "id": 27,
+      "name": "16. Seller Inventory Management",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/seller-inventory.tsv",
+      "tests": ["tests/OneDirectBuy/SellerInventory.spec.js"]
     }
   ]
 }

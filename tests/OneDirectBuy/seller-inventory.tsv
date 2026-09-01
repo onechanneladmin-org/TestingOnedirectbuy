@@ -1,0 +1,11 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-251	Inventory	Seller	Add inventory	Seller adds stock quantity.	P0	Yes	Working
+ODB-UC-252	Inventory	Seller	Reduce inventory	Seller reduces stock quantity.	P0	Yes	Working
+ODB-UC-253	Inventory	Seller	Prevent negative inventory	The system blocks a negative stock entry.	P0	Yes	Working
+ODB-UC-254	Inventory	System	Inventory decreases after order	Stock reduces after an order.	P0	Yes	Working
+ODB-UC-255	Inventory	System	Inventory restored after cancellation	Stock restores when an order is cancelled.	P0	Yes	Pending
+ODB-UC-256	Inventory	Seller	Low stock alert	Seller receives a low stock notification.	P1	Yes	New Functionality
+ODB-UC-257	Inventory	System	Out of stock product behavior	A product shows out of stock on the storefront.	P0	Yes	Working
+ODB-UC-258	Inventory	Seller	Multi-warehouse inventory	Seller views stock by warehouse.	P1	Yes	New Functionality
+ODB-UC-259	Inventory	Seller	Update handling lead time	Seller updates product handling lead time.	P1	Yes	New Functionality
+ODB-UC-260	Inventory	System	Oversell prevention	The system prevents purchase when out of stock.	P0	Yes	New Functionality

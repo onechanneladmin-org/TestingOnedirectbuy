@@ -1,5 +1,5 @@
 {
-  "$comment": "Control which Playwright specs run in GitHub Actions (Chromium only). Set enabled: false to skip. Buyer-auth / purchase journey disabled until ONEDIRECTBUY_BUYER_* secrets are added.",
+  "$comment": "Control which Playwright specs run in GitHub Actions (Chromium only). Set enabled: false to skip. Authenticated buyer account/address specs skip themselves when ONEDIRECTBUY_BUYER_* secrets are missing.",
   "workers": 4,
   "retries": 1,
   "suites": {
@@ -31,7 +31,7 @@
     {
       "file": "tests/OneDirectBuy/Search.spec.js",
       "enabled": true,
-      "description": "Product search (header search, empty state, sort)"
+      "description": "Product search — keyword, suggestions, empty state, sort, open PDP"
     },
     {
       "file": "tests/OneDirectBuy/CategoryProductListing.spec.js",
@@ -41,17 +41,22 @@
     {
       "file": "tests/OneDirectBuy/AutoPartsFitment.spec.js",
       "enabled": true,
-      "description": "Select Vehicle / My Vehicles garage and Year-Make-Model fitment"
+      "description": "Sheet group 7 — YMM/VIN/garage fitment plus seller ACES/PIES probes"
     },
     {
       "file": "tests/OneDirectBuy/ProductDetail.spec.js",
       "enabled": true,
-      "description": "Product detail page — gallery, ATC, tabs, related, 404"
+      "description": "Product detail page — gallery, variants, cart, wishlist, reviews, 404"
+    },
+    {
+      "file": "tests/OneDirectBuy/ProductVariantsPricing.spec.js",
+      "enabled": true,
+      "description": "Sheet group 6 — buyer variants plus seller/admin catalog probes"
     },
     {
       "file": "tests/OneDirectBuy/Cart.spec.js",
       "enabled": true,
-      "description": "Shopping cart — add, qty, remove, coupon, checkout CTA"
+      "description": "Sheet group 8 — guest cart, merge on login, coupons, estimates"
     },
     {
       "file": "tests/OneDirectBuy/BuyerAccount.spec.js",
@@ -60,13 +65,23 @@
     },
     {
       "file": "tests/OneDirectBuy/BuyerAccountAuthenticated.spec.js",
-      "enabled": false,
-      "description": "Authenticated buyer account (needs buyer credentials — re-enable later)"
+      "enabled": true,
+      "description": "Authenticated buyer account — dashboard, profile update, logout (skips without buyer secrets)"
     },
     {
       "file": "tests/OneDirectBuy/Checkout.spec.js",
       "enabled": true,
-      "description": "Checkout — shipping form, order summary, payment-success"
+      "description": "Sheet group 9 — guest/buyer checkout, shipping, payment UI (no live charge)"
+    },
+    {
+      "file": "tests/OneDirectBuy/PaymentsRefundsWallet.spec.js",
+      "enabled": true,
+      "description": "Sheet group 10 — card payment UI, refunds, wallet, store credit probes"
+    },
+    {
+      "file": "tests/OneDirectBuy/BuyerOrders.spec.js",
+      "enabled": true,
+      "description": "Sheet group 11 — buyer order history, tracking, multi-seller probes"
     },
     {
       "file": "tests/OneDirectBuy/LegalPages.spec.js",
@@ -80,13 +95,38 @@
     },
     {
       "file": "tests/OneDirectBuy/SellerStorefront.spec.js",
-      "enabled": true,
-      "description": "Buyer-facing stores list, store detail, Sold by on PDP"
+      "enabled": false,
+      "description": "Merged into Flow 23 — Seller Registration, Onboarding, and Storefront"
     },
     {
       "file": "tests/OneDirectBuy/SellerOnboarding.spec.js",
+      "enabled": false,
+      "description": "Merged into Flow 23 — Seller Registration, Onboarding, and Storefront"
+    },
+    {
+      "file": "tests/OneDirectBuy/SellerOnboardingStorefront.spec.js",
       "enabled": true,
-      "description": "Become a vendor landing + seller application form"
+      "description": "Sheet group 12 — seller application, storefront, admin seller probes"
+    },
+    {
+      "file": "tests/OneDirectBuy/BrandApproval.spec.js",
+      "enabled": true,
+      "description": "Sheet group 13 — brand approval seller/admin probes (no live submit)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ProductCatalog.spec.js",
+      "enabled": true,
+      "description": "Sheet group 14 — product catalog/approval probes (no live catalog change)"
+    },
+    {
+      "file": "tests/OneDirectBuy/CatalogImportExport.spec.js",
+      "enabled": true,
+      "description": "Sheet group 15 — catalog import/export and master data probes (no live change)"
+    },
+    {
+      "file": "tests/OneDirectBuy/SellerInventory.spec.js",
+      "enabled": true,
+      "description": "Sheet group 16 — seller inventory probes (no live stock or order change)"
     },
     {
       "file": "tests/OneDirectBuy/SellerMessaging.spec.js",
@@ -95,8 +135,8 @@
     },
     {
       "file": "tests/OneDirectBuy/SellerOrders.spec.js",
-      "enabled": true,
-      "description": "Order Tracking form + buyer orders (auth); seller portal skips"
+      "enabled": false,
+      "description": "Merged into Flow 22 — Buyer Orders and Multi-Seller Orders"
     },
     {
       "file": "tests/OneDirectBuy/SellerPromotions.spec.js",
@@ -130,8 +170,18 @@
     },
     {
       "file": "tests/OneDirectBuy/BuyerAddress.spec.js",
-      "enabled": false,
-      "description": "Address book guest gate + CRUD (needs buyer credentials — re-enable later)"
+      "enabled": true,
+      "description": "Address book guest gate + CRUD (skips authenticated cases without buyer secrets)"
+    },
+    {
+      "file": "tests/OneDirectBuy/BuyerVerification.spec.js",
+      "enabled": true,
+      "description": "Buyer email verification + phone OTP probes (019/020 not required)"
+    },
+    {
+      "file": "tests/OneDirectBuy/BuyerAccountSecurity.spec.js",
+      "enabled": true,
+      "description": "Account security — change password, mismatch, lockout probe, logout all devices"
     }
   ]
 }

@@ -1,0 +1,11 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-016	Buyer Verification	Buyer	Verify email address	Buyer verifies the email used at registration.	P0	Yes	Working
+ODB-UC-017	Buyer Verification	Guest Buyer	Expired verification link	System rejects an expired email verification link.	P1	Yes	Working
+ODB-UC-018	Buyer Verification	Buyer	Resend verification email	Buyer can request a new email verification message.	P1	Yes	Working
+ODB-UC-019	Buyer Verification	Buyer	Verify phone with OTP	Buyer verifies a phone number using a one-time passcode.	P1	Yes	Not Required
+ODB-UC-020	Buyer Verification	System	Invalid OTP handling	System rejects an incorrect phone verification OTP.	P1	Yes	Not Required
+ODB-UC-021	Account Security	Buyer	Change password	Buyer changes password from account security.	P0	Yes	Working
+ODB-UC-022	Account Security	Buyer	Wrong current password	System rejects a password change when the current password is wrong.	P0	Yes	Working
+ODB-UC-023	Account Security	Buyer	Password confirmation mismatch	System shows validation when new password and confirmation do not match.	P1	Yes	Working
+ODB-UC-024	Account Security	System	Account lock after failed attempts	System locks or throttles access after too many failed logins.	P1	Yes	Working
+ODB-UC-025	Account Security	Buyer	Logout from all devices	Buyer signs out of every active session.	P1	Yes	Working
