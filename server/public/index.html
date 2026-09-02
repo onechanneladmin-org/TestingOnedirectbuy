@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>OneDirectBuy — Flow Control</title>
-    <link rel="stylesheet" href="/ui/styles.css?v=5" />
+    <title>Flow Control Plane</title>
+    <link rel="stylesheet" href="/ui/styles.css?v=10" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
@@ -12,8 +12,27 @@
     <header class="topbar">
       <div class="brand">
         <span class="brand-mark" aria-hidden="true"></span>
-        <div>
-          <p class="brand-name">OneDirectBuy</p>
+        <div class="brand-copy">
+          <div class="brand-switcher">
+            <button
+              type="button"
+              class="brand-name-btn"
+              id="projectMenuBtn"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              aria-controls="projectMenu"
+              title="Switch project"
+            >
+              <span id="projectLabel">OneDirectBuy</span>
+              <span class="brand-caret" aria-hidden="true"></span>
+            </button>
+            <ul
+              id="projectMenu"
+              class="project-menu hidden"
+              role="listbox"
+              aria-labelledby="projectMenuBtn"
+            ></ul>
+          </div>
           <p class="brand-sub">Flow Control Plane</p>
         </div>
       </div>
@@ -32,6 +51,34 @@
         </button>
       </div>
     </header>
+
+    <section class="stat-strip" id="statStrip" aria-label="Project totals">
+      <article class="stat-card">
+        <p class="stat-label">Flows</p>
+        <p class="stat-value" id="statFlows">0</p>
+        <p class="stat-hint" id="statFlowsHint">Enabled 0</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Use cases</p>
+        <p class="stat-value" id="statUseCases">0</p>
+        <p class="stat-hint">Sheet / catalog rows</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Steps</p>
+        <p class="stat-value" id="statSteps">0</p>
+        <p class="stat-hint">Nested automation steps</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Spec files</p>
+        <p class="stat-value" id="statSpecs">0</p>
+        <p class="stat-hint" id="statSpecsHint">Playwright tests</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Recent runs</p>
+        <p class="stat-value" id="statRuns">0</p>
+        <p class="stat-hint" id="statRunsHint">No runs yet</p>
+      </article>
+    </section>
 
     <main class="shell">
       <aside class="rail">
@@ -77,7 +124,7 @@
               <span id="runBadge" class="status-pill idle">idle</span>
               <button type="button" class="btn primary" id="btnRun">
                 <span class="btn-pulse" aria-hidden="true"></span>
-                Run flow
+                <span id="btnRunLabel">Run flow</span>
               </button>
             </div>
           </header>
@@ -107,7 +154,7 @@
                 <h3>Live run</h3>
               </div>
               <div id="liveEmpty" class="live-empty">
-                No active occurrence. Hit <strong>Run flow</strong> to start.
+                No active occurrence. Hit <strong id="liveEmptyAction">Run flow</strong> to start.
                 A new terminal window will open for Playwright; step status streams into MongoDB for this panel.
               </div>
               <div id="liveBody" class="live-body hidden">
@@ -122,12 +169,13 @@
               <span id="sheetRowCount" class="badge">0</span>
             </div>
             <p id="sheetIdleHint" class="muted sheet-hint">
-              Catalog from the sheet. Hit <strong>Run flow</strong> to fill Test Status and Issues.
+              Catalog from the sheet. Click a row to expand its steps. Hit <strong>Run flow</strong> for the module, or <strong>Run</strong> on a row for one use case.
             </p>
             <div class="sheet-scroll">
               <table class="use-case-sheet" id="useCaseSheet">
                 <thead>
                   <tr>
+                    <th class="expand-cell" aria-hidden="true"></th>
                     <th>Use Case ID</th>
                     <th>Module</th>
                     <th>Actor</th>
@@ -136,9 +184,11 @@
                     <th>Priority</th>
                     <th>Automation</th>
                     <th>Current Onedirectbuy Status</th>
+                    <th>Added / Updated</th>
                     <th>testedby</th>
                     <th class="issues">Issues</th>
                     <th class="status-cell">Test Status</th>
+                    <th class="run-cell">Run</th>
                   </tr>
                 </thead>
                 <tbody id="useCaseSheetBody"></tbody>
@@ -170,6 +220,6 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="/ui/app.js?v=5" type="module"></script>
+    <script src="/ui/app.js?v=10" type="module"></script>
   </body>
 </html>

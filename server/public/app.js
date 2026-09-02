@@ -1,12 +1,20 @@
 const state = {
   flows: [],
+  projects: [],
+  projectId: localStorage.getItem("odb_project_id") || "",
   filter: "all",
   search: "",
   selectedFlowId: null,
+  selectedUseCaseId: null,
+  expandedUseCaseIds: new Set(),
   occurrenceId: null,
+  lastOccurrence: null,
+  history: [],
   pollTimer: null,
   token: localStorage.getItem("odb_api_token") || "",
 };
+
+const SHEET_COLSPAN = 14;
 
 const $ = (id) => document.getElementById(id);
 
@@ -27,7 +35,13 @@ function headers(json = true) {
 }
 
 async function api(path, opts = {}) {
-  const res = await fetch(path, {
+  const url = new URL(path, window.location.origin);
+  if (state.projectId && !url.searchParams.has("projectId")) {
+    if (path.startsWith("/api/flows") || path.startsWith("/api/occurrences")) {
+      url.searchParams.set("projectId", state.projectId);
+    }
+  }
+  const res = await fetch(`${url.pathname}${url.search}`, {
     ...opts,
     headers: { ...headers(Boolean(opts.body)), ...(opts.headers || {}) },
   });
@@ -56,6 +70,7 @@ function filteredFlows() {
       String(f.flowId),
       f.catalog,
       ...(f.tests || []),
+      ...(f.steps || []).flatMap((s) => [s.stepId, s.useCase, s.title, s.module]),
     ]
       .filter(Boolean)
       .join(" ")
@@ -79,8 +94,49 @@ function sheetGroupOrder(f) {
   return flowIdSortKey(f.flowId);
 }
 
+function childCount(s) {
+  return Array.isArray(s?.children) ? s.children.length : 0;
+}
+
+function catalogUseCases(flows) {
+  const out = [];
+  for (const f of flows) {
+    if (!isSheetFlow(f)) continue;
+    for (const s of f.steps || []) {
+      out.push({
+        flowId: f.flowId,
+        flowName: f.name,
+        flowEnabled: f.enabled,
+        stepId: s.stepId,
+        title: s.useCase || s.title || s.stepId,
+        module: s.module || "",
+        childrenCount: childCount(s),
+        createdAt: s.createdAt,
+        updatedAt: s.updatedAt,
+      });
+    }
+  }
+  return out;
+}
+
+function filteredUseCases() {
+  const q = state.search.trim().toLowerCase();
+  return catalogUseCases(state.flows).filter((uc) => {
+    if (state.filter === "enabled" && !uc.flowEnabled) return false;
+    if (state.filter === "disabled" && uc.flowEnabled) return false;
+    if (!q) return true;
+    return [uc.stepId, uc.title, uc.module, uc.flowName]
+      .join(" ")
+      .toLowerCase()
+      .includes(q);
+  });
+}
+
 function flowItemHtml(f) {
-  const active = String(f.flowId) === String(state.selectedFlowId) ? "active" : "";
+  const active =
+    String(f.flowId) === String(state.selectedFlowId) && !state.selectedUseCaseId
+      ? "active"
+      : "";
   return `
         <li>
           <button type="button" class="flow-item ${active}" data-id="${escapeAttr(f.flowId)}">
@@ -89,17 +145,64 @@ function flowItemHtml(f) {
               <span>#${escapeHtml(String(f.flowId))}</span>
               <span>${f.stepsTotal || 0} steps</span>
               <span>${f.enabled ? "enabled" : "off"}</span>
+              ${recordTimeLabel(f) ? `<span class="when">${escapeHtml(recordTimeLabel(f))}</span>` : ""}
             </span>
           </button>
         </li>`;
 }
 
+function useCaseItemHtml(uc) {
+  const active =
+    String(uc.flowId) === String(state.selectedFlowId) &&
+    String(uc.stepId) === String(state.selectedUseCaseId)
+      ? "active"
+      : "";
+  return `
+        <li>
+          <button type="button" class="flow-item uc-item ${active}" data-id="${escapeAttr(
+            uc.flowId,
+          )}" data-uc="${escapeAttr(uc.stepId)}">
+            <span class="name">${escapeHtml(uc.stepId)} · ${escapeHtml(uc.title)}</span>
+            <span class="meta">
+              <span>${uc.childrenCount} steps</span>
+              <span>${escapeHtml(uc.module || uc.flowName)}</span>
+              ${recordTimeLabel(uc) ? `<span class="when">${escapeHtml(recordTimeLabel(uc))}</span>` : ""}
+            </span>
+          </button>
+        </li>`;
+}
+
+function useCaseRailHtml() {
+  const items = filteredUseCases();
+  if (!items.length) return "";
+  const groups = new Map();
+  for (const uc of items) {
+    const key = uc.flowName || "Use cases";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(uc);
+  }
+  const flowByName = new Map(state.flows.map((f) => [f.name, f]));
+  const groupNames = [...groups.keys()].sort(
+    (a, b) =>
+      sheetGroupOrder(flowByName.get(a) || {}) -
+      sheetGroupOrder(flowByName.get(b) || {}),
+  );
+  let html = `<li class="rail-group">Use cases</li>`;
+  for (const name of groupNames) {
+    html += `<li class="rail-subgroup">${escapeHtml(name)}</li>`;
+    html += groups.get(name).map(useCaseItemHtml).join("");
+  }
+  return html;
+}
+
 function renderFlowList() {
   const list = $("flowList");
   const flows = filteredFlows();
-  $("flowCount").textContent = `${flows.length} shown · ${state.flows.length} total`;
+  const ucCount = filteredUseCases().length;
+  $("flowCount").textContent = `${flows.length} shown · ${state.flows.length} total · ${ucCount} use cases`;
+  renderStats();
 
-  if (!flows.length) {
+  if (!flows.length && !ucCount) {
     list.innerHTML = `<li class="flow-empty muted">No flows match that search.</li>`;
     return;
   }
@@ -118,15 +221,24 @@ function renderFlowList() {
       .join("")}`;
   };
 
-  list.innerHTML = `${section("Sheet modules", sheet)}${section("Other flows", other)}`;
+  list.innerHTML = `${section("Sheet modules", sheet)}${useCaseRailHtml()}${section(
+    "Other flows",
+    other,
+  )}`;
 
   list.querySelectorAll(".flow-item").forEach((btn) => {
-    btn.addEventListener("click", () => selectFlow(btn.dataset.id));
+    btn.addEventListener("click", () => {
+      selectFlow(btn.dataset.id, btn.dataset.uc || null);
+    });
   });
 }
 
 function hasSheetCatalog(flow) {
   return (flow?.steps || []).some((s) => s.module || s.useCase || s.priority);
+}
+
+function findUseCase(flow, useCaseId) {
+  return (flow?.steps || []).find((s) => s.stepId === useCaseId) || null;
 }
 
 function sheetStatusLabel(status) {
@@ -146,7 +258,7 @@ function cleanIssueText(raw) {
     .trim();
 }
 
-function issuesForRow(stepId, occ) {
+function issuesForRow(stepId, occ, live) {
   const issues = occ?.liveIssues || [];
   const matched = issues.filter((issue) => {
     const id = String(issue.id || issue.step || "");
@@ -159,11 +271,64 @@ function issuesForRow(stepId, occ) {
         .join(" · "),
     ).slice(0, 280);
   }
-  const step = (occ?.steps || []).find((s) => s.stepId === stepId);
-  if (step?.error) return cleanIssueText(step.error).slice(0, 280);
-  const label = sheetStatusLabel(step?.status);
+  const childErr = (live?.children || [])
+    .map((c) => c.error)
+    .filter(Boolean)
+    .join(" · ");
+  if (childErr) return cleanIssueText(childErr).slice(0, 280);
+  if (live?.error) return cleanIssueText(live.error).slice(0, 280);
+  const label = sheetStatusLabel(live?.status);
   if (label === "pass") return "no issue";
   return "";
+}
+
+function nestedStepsHtml(s, live) {
+  const children = live?.children?.length ? live.children : s.children || [];
+  if (!children.length) {
+    return `<p class="muted uc-step-empty">No extracted steps for this use case.</p>`;
+  }
+  return `<ol class="uc-step-list">${children
+    .map((c) => {
+      const st = c.status || "pending";
+      const label = sheetStatusLabel(st) || st;
+      return `<li>
+        <span class="sid">${escapeHtml(c.stepId)}</span>
+        <span>${escapeHtml(c.title || "")}</span>
+        ${recordTimeLabel(c) ? `<span class="when">${escapeHtml(recordTimeLabel(c))}</span>` : ""}
+        <span class="sheet-status ${escapeAttr(st)}">${escapeHtml(label)}</span>
+      </li>`;
+    })
+    .join("")}</ol>`;
+}
+
+function bindSheetEvents() {
+  const body = $("useCaseSheetBody");
+  if (!body) return;
+  body.querySelectorAll("tr.uc-row").forEach((row) => {
+    row.addEventListener("click", (ev) => {
+      if (ev.target.closest(".uc-run")) return;
+      const id = row.dataset.step;
+      if (!id) return;
+      if (state.expandedUseCaseIds.has(id)) state.expandedUseCaseIds.delete(id);
+      else state.expandedUseCaseIds.add(id);
+      const flow = state.flows.find(
+        (f) => String(f.flowId) === String(state.selectedFlowId),
+      );
+      if (!flow) return;
+      const occ =
+        state.lastOccurrence &&
+        String(state.lastOccurrence.flowId) === String(flow.flowId)
+          ? state.lastOccurrence
+          : null;
+      renderUseCaseSheet(flow, occ);
+    });
+  });
+  body.querySelectorAll(".uc-run").forEach((btn) => {
+    btn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      startRun({ useCaseId: btn.dataset.uc, keepSheet: true });
+    });
+  });
 }
 
 function renderUseCaseSheet(flow, occ) {
@@ -179,10 +344,17 @@ function renderUseCaseSheet(flow, occ) {
       const live = (occ?.steps || []).find((x) => x.stepId === s.stepId);
       const status = live?.status || "pending";
       const statusLabel = sheetStatusLabel(status);
-      const issues = occ ? issuesForRow(s.stepId, occ) : "";
+      const issues = occ ? issuesForRow(s.stepId, occ, live) : "";
+      const expanded = state.expandedUseCaseIds.has(s.stepId);
+      const n = childCount(s);
       return `
-        <tr data-step="${escapeAttr(s.stepId)}">
-          <td class="mono">${escapeHtml(s.stepId)}</td>
+        <tr class="uc-row${expanded ? " expanded" : ""}" data-step="${escapeAttr(
+          s.stepId,
+        )}" aria-expanded="${expanded ? "true" : "false"}">
+          <td class="expand-cell"><span class="uc-chevron">▸</span></td>
+          <td class="mono">${escapeHtml(s.stepId)}<span class="uc-step-count">${n} step${
+            n === 1 ? "" : "s"
+          }</span></td>
           <td>${escapeHtml(s.module || "")}</td>
           <td>${escapeHtml(s.actor || "")}</td>
           <td>${escapeHtml(s.useCase || s.title || "")}</td>
@@ -190,6 +362,7 @@ function renderUseCaseSheet(flow, occ) {
           <td>${escapeHtml(s.priority || "")}</td>
           <td>${escapeHtml(s.automation || "Yes")}</td>
           <td>${escapeHtml(s.currentStatus || "")}</td>
+          <td class="when">${escapeHtml(recordTimeLabel(s))}</td>
           <td>${escapeHtml(testedBy)}</td>
           <td class="issues"><span class="issues-text" title="${escapeAttr(
             issues,
@@ -197,19 +370,90 @@ function renderUseCaseSheet(flow, occ) {
           <td class="status-cell"><span class="sheet-status ${escapeAttr(status)}">${escapeHtml(
             statusLabel,
           )}</span></td>
-        </tr>`;
+          <td class="run-cell">
+            <button type="button" class="btn ghost sm uc-run" data-uc="${escapeAttr(
+              s.stepId,
+            )}">Run</button>
+          </td>
+        </tr>
+        ${
+          expanded
+            ? `<tr class="uc-steps"><td colspan="${SHEET_COLSPAN}">${nestedStepsHtml(
+                s,
+                live,
+              )}</td></tr>`
+            : ""
+        }`;
     })
+    .join("");
+
+  bindSheetEvents();
+}
+
+function stepCatalogItems(steps) {
+  return (steps || [])
+    .map(
+      (s) => `
+      <li>
+        <div>
+          <span class="sid">${escapeHtml(s.stepId)}${
+            s.dependsOn ? ` · after ${escapeHtml(s.dependsOn)}` : ""
+          }</span>
+          ${escapeHtml(s.title || "")}
+          ${recordTimeLabel(s) ? `<span class="when">${escapeHtml(recordTimeLabel(s))}</span>` : ""}
+        </div>
+      </li>`,
+    )
     .join("");
 }
 
-function showFlowLayout(flow) {
-  const sheet = hasSheetCatalog(flow);
-  $("listLayout").classList.toggle("hidden", sheet);
-  $("sheetLayout").classList.toggle("hidden", !sheet);
+function liveStepEntries(occ) {
+  const steps = occ?.steps || [];
+  if (steps.length === 1 && (steps[0].children || []).length) {
+    return steps[0].children;
+  }
+  return steps;
 }
 
-function selectFlow(flowId) {
+function setRunLabels(isUseCase) {
+  const label = isUseCase ? "Run use case" : "Run flow";
+  const btnLabel = $("btnRunLabel");
+  if (btnLabel) btnLabel.textContent = label;
+  const emptyAction = $("liveEmptyAction");
+  if (emptyAction) emptyAction.textContent = label;
+}
+
+function showFlowLayout(flow) {
+  const useCaseView = Boolean(state.selectedUseCaseId);
+  const sheet = hasSheetCatalog(flow) && !useCaseView;
+  $("listLayout").classList.toggle("hidden", sheet);
+  $("sheetLayout").classList.toggle("hidden", !sheet);
+  setRunLabels(useCaseView);
+}
+
+function renderSelectedCatalog(flow, occ) {
+  if (state.selectedUseCaseId) {
+    const uc = findUseCase(flow, state.selectedUseCaseId);
+    const children =
+      (occ?.steps || []).find((s) => s.stepId === state.selectedUseCaseId)?.children ||
+      uc?.children ||
+      [];
+    const list = children.length
+      ? children
+      : uc
+        ? [{ stepId: uc.stepId, title: uc.useCase || uc.title, dependsOn: null }]
+        : [];
+    $("stepCatalogCount").textContent = String(list.length);
+    $("stepCatalog").innerHTML = stepCatalogItems(list);
+    return;
+  }
+  $("stepCatalogCount").textContent = String(flow.steps?.length || 0);
+  $("stepCatalog").innerHTML = stepCatalogItems(flow.steps);
+}
+
+function selectFlow(flowId, useCaseId = null) {
   state.selectedFlowId = String(flowId);
+  state.selectedUseCaseId = useCaseId ? String(useCaseId) : null;
   const flow = state.flows.find((f) => String(f.flowId) === state.selectedFlowId);
   renderFlowList();
 
@@ -221,31 +465,31 @@ function selectFlow(flowId) {
 
   $("emptyState").classList.add("hidden");
   $("flowDetail").classList.remove("hidden");
-  $("flowEyebrow").textContent = `Flow ${flow.flowId}`;
-  $("flowTitle").textContent = flow.name;
-  $("flowMeta").textContent = `${flow.tests?.length || 0} spec file(s) · ${
-    flow.enabled ? "enabled" : "disabled in config"
-  }`;
-  $("stepCatalogCount").textContent = String(flow.steps?.length || 0);
+
+  const uc = state.selectedUseCaseId
+    ? findUseCase(flow, state.selectedUseCaseId)
+    : null;
+  if (uc) {
+    $("flowEyebrow").textContent = `Flow ${flow.flowId} · Use case`;
+    $("flowTitle").textContent = `${uc.stepId} — ${uc.useCase || uc.title || uc.stepId}`;
+    $("flowMeta").textContent = `${flow.name} · ${childCount(uc)} step(s) · ${
+      flow.enabled ? "enabled" : "disabled in config"
+    } · ${recordTimeLabel(uc) || recordTimeLabel(flow)}`;
+  } else {
+    $("flowEyebrow").textContent = `Flow ${flow.flowId}`;
+    $("flowTitle").textContent = flow.name;
+    $("flowMeta").textContent = `${flow.tests?.length || 0} spec file(s) · ${
+      flow.enabled ? "enabled" : "disabled in config"
+    } · ${recordTimeLabel(flow)}`;
+  }
+
   showFlowLayout(flow);
 
-  if (hasSheetCatalog(flow)) {
+  if (hasSheetCatalog(flow) && !state.selectedUseCaseId) {
     renderUseCaseSheet(flow, null);
     $("sheetIdleHint").classList.remove("hidden");
   } else {
-    $("stepCatalog").innerHTML = (flow.steps || [])
-      .map(
-        (s) => `
-      <li>
-        <div>
-          <span class="sid">${escapeHtml(s.stepId)}${
-            s.dependsOn ? ` · after ${escapeHtml(s.dependsOn)}` : ""
-          }</span>
-          ${escapeHtml(s.title)}
-        </div>
-      </li>`,
-      )
-      .join("");
+    renderSelectedCatalog(flow, null);
   }
 }
 
@@ -258,14 +502,19 @@ function setLiveIdle() {
   $("btnLoadReport").disabled = true;
   $("reportBody").innerHTML =
     '<p class="muted">Report appears when the occurrence finishes.</p>';
+  state.lastOccurrence = null;
   const flow = state.flows.find((f) => String(f.flowId) === state.selectedFlowId);
-  if (flow && hasSheetCatalog(flow)) {
+  if (!flow) return;
+  if (hasSheetCatalog(flow) && !state.selectedUseCaseId) {
     $("sheetIdleHint").classList.remove("hidden");
     renderUseCaseSheet(flow, null);
+  } else {
+    renderSelectedCatalog(flow, null);
   }
 }
 
 function renderOccurrence(occ) {
+  state.lastOccurrence = occ;
   $("liveEmpty").classList.add("hidden");
   $("liveBody").classList.remove("hidden");
   $("runProgress").classList.remove("hidden");
@@ -287,11 +536,20 @@ function renderOccurrence(occ) {
   $("btnRun").disabled = status === "running" || status === "queued";
 
   const flow = state.flows.find((f) => String(f.flowId) === String(occ.flowId));
-  if (flow && hasSheetCatalog(flow)) {
+  const occUseCase = occ.useCaseId || "";
+  if (occUseCase && !state.selectedUseCaseId) {
+    // keep sheet if the user launched a row run from the module view
+  } else if (occUseCase && state.selectedUseCaseId !== occUseCase) {
+    state.selectedUseCaseId = occUseCase;
+    if (flow) showFlowLayout(flow);
+  }
+
+  if (flow && hasSheetCatalog(flow) && !state.selectedUseCaseId) {
     $("sheetIdleHint").classList.add("hidden");
     renderUseCaseSheet(flow, occ);
   } else {
-    $("liveSteps").innerHTML = (occ.steps || [])
+    if (flow) renderSelectedCatalog(flow, occ);
+    $("liveSteps").innerHTML = liveStepEntries(occ)
       .map((s) => {
         const err = s.error
           ? `<span class="err">${escapeHtml(String(s.error).slice(0, 220))}</span>`
@@ -312,7 +570,6 @@ function renderOccurrence(occ) {
       .join("");
   }
 
-  // Live issues from DB (source of truth during the run)
   const liveIssues = occ.liveIssues || [];
   if (liveIssues.length && !terminal) {
     $("reportBody").innerHTML =
@@ -411,8 +668,12 @@ function startPolling(occurrenceId) {
   state.pollTimer = setInterval(tick, 1000);
 }
 
-async function runSelectedFlow() {
+async function startRun({ useCaseId = "", keepSheet = false } = {}) {
   if (!state.selectedFlowId) return;
+  const id = useCaseId || state.selectedUseCaseId || "";
+  if (id && !keepSheet && !state.selectedUseCaseId) {
+    state.selectedUseCaseId = id;
+  }
   $("btnRun").disabled = true;
   setLiveIdle();
   try {
@@ -420,7 +681,11 @@ async function runSelectedFlow() {
       `/api/flows/${encodeURIComponent(state.selectedFlowId)}/run`,
       {
         method: "POST",
-        body: JSON.stringify({ headed: $("headedMode").checked }),
+        body: JSON.stringify({
+          headed: $("headedMode").checked,
+          projectId: state.projectId,
+          ...(id ? { useCaseId: id } : {}),
+        }),
       },
     );
     toast(`Started occurrence ${data.occurrenceId.slice(0, 8)}…`);
@@ -431,16 +696,89 @@ async function runSelectedFlow() {
   }
 }
 
+async function runSelectedFlow() {
+  await startRun({
+    useCaseId: state.selectedUseCaseId || "",
+    keepSheet: !state.selectedUseCaseId,
+  });
+}
+
+function projectStats() {
+  const flows = state.flows || [];
+  let steps = 0;
+  const specs = new Set();
+  let enabled = 0;
+  for (const f of flows) {
+    if (f.enabled) enabled += 1;
+    for (const t of f.tests || []) specs.add(t);
+    for (const s of f.steps || []) {
+      const n = childCount(s);
+      steps += n > 0 ? n : 1;
+    }
+  }
+  const history = state.history || [];
+  return {
+    flows: flows.length,
+    enabled,
+    useCases: catalogUseCases(flows).length,
+    steps,
+    specs: specs.size,
+    runs: history.length,
+    passed: history.filter((o) => o.status === "passed").length,
+    failed: history.filter((o) => o.status === "failed").length,
+    running: history.filter((o) =>
+      ["running", "queued"].includes(o.status),
+    ).length,
+  };
+}
+
+function setText(id, value) {
+  const el = $(id);
+  if (el) el.textContent = value;
+}
+
+function renderStats() {
+  if (!$("statStrip")) return;
+  const s = projectStats();
+  setText("statFlows", String(s.flows));
+  setText("statFlowsHint", `${s.enabled} enabled · ${s.flows - s.enabled} off`);
+  setText("statUseCases", String(s.useCases));
+  setText("statSteps", String(s.steps));
+  setText("statSpecs", String(s.specs));
+  setText("statRuns", String(s.runs));
+  const hint = $("statRunsHint");
+  if (!hint) return;
+  hint.classList.remove("pass", "fail");
+  if (!s.runs) {
+    hint.textContent = "No runs yet";
+    return;
+  }
+  const parts = [];
+  if (s.passed) parts.push(`${s.passed} passed`);
+  if (s.failed) parts.push(`${s.failed} failed`);
+  if (s.running) parts.push(`${s.running} running`);
+  hint.textContent = parts.join(" · ") || "Latest 20";
+  if (s.failed && !s.passed) hint.classList.add("fail");
+  else if (s.passed && !s.failed) hint.classList.add("pass");
+}
+
 async function loadFlows() {
   const data = await api("/api/flows");
   state.flows = data.flows || [];
   renderFlowList();
-  if (state.selectedFlowId) selectFlow(state.selectedFlowId);
+  if (state.selectedFlowId) {
+    selectFlow(state.selectedFlowId, state.selectedUseCaseId);
+  }
 }
 
 async function loadHistory() {
-  const data = await api("/api/occurrences?limit=20");
+  const qs = state.projectId
+    ? `?limit=20&projectId=${encodeURIComponent(state.projectId)}`
+    : "?limit=20";
+  const data = await api(`/api/occurrences${qs}`);
   const items = data.occurrences || [];
+  state.history = items;
+  renderStats();
   $("runHistory").innerHTML = items.length
     ? items
         .map(
@@ -465,12 +803,13 @@ async function loadHistory() {
 
   $("runHistory").querySelectorAll(".history-item").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      selectFlow(btn.dataset.flow);
-      state.occurrenceId = btn.dataset.id;
       try {
         const occ = await api(
           `/api/occurrences/${encodeURIComponent(btn.dataset.id)}`,
         );
+        selectFlow(btn.dataset.flow, occ.useCaseId || null);
+        if (occ.projectId) state.projectId = occ.projectId;
+        state.occurrenceId = btn.dataset.id;
         renderOccurrence(occ);
         if (["running", "queued"].includes(occ.status)) {
           startPolling(occ.occurrenceId);
@@ -491,12 +830,25 @@ function formatTime(iso) {
     return new Date(iso).toLocaleString(undefined, {
       month: "short",
       day: "numeric",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
   } catch {
     return "—";
   }
+}
+
+function recordTimeLabel(record) {
+  const added = record?.createdAt || record?.addedAt;
+  const updated = record?.updatedAt;
+  if (!added && !updated) return "";
+  const addedMs = added ? new Date(added).getTime() : 0;
+  const updatedMs = updated ? new Date(updated).getTime() : 0;
+  if (updatedMs && addedMs && updatedMs - addedMs > 1000) {
+    return `Updated ${formatTime(updated)}`;
+  }
+  return `Added ${formatTime(added || updated)}`;
 }
 
 function escapeHtml(s) {
@@ -509,6 +861,107 @@ function escapeHtml(s) {
 
 function escapeAttr(s) {
   return escapeHtml(s).replace(/'/g, "&#39;");
+}
+
+function currentProject() {
+  return (
+    state.projects.find((p) => p.id === state.projectId) ||
+    state.projects[0] ||
+    null
+  );
+}
+
+function closeProjectMenu() {
+  const menu = $("projectMenu");
+  const btn = $("projectMenuBtn");
+  if (!menu || !btn) return;
+  menu.classList.add("hidden");
+  btn.setAttribute("aria-expanded", "false");
+}
+
+function renderProjectSwitcher() {
+  const label = $("projectLabel");
+  const menu = $("projectMenu");
+  const btn = $("projectMenuBtn");
+  if (!label || !menu || !btn) return;
+
+  const current = currentProject();
+  label.textContent = current?.name || "Select project";
+  document.title = current
+    ? `${current.name} — Flow Control`
+    : "Flow Control Plane";
+
+  menu.innerHTML = state.projects
+    .map((p) => {
+      const selected = p.id === state.projectId ? "true" : "false";
+      const missing = p.available ? "" : " unavailable";
+      return `<li>
+        <button type="button" class="project-option${p.id === state.projectId ? " selected" : ""}${missing}" role="option" aria-selected="${selected}" data-id="${escapeAttr(p.id)}" ${p.available ? "" : "disabled"}>
+          <span class="project-option-name">${escapeHtml(p.name)}</span>
+          <span class="project-option-meta">${p.available ? "ready" : "folder missing"}</span>
+        </button>
+      </li>`;
+    })
+    .join("");
+
+  menu.querySelectorAll(".project-option").forEach((item) => {
+    item.addEventListener("click", () => {
+      switchProject(item.dataset.id);
+    });
+  });
+}
+
+async function switchProject(projectId) {
+  const next = String(projectId || "").trim();
+  if (!next || next === state.projectId) {
+    closeProjectMenu();
+    return;
+  }
+  const project = state.projects.find((p) => p.id === next);
+  if (project && !project.available) {
+    toast(`${project.name} folder was not found`, true);
+    closeProjectMenu();
+    return;
+  }
+
+  stopPolling();
+  state.projectId = next;
+  localStorage.setItem("odb_project_id", next);
+  state.selectedFlowId = null;
+  state.selectedUseCaseId = null;
+  state.expandedUseCaseIds = new Set();
+  state.occurrenceId = null;
+  state.lastOccurrence = null;
+  state.history = [];
+  state.flows = [];
+  closeProjectMenu();
+  renderProjectSwitcher();
+  renderStats();
+  $("emptyState")?.classList.remove("hidden");
+  $("flowDetail")?.classList.add("hidden");
+  setLiveIdle();
+  try {
+    await Promise.all([loadFlows(), loadHistory()]);
+    toast(`Loaded ${currentProject()?.name || next}`);
+  } catch (err) {
+    toast(err.message, true);
+  }
+}
+
+async function loadProjects() {
+  const data = await api("/api/projects");
+  state.projects = data.projects || [];
+  const saved = state.projectId;
+  const match = state.projects.find((p) => p.id === saved && p.available);
+  const fallback =
+    state.projects.find((p) => p.id === data.defaultProjectId && p.available) ||
+    state.projects.find((p) => p.available) ||
+    state.projects[0];
+  state.projectId = (match || fallback)?.id || "";
+  if (state.projectId) {
+    localStorage.setItem("odb_project_id", state.projectId);
+  }
+  renderProjectSwitcher();
 }
 
 function bindUi() {
@@ -546,12 +999,34 @@ function bindUi() {
     state.search = $("flowSearch").value;
     renderFlowList();
   });
+
+  const menuBtn = $("projectMenuBtn");
+  if (menuBtn) {
+    menuBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const menu = $("projectMenu");
+      if (!menu) return;
+      const open = menu.classList.contains("hidden");
+      menu.classList.toggle("hidden", !open);
+      menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+
+  document.addEventListener("click", (ev) => {
+    const switcher = ev.target.closest(".brand-switcher");
+    if (!switcher) closeProjectMenu();
+  });
+
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") closeProjectMenu();
+  });
 }
 
 async function init() {
   bindUi();
   setLiveIdle();
   try {
+    await loadProjects();
     await Promise.all([loadFlows(), loadHistory()]);
   } catch (err) {
     toast(err.message || "Failed to load API", true);

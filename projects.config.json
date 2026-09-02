@@ -1,0 +1,25 @@
+{
+  "$comment": "Hub projects for the Flow Control Plane. root is relative to this repo unless absolute. flowsConfigRelativeTo=hub means the JSON lives in this repo, not the sibling project.",
+  "defaultProjectId": "onedirectbuy",
+  "projects": [
+    {
+      "id": "onedirectbuy",
+      "name": "OneDirectBuy",
+      "root": ".",
+      "flowsConfig": "flows.config.json"
+    },
+    {
+      "id": "onechanneladmin",
+      "name": "Testing-OneChannelAdmin",
+      "root": "../Testing-OneChannelAdmin",
+      "flowsConfig": "server/data/external-flows/onechanneladmin.flows.json",
+      "flowsConfigRelativeTo": "hub"
+    },
+    {
+      "id": "oneproducthubv2",
+      "name": "Testing-OneProductHubV2",
+      "root": "../Testing-OneProductHubV2",
+      "flowsConfig": "flows.config.json"
+    }
+  ]
+}

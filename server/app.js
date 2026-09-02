@@ -4,6 +4,7 @@ const cors = require("cors");
 const { optionalAuth } = require("./middleware/auth");
 const flowsRouter = require("./routes/flows");
 const occurrencesRouter = require("./routes/occurrences");
+const projectsRouter = require("./routes/projects");
 const { seedFlows } = require("./services/seedFlows");
 
 const PUBLIC_DIR = path.join(__dirname, "public");
@@ -28,12 +29,16 @@ function createApp() {
   const api = express.Router();
   api.use(optionalAuth);
 
-  api.post("/seed", async (_req, res, next) => {
+  api.post("/seed", async (req, res, next) => {
     try {
-      const result = await seedFlows();
+      const projectId = req.body?.projectId
+        ? String(req.body.projectId).trim()
+        : undefined;
+      const result = await seedFlows(projectId);
       res.json({
         upserted: result.upserted,
         flows: result.flows.map((f) => ({
+          projectId: f.projectId,
           flowId: f.flowId,
           name: f.name,
           steps: (f.steps || []).length,
@@ -44,6 +49,7 @@ function createApp() {
     }
   });
 
+  api.use("/projects", projectsRouter);
   api.use("/flows", flowsRouter);
   api.use("/occurrences", occurrencesRouter);
 

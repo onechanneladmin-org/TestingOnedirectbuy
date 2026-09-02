@@ -18,10 +18,10 @@ const { ROOT } = require("../config");
  *   currentStatus: string;
  * }[]}
  */
-function loadUseCaseCatalog(relativeOrAbsolute) {
+function loadUseCaseCatalog(relativeOrAbsolute, projectRoot = ROOT) {
   const filePath = path.isAbsolute(relativeOrAbsolute)
     ? relativeOrAbsolute
-    : path.join(ROOT, relativeOrAbsolute);
+    : path.join(projectRoot, relativeOrAbsolute);
   if (!fs.existsSync(filePath)) {
     throw new Error(`Use-case catalog not found: ${filePath}`);
   }
@@ -71,4 +71,17 @@ function matchingExtractedSteps(catalogId, extracted) {
   );
 }
 
-module.exports = { loadUseCaseCatalog, matchingExtractedSteps };
+/**
+ * Playwright --grep pattern for a catalog id (does not match ODB-UC-0010).
+ * @param {string} catalogId
+ */
+function grepUseCasePattern(catalogId) {
+  const escaped = String(catalogId).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return `${escaped}(?:[:\\s-]|$)`;
+}
+
+module.exports = {
+  loadUseCaseCatalog,
+  matchingExtractedSteps,
+  grepUseCasePattern,
+};

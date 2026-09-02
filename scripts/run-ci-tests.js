@@ -309,12 +309,17 @@ function main() {
       ? process.env.PW_WORKERS
       : String(config.workers ?? 4);
   // Shared buyer account cannot login from two browsers at once.
+  // Sheet-module / use-case runs stay serial so cases do not overlap.
   if (
     (process.env.PW_WORKERS === undefined || process.env.PW_WORKERS === "") &&
     String(suite).startsWith("flow:") &&
-    selectedFlows?.[0]?.workers
+    selectedFlows?.[0]
   ) {
-    workers = String(selectedFlows[0].workers);
+    if (selectedFlows[0].workers) {
+      workers = String(selectedFlows[0].workers);
+    } else if (selectedFlows[0].catalog) {
+      workers = "1";
+    }
   }
   const retries =
     process.env.PW_RETRIES !== undefined && process.env.PW_RETRIES !== ""
@@ -396,6 +401,11 @@ function main() {
     process.env.PW_HEADLESS === "0"
   ) {
     args.push("--headed");
+  }
+  const grep = String(process.env.PW_GREP || "").trim();
+  if (grep) {
+    args.push("--grep", grep);
+    console.log(`Grep: ${grep}`);
   }
 
   // Invoke Playwright CLI via node (no npx / no shell) so env vars survive on Windows

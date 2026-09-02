@@ -9,6 +9,7 @@ const router = express.Router();
 router.get("/", async (req, res, next) => {
   try {
     const filter = {};
+    if (req.query.projectId) filter.projectId = String(req.query.projectId);
     if (req.query.flowId) filter.flowId = String(req.query.flowId);
     if (req.query.status) filter.status = String(req.query.status);
 
@@ -17,7 +18,7 @@ router.get("/", async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(limit)
       .select(
-        "occurrenceId flowId flowName status startedAt finishedAt stepsCompleted stepsTotal currentStepId exitCode createdAt",
+        "occurrenceId projectId flowId flowName status startedAt finishedAt stepsCompleted stepsTotal currentStepId exitCode createdAt",
       )
       .lean();
 
@@ -54,6 +55,7 @@ router.get("/:occurrenceId", async (req, res, next) => {
 
     res.json({
       occurrenceId: occurrence.occurrenceId,
+      projectId: occurrence.projectId || "",
       flowId: occurrence.flowId,
       flowName: occurrence.flowName,
       status: occurrence.status,
@@ -67,6 +69,7 @@ router.get("/:occurrenceId", async (req, res, next) => {
       runDir: occurrence.runDir,
       liveIssueCount: occurrence.liveIssueCount || 0,
       liveIssues: occurrence.liveIssues || [],
+      useCaseId: occurrence.envSummary?.useCaseId || "",
       progress: {
         pending,
         running,

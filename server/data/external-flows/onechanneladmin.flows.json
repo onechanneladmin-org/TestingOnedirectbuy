@@ -1,0 +1,86 @@
+{
+  "$comment": "One Channel Admin flows for the hub control plane. Specs live in Testing-OneChannelAdmin.",
+  "workers": 1,
+  "retries": 0,
+  "flows": [
+    {
+      "id": 1,
+      "name": "Login",
+      "enabled": true,
+      "tests": ["tests/Onechanneladmin/login.spec.js"]
+    },
+    {
+      "id": 2,
+      "name": "CRM",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/CompleteCRMFlow.spec.js",
+        "tests/Onechanneladmin/CRMDashboard.spec.js",
+        "tests/Onechanneladmin/addcontacttest.spec.js",
+        "tests/Onechanneladmin/crm-accounts.spec.js",
+        "tests/Onechanneladmin/crm-accountdetails.spec.js"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Catalog",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/add-product.spec.js",
+        "tests/Onechanneladmin/catalogbundles.spec.js",
+        "tests/Onechanneladmin/CatalogVariationflow.spec.js",
+        "tests/Onechanneladmin/CatalogFitmentFlow.spec.js",
+        "tests/Onechanneladmin/CompleteProductFlow.spec.js"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Fulfillment D2C",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/FulfillmentSOD2COrderFlow.spec.js",
+        "tests/Onechanneladmin/Fulfillmentflowsod2corder.spec.js",
+        "tests/Onechanneladmin/NexusD2Cborderflow.spec.js"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Fulfillment B2B",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/FulfillmentSOB2BOrderFlow.spec.js",
+        "tests/Onechanneladmin/Nexusb2borderflow.spec.js"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Fulfillment Returns",
+      "enabled": true,
+      "tests": ["tests/Onechanneladmin/Fulfillmentflowreturn.spec.js"]
+    },
+    {
+      "id": 7,
+      "name": "Orders",
+      "enabled": true,
+      "tests": ["tests/Onechanneladmin/CompleteOrderFlow.spec.js"]
+    },
+    {
+      "id": 8,
+      "name": "Rentals",
+      "enabled": true,
+      "tests": ["tests/Onechanneladmin/RentalsOrderFlow.spec.js"]
+    },
+    {
+      "id": 9,
+      "name": "Email Marketing",
+      "enabled": true,
+      "tests": ["tests/Onechanneladmin/emaimarketingflow.spec.js"]
+    },
+    {
+      "id": 10,
+      "name": "Advanced Datatable",
+      "enabled": true,
+      "tests": ["tests/Onechanneladmin/advanced/demoDatatable.spec.js"]
+    }
+  ]
+}

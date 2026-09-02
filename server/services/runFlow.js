@@ -15,27 +15,44 @@ const {
   clearMeta,
   META_PATH,
 } = require("../../lib/occurrenceLive");
+const { grepUseCasePattern } = require("../lib/useCaseCatalog");
+const {
+  defaultProjectId,
+  requireAvailableProject,
+} = require("../lib/projects");
+const {
+  applyLiveStep,
+  countCompleted,
+  countTotal,
+  skipIncomplete,
+} = require("../../lib/applyLiveStep");
 
 /** @type {Map<string, { timer?: NodeJS.Timeout }>} */
 const activeWatchers = new Map();
 
-/**
- * @param {string} flowId
- * @param {{ headed?: boolean }} [opts]
- */
-async function startFlowRun(flowId, opts = {}) {
-  const key = String(flowId);
-  const flow = await Flow.findOne({ flowId: key });
-  if (!flow) {
-    const err = new Error(`Flow not found: ${key}`);
-    err.status = 404;
-    throw err;
-  }
+function mapChildForOccurrence(c, i) {
+  return {
+    stepId: c.stepId,
+    title: c.title || c.stepId,
+    specFile: c.specFile || "",
+    order: c.order ?? i + 1,
+    dependsOn: c.dependsOn || null,
+    status: "pending",
+    startedAt: null,
+    finishedAt: null,
+    durationMs: null,
+    error: "",
+    marker: "",
+    severity: "",
+  };
+}
 
-  const occurrenceId = randomUUID();
-  const steps = (flow.steps || []).map((s) => ({
+function mapParentForOccurrence(s) {
+  const children = (s.children || []).map((c, i) => mapChildForOccurrence(c, i));
+  return {
     stepId: s.stepId,
     title: s.title,
+    specFile: s.specFile || "",
     status: "pending",
     order: s.order,
     startedAt: null,
@@ -51,7 +68,46 @@ async function startFlowRun(flowId, opts = {}) {
     priority: s.priority || "",
     automation: s.automation || "",
     currentStatus: s.currentStatus || "",
-  }));
+    children,
+  };
+}
+
+/**
+ * @param {string} flowId
+ * @param {{ headed?: boolean; useCaseId?: string; projectId?: string }} [opts]
+ */
+async function startFlowRun(flowId, opts = {}) {
+  const key = String(flowId);
+  const projectId = String(opts.projectId || defaultProjectId()).trim();
+  const project = requireAvailableProject(projectId);
+  const flow = await Flow.findOne({ projectId, flowId: key });
+  if (!flow) {
+    const err = new Error(`Flow not found: ${key} (${projectId})`);
+    err.status = 404;
+    throw err;
+  }
+  const projectRoot = project.root;
+  const hasCiRunner = fs.existsSync(
+    path.join(projectRoot, "scripts", "run-ci-tests.js"),
+  );
+
+  const useCaseId = opts.useCaseId ? String(opts.useCaseId).trim() : "";
+  let sourceSteps = flow.steps || [];
+  if (useCaseId) {
+    const parent = sourceSteps.find((s) => s.stepId === useCaseId);
+    if (!parent) {
+      const err = new Error(`Use case not found: ${useCaseId}`);
+      err.status = 404;
+      throw err;
+    }
+    sourceSteps = [parent];
+  }
+
+  const occurrenceId = randomUUID();
+  const steps = sourceSteps.map((s) => mapParentForOccurrence(s));
+  const grep = useCaseId ? grepUseCasePattern(useCaseId) : "";
+  const serialWorkers = Boolean(flow.catalog || useCaseId);
+  const flowName = useCaseId ? `${flow.name} · ${useCaseId}` : flow.name;
 
   const exitFile = path.join(ROOT, "reports", `.flow-exit-${occurrenceId}.txt`);
   try {
@@ -62,11 +118,12 @@ async function startFlowRun(flowId, opts = {}) {
 
   const occurrence = await RunningOccurrence.create({
     occurrenceId,
+    projectId,
     flowId: key,
-    flowName: flow.name,
+    flowName,
     status: "queued",
     stepsCompleted: 0,
-    stepsTotal: steps.length,
+    stepsTotal: countTotal(steps),
     steps,
     liveIssues: [],
     liveIssueCount: 0,
@@ -74,8 +131,14 @@ async function startFlowRun(flowId, opts = {}) {
     envSummary: {
       STATUS_API_URL,
       CI_TESTS_CONFIG: "flows.config.json",
-      suite: `flow:${key}`,
+      suite: useCaseId ? `flow:${key}:${useCaseId}` : `flow:${key}`,
       visibleTerminal: process.platform === "win32",
+      useCaseId,
+      grep,
+      projectId,
+      projectRoot,
+      tests: flow.tests || [],
+      runner: hasCiRunner ? "ci-tests" : "playwright",
     },
   });
 
@@ -91,7 +154,14 @@ async function startFlowRun(flowId, opts = {}) {
   // Meta lives under reports/ (NOT test-results/) so Playwright cleanup cannot wipe it.
   writeMeta({
     occurrenceId,
+    projectId,
+    projectRoot,
     flowId: key,
+    tests: flow.tests || [],
+    runner: hasCiRunner ? "ci-tests" : "playwright",
+    useCaseId,
+    grep,
+    workers: serialWorkers ? 1 : undefined,
     statusApiUrl: STATUS_API_URL,
     mongoUri: MONGODB_URI,
     headed: Boolean(opts.headed),
@@ -105,7 +175,7 @@ async function startFlowRun(flowId, opts = {}) {
   const useSmokeRunner = process.env.FLOW_SMOKE_RUNNER === "1";
 
   console.log(
-    `[runFlow] starting flow=${key} occurrence=${occurrenceId} visible=${process.platform === "win32"}`,
+    `[runFlow] starting project=${projectId} flow=${key}${useCaseId ? ` useCase=${useCaseId}` : ""} occurrence=${occurrenceId} cwd=${projectRoot} visible=${process.platform === "win32"}`,
   );
 
   occurrence.status = "running";
@@ -144,7 +214,7 @@ async function startFlowRun(flowId, opts = {}) {
     // env vars are explicit, and Playwright logs stream in that window.
     const batPath = path.join(ROOT, "reports", `flow-run-${occurrenceId}.cmd`);
     const logPath = path.join(ROOT, "reports", `flow-run-${occurrenceId}.log`);
-    const rootCmd = ROOT.replace(/\//g, "\\");
+    const projectCmd = projectRoot.replace(/\//g, "\\");
     const batPathCmd = batPath.replace(/\//g, "\\");
     const logPathCmd = logPath.replace(/\//g, "\\");
     const exitFileCmd = exitFile.replace(/\//g, "\\");
@@ -154,11 +224,12 @@ async function startFlowRun(flowId, opts = {}) {
     const headedLines = opts.headed
       ? ["set PW_HEADED=1", "set HEADLESS=false", "set PW_HEADLESS=0"]
       : ["set PW_HEADLESS=1", "set HEADLESS=true"];
+    const workerLines = serialWorkers ? ['set "PW_WORKERS=1"'] : [];
     const bat = [
       "@echo off",
       "setlocal EnableExtensions EnableDelayedExpansion",
-      `title ODB Flow ${key} — ${occurrenceId.slice(0, 8)}`,
-      `cd /d "${rootCmd}"`,
+      `title ${project.name} Flow ${key}${useCaseId ? ` ${useCaseId}` : ""} — ${occurrenceId.slice(0, 8)}`,
+      `cd /d "${projectCmd}"`,
       `echo [%DATE% %TIME%] launcher start> "${logPathCmd}"`,
       `set "RUNNING_OCCURRENCE_ID=${occurrenceId}"`,
       `set "STATUS_API_URL=${STATUS_API_URL}"`,
@@ -167,10 +238,13 @@ async function startFlowRun(flowId, opts = {}) {
       'set "CI_TESTS_CONFIG=flows.config.json"',
       'set "ODB_PAUSE_ON_EXIT=0"',
       ...headedLines,
+      ...workerLines,
       "echo.",
       "echo ============================================",
-      "echo  OneDirectBuy Flow Control Plane — runner",
+      "echo  Flow Control Plane — runner",
+      `echo  Project:    ${project.name}`,
       `echo  Flow:       ${key}`,
+      useCaseId ? `echo  Use case:   ${useCaseId}` : "echo.",
       `echo  Occurrence: ${occurrenceId}`,
       "echo  Dir:        %CD%",
       `echo  API:        ${STATUS_API_URL}`,
@@ -192,10 +266,10 @@ async function startFlowRun(flowId, opts = {}) {
     fs.writeFileSync(batPath, bat, "utf8");
 
     // shell:true + start "title" /D cwd — most reliable new-console spawn on Windows
-    const startCmd = `start "ODB Flow ${key}" /D "${rootCmd}" cmd.exe /c "${batPathCmd}"`;
+    const startCmd = `start "${project.name} Flow ${key}" /D "${projectCmd}" cmd.exe /c "${batPathCmd}"`;
     console.log(`[runFlow] spawning visible terminal: ${startCmd}`);
     const child = spawn(startCmd, {
-      cwd: ROOT,
+      cwd: projectRoot,
       env: {
         ...process.env,
         RUNNING_OCCURRENCE_ID: occurrenceId,
@@ -214,18 +288,23 @@ async function startFlowRun(flowId, opts = {}) {
       batPath: path.relative(ROOT, batPath).replace(/\\/g, "/"),
       logPath: path.relative(ROOT, logPath).replace(/\\/g, "/"),
       headed: Boolean(opts.headed),
+      useCaseId,
+      grep,
+      projectId,
+      projectRoot,
     };
     await occurrence.save();
     watchExitFile(occurrenceId, exitFile);
   } else {
     const child = spawn(process.execPath, [launcher, META_PATH], {
-      cwd: ROOT,
+      cwd: projectRoot,
       env: {
         ...process.env,
         RUNNING_OCCURRENCE_ID: occurrenceId,
         STATUS_API_URL,
         MONGODB_URI,
         ODB_PAUSE_ON_EXIT: "0",
+        ...(serialWorkers ? { PW_WORKERS: "1" } : {}),
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -359,7 +438,12 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
     return;
   }
 
-  const latestPath = path.join(ROOT, "reports", "latest.json");
+  const reportsRoot =
+    occurrence.envSummary?.projectRoot &&
+    fs.existsSync(occurrence.envSummary.projectRoot)
+      ? occurrence.envSummary.projectRoot
+      : ROOT;
+  const latestPath = path.join(reportsRoot, "reports", "latest.json");
   let runDir = "";
   let summary = null;
   let issues = null;
@@ -369,7 +453,7 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   if (fs.existsSync(latestPath)) {
     try {
       const latest = JSON.parse(fs.readFileSync(latestPath, "utf8"));
-      if (latest.path) runDir = path.join(ROOT, latest.path);
+      if (latest.path) runDir = path.join(reportsRoot, latest.path);
     } catch {
       // ignore
     }
@@ -418,22 +502,7 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   // Reload steps from DB in case soft()/HTTP updated meanwhile
   const fresh = await RunningOccurrence.findOne({ occurrenceId }).lean();
   if (fresh?.steps?.length) {
-    // Merge: keep whichever side progressed further per step
-    const byId = new Map(occurrence.steps.map((s) => [s.stepId, s]));
-    for (const fsStep of fresh.steps) {
-      const cur = byId.get(fsStep.stepId);
-      if (!cur) {
-        occurrence.steps.push(fsStep);
-        continue;
-      }
-      const rank = (st) =>
-        ({ pending: 0, running: 1, skipped: 2, passed: 3, failed: 3, blocked: 3 })[
-          st
-        ] ?? 0;
-      if (rank(fsStep.status) >= rank(cur.status)) {
-        Object.assign(cur, fsStep);
-      }
-    }
+    occurrence.steps = fresh.steps;
     occurrence.liveIssues = fresh.liveIssues?.length
       ? fresh.liveIssues
       : occurrence.liveIssues;
@@ -443,13 +512,7 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
     occurrence.markModified("liveIssues");
   }
 
-  // Mark remaining pending/running as skipped after run ends
-  for (const step of occurrence.steps) {
-    if (step.status === "pending" || step.status === "running") {
-      step.status = "skipped";
-      step.finishedAt = new Date();
-    }
-  }
+  skipIncomplete(occurrence.steps);
   occurrence.markModified("steps");
 
   const realExit =
@@ -480,11 +543,13 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   occurrence.finishedAt = new Date();
   occurrence.exitCode = realExit;
   occurrence.runDir = runDir
-    ? path.relative(ROOT, runDir).replace(/\\/g, "/")
+    ? path.relative(reportsRoot, runDir).replace(/\\/g, "/")
     : "";
-  occurrence.stepsCompleted = occurrence.steps.filter((s) =>
-    ["passed", "failed", "skipped", "blocked"].includes(s.status),
-  ).length;
+  occurrence.stepsCompleted = countCompleted(occurrence.steps);
+  occurrence.stepsTotal = Math.max(
+    occurrence.stepsTotal || 0,
+    countTotal(occurrence.steps),
+  );
   occurrence.currentStepId = null;
   await occurrence.save();
 
@@ -513,6 +578,7 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
     { occurrenceId },
     {
       occurrenceId,
+      projectId: occurrence.projectId,
       flowId: occurrence.flowId,
       summary,
       issues: finalIssues,
@@ -539,33 +605,6 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   );
 }
 
-function isCatalogDriven(occurrence) {
-  return (occurrence.steps || []).some((s) => s.useCase || s.module);
-}
-
-/**
- * ODB-UC-005-b → ODB-UC-005 when the parent row exists.
- * @param {object[]} steps
- * @param {string} stepId
- */
-function findCatalogParent(steps, stepId) {
-  const exact = steps.find((s) => s.stepId === stepId);
-  if (exact) return exact;
-  const matches = steps.filter(
-    (s) =>
-      String(stepId).startsWith(`${s.stepId}-`) ||
-      String(stepId).startsWith(`${s.stepId}:`),
-  );
-  if (!matches.length) return null;
-  return matches.sort((a, b) => b.stepId.length - a.stepId.length)[0];
-}
-
-function mergeStepStatus(current, incoming) {
-  if (incoming === "failed" || incoming === "blocked") return incoming;
-  if (current === "failed" || current === "blocked") return current;
-  return incoming;
-}
-
 async function updateStep(occurrenceId, payload) {
   if (!payload?.stepId || !payload?.status) {
     const err = new Error("stepId and status are required");
@@ -585,65 +624,30 @@ async function updateStep(occurrenceId, payload) {
         throw err;
       }
 
-      const catalogFlow = isCatalogDriven(occurrence);
-      let step = occurrence.steps.find((s) => s.stepId === payload.stepId);
-      if (!step) {
-        step = findCatalogParent(occurrence.steps, payload.stepId);
+      const result = applyLiveStep(occurrence.steps, payload, { now });
+      if (result.skipped) {
+        return occurrence.toObject();
       }
-      if (!step) {
-        if (catalogFlow) {
-          // Extra probes (e.g. ODB-UC-021, ODB-UC-385) stay off the sheet.
-          return occurrence.toObject();
-        }
-        occurrence.steps.push({
-          stepId: payload.stepId,
-          title: payload.title || payload.stepId,
-          status: "pending",
-          order: occurrence.steps.length + 1,
-        });
-        step = occurrence.steps[occurrence.steps.length - 1];
-      }
-
-      if (payload.title && !step.useCase) step.title = payload.title;
-      step.status = mergeStepStatus(step.status, payload.status);
 
       if (payload.status === "running") {
-        if (!step.startedAt) step.startedAt = now;
-        step.finishedAt = null;
-        step.durationMs = null;
-        occurrence.currentStepId = step.stepId;
+        occurrence.currentStepId = result.currentStepId;
       } else if (
-        ["passed", "failed", "skipped", "blocked"].includes(payload.status)
+        ["passed", "failed", "skipped", "blocked"].includes(payload.status) &&
+        occurrence.currentStepId === result.step?.stepId
       ) {
-        if (!step.startedAt) step.startedAt = now;
-        step.finishedAt = now;
-        step.durationMs = Math.max(
-          0,
-          now.getTime() - new Date(step.startedAt).getTime(),
-        );
-        if (payload.error) {
-          const prev = step.error ? `${step.error}\n` : "";
-          step.error = `${prev}${payload.error}`.slice(0, 2000);
-        }
-        if (payload.marker) step.marker = payload.marker;
-        if (payload.severity) step.severity = payload.severity;
-        if (occurrence.currentStepId === step.stepId) {
-          occurrence.currentStepId = null;
-        }
+        occurrence.currentStepId = null;
       }
 
-      occurrence.stepsCompleted = occurrence.steps.filter((s) =>
-        ["passed", "failed", "skipped", "blocked"].includes(s.status),
-      ).length;
+      occurrence.stepsCompleted = countCompleted(occurrence.steps);
       occurrence.stepsTotal = Math.max(
         occurrence.stepsTotal || 0,
-        occurrence.steps.length,
+        countTotal(occurrence.steps),
       );
       occurrence.markModified("steps");
       await occurrence.save();
 
       console.log(
-        `[runFlow] step ${payload.status} ${payload.stepId} → ${step.stepId} (${occurrence.stepsCompleted}/${occurrence.stepsTotal}) occ=${occurrenceId.slice(0, 8)}`,
+        `[runFlow] step ${payload.status} ${payload.stepId} → ${result.step?.stepId || payload.stepId} (${occurrence.stepsCompleted}/${occurrence.stepsTotal}) occ=${occurrenceId.slice(0, 8)}`,
       );
 
       return occurrence.toObject();
@@ -700,6 +704,7 @@ async function upsertReport(occurrenceId, body) {
     { occurrenceId },
     {
       occurrenceId,
+      projectId: occurrence.projectId,
       flowId: occurrence.flowId,
       summary: body.summary ?? undefined,
       issues: body.issues ?? undefined,

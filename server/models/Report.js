@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const ReportSchema = new mongoose.Schema(
   {
     occurrenceId: { type: String, required: true, unique: true, index: true },
+    projectId: { type: String, default: "onedirectbuy", index: true },
     flowId: { type: String, default: "" },
     summary: { type: Object, default: null },
     issues: { type: Object, default: null },

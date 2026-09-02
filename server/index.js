@@ -48,7 +48,8 @@ async function main() {
     );
     console.log(`[server] API health       http://127.0.0.1:${PORT}/health`);
     console.log(`[server] STATUS_API_URL   ${STATUS_API_URL}`);
-    console.log(`[server] GET  /api/flows`);
+    console.log(`[server] GET  /api/projects`);
+    console.log(`[server] GET  /api/flows?projectId=`);
     console.log(`[server] POST /api/flows/:flowId/run`);
     console.log(`[server] GET  /api/occurrences/:occurrenceId`);
     console.log(`[server] GET  /api/occurrences/:occurrenceId/report`);
