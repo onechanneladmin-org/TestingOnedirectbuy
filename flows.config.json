@@ -230,6 +230,20 @@
       "enabled": true,
       "catalog": "tests/OneDirectBuy/seller-inventory.tsv",
       "tests": ["tests/OneDirectBuy/SellerInventory.spec.js"]
+    },
+    {
+      "id": 28,
+      "name": "17. Seller Order Fulfillment and Shipping",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/seller-fulfillment-shipping.tsv",
+      "tests": ["tests/OneDirectBuy/SellerFulfillmentShipping.spec.js"]
+    },
+    {
+      "id": 29,
+      "name": "18. OneFulfillmentCenter / 3PL Fulfillment",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/onefulfillment-3pl.tsv",
+      "tests": ["tests/OneDirectBuy/OneFulfillment3pl.spec.js"]
     }
   ]
 }

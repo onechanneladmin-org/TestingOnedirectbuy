@@ -1,0 +1,20 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UC-261	Fulfillment	Seller	View new orders	Seller sees new orders in the fulfillment queue.	P0	Yes	Working
+ODB-UC-262	Fulfillment	Seller	Accept order	Seller accepts an order to start fulfillment.	P0	Yes	Working
+ODB-UC-263	Fulfillment	Seller	Print packing slip	Seller prints a packing slip for the order.	P1	Yes	Working
+ODB-UC-264	Fulfillment	Seller	Create shipping label	Seller buys or generates a shipping label.	P0	Yes	Working
+ODB-UC-265	Fulfillment	Seller	Add manual tracking	Seller enters carrier and tracking number manually.	P0	Yes	Working
+ODB-UC-266	Fulfillment	Seller	Mark order shipped	Seller marks the order as shipped.	P0	Yes	Working
+ODB-UC-267	Fulfillment	Seller	Split shipment	Seller ships items in separate shipments.	P1	Yes	Working
+ODB-UC-268	Fulfillment	Seller	Seller cancellation	Seller cancels the order before it is shipped.	P0	Yes	Working
+ODB-UC-269	Fulfillment	Seller	Late shipment alert	Seller receives an alert when shipment is late.	P1	Yes	Working
+ODB-UC-270	Fulfillment	Admin	Monitor fulfillment SLA	Admin monitors fulfillment SLA across orders.	P1	Yes	Working
+ODB-UC-271	Shipping	Seller	Create shipping template	Seller creates a shipping rate template.	P0	Yes	Working
+ODB-UC-272	Shipping	Seller	Edit shipping template	Seller updates an existing shipping template.	P1	Yes	Working
+ODB-UC-273	Shipping	Seller	Assign shipping template	Seller assigns a shipping template to products.	P0	Yes	Working
+ODB-UC-274	Shipping	Buyer	Restricted shipping location	Checkout blocks shipping to a restricted location.	P0	Yes	Working
+ODB-UC-275	Shipping	Buyer	Free shipping threshold	Free shipping applies when the order meets the threshold.	P1	Yes	Working
+ODB-UC-276	Shipping	Buyer	Oversized item shipping	Oversized products use the correct shipping calculation.	P1	Yes	Working
+ODB-UC-277	Shipping	Buyer	Multi-seller shipping calculation	Shipping is calculated across items from multiple sellers.	P0	Yes	Working
+ODB-UC-278	Shipping	System	Carrier rate failure fallback	The system handles a carrier rate failure with a fallback.	P0	Yes	Working
+ODB-UC-279	Shipping	Seller	Void label	Seller voids an unused shipping label.	P1	Yes	Working

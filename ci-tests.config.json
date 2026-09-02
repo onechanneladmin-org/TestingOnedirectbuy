@@ -129,6 +129,16 @@
       "description": "Sheet group 16 — seller inventory probes (no live stock or order change)"
     },
     {
+      "file": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+      "enabled": true,
+      "description": "Sheet group 17 — seller fulfillment/shipping probes (no live order or label change)"
+    },
+    {
+      "file": "tests/OneDirectBuy/OneFulfillment3pl.spec.js",
+      "enabled": true,
+      "description": "Sheet group 18 — OneFulfillmentCenter / 3PL (later versions)"
+    },
+    {
       "file": "tests/OneDirectBuy/SellerMessaging.spec.js",
       "enabled": true,
       "description": "Contact Seller → Conversations; auth order messaging shell"

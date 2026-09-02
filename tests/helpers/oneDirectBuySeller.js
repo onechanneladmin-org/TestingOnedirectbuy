@@ -239,3 +239,28 @@ export async function sellerInventoryVisible(page) {
   }
   return false;
 }
+
+const SELLER_FULFILLMENT_PATHS = [
+  "/vendor/orders",
+  "/vendor/fulfillment",
+  "/vendor/shipping",
+  "/vendor/labels",
+  "/vendor/dashboard",
+  "/admin/orders",
+  "/admin/fulfillment",
+];
+
+/** True when seller/admin order fulfillment or shipping tools are on this storefront. */
+export async function sellerFulfillmentVisible(page) {
+  if (await sellerInventoryVisible(page)) return true;
+  for (const path of SELLER_FULFILLMENT_PATHS) {
+    await gotoOneDirectBuy(page, path);
+    const ui = page.getByText(
+      /packing slip|shipping label|mark (as )?shipped|accept order|new orders|tracking number|void label|shipping template|fulfillment sla|split shipment/i,
+    );
+    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+      return true;
+    }
+  }
+  return false;
+}
