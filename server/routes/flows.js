@@ -1,6 +1,6 @@
 const express = require("express");
 const Flow = require("../models/Flow");
-const { startFlowRun } = require("../services/runFlow");
+const { startFlowRun, stopFlowRun } = require("../services/runFlow");
 const { seedFlows } = require("../services/seedFlows");
 const { defaultProjectId } = require("../lib/projects");
 
@@ -108,11 +108,16 @@ router.post("/:flowId/run", async (req, res, next) => {
   try {
     const projectId = projectFromReq(req);
     const headed = Boolean(req.body?.headed);
+    const visibleTerminal =
+      req.body?.visibleTerminal !== undefined
+        ? Boolean(req.body.visibleTerminal)
+        : undefined;
     const useCaseId = req.body?.useCaseId
       ? String(req.body.useCaseId).trim()
       : "";
     const occurrence = await startFlowRun(String(req.params.flowId), {
       headed,
+      visibleTerminal,
       useCaseId: useCaseId || undefined,
       projectId,
     });
@@ -126,6 +131,30 @@ router.post("/:flowId/run", async (req, res, next) => {
       stepsCompleted: occurrence.stepsCompleted,
       workerPid: occurrence.workerPid,
       useCaseId: occurrence.envSummary?.useCaseId || "",
+    });
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({ error: err.message });
+    }
+    next(err);
+  }
+});
+
+/** POST /api/flows/:flowId/stop — stop active run for this flow */
+router.post("/:flowId/stop", async (req, res, next) => {
+  try {
+    const projectId = projectFromReq(req);
+    const reason = req.body?.reason || "Stopped by user";
+    const occurrence = await stopFlowRun(
+      String(req.params.flowId),
+      projectId,
+      reason,
+    );
+    res.json({
+      ok: true,
+      occurrenceId: occurrence.occurrenceId,
+      status: occurrence.status,
+      occurrence,
     });
   } catch (err) {
     if (err.status) {

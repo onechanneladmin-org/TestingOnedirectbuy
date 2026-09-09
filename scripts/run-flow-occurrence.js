@@ -9,6 +9,9 @@ const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
 const { META_PATH } = require("../lib/occurrenceLive");
+const {
+  sanitizePlaywrightBrowsersPath,
+} = require("../lib/playwrightBrowsers.cjs");
 
 const HUB_ROOT = path.resolve(__dirname, "..");
 
@@ -35,6 +38,14 @@ function main() {
   if (!flowId || !occurrenceId) {
     console.error("meta must include flowId and occurrenceId");
     process.exit(1);
+  }
+
+  const pidFile = path.join(HUB_ROOT, "reports", `.flow-pid-${occurrenceId}.txt`);
+  try {
+    fs.mkdirSync(path.dirname(pidFile), { recursive: true });
+    fs.writeFileSync(pidFile, `${process.pid}\n`, "utf8");
+  } catch (err) {
+    console.warn("Failed to write pid file:", err.message);
   }
 
   const projectRoot = meta.projectRoot
@@ -70,6 +81,7 @@ function main() {
     // Always real exit for control-plane (UI must not fake PASSED)
     CI_SOFT_PASS: "0",
   };
+  sanitizePlaywrightBrowsersPath(env);
 
   if (meta.headed) {
     env.PW_HEADED = "1";
@@ -140,6 +152,12 @@ function main() {
     console.log(`Wrote exit file: ${exitFile} → ${code}`);
   } catch (err) {
     console.error("Failed to write exit file:", err.message);
+  }
+
+  try {
+    if (fs.existsSync(pidFile)) fs.unlinkSync(pidFile);
+  } catch {
+    // ignore
   }
 
   console.log(`\nFlow finished with exit code ${code}`);

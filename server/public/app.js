@@ -485,11 +485,28 @@ function selectFlow(flowId, useCaseId = null) {
 
   showFlowLayout(flow);
 
-  if (hasSheetCatalog(flow) && !state.selectedUseCaseId) {
-    renderUseCaseSheet(flow, null);
-    $("sheetIdleHint").classList.remove("hidden");
+  const activeOcc = (state.history || []).find(
+    (o) =>
+      String(o.flowId) === state.selectedFlowId &&
+      ["running", "queued"].includes(o.status),
+  );
+  const latestOccForFlow =
+    activeOcc ||
+    (state.history || []).find((o) => String(o.flowId) === state.selectedFlowId);
+
+  if (latestOccForFlow) {
+    api(`/api/occurrences/${encodeURIComponent(latestOccForFlow.occurrenceId)}`)
+      .then((occ) => {
+        renderOccurrence(occ);
+        if (["running", "queued"].includes(occ.status)) {
+          startPolling(occ.occurrenceId);
+        }
+      })
+      .catch(() => {
+        setLiveIdle();
+      });
   } else {
-    renderSelectedCatalog(flow, null);
+    setLiveIdle();
   }
 }
 
@@ -500,9 +517,12 @@ function setLiveIdle() {
   $("liveBody").classList.add("hidden");
   $("runProgress").classList.add("hidden");
   $("btnLoadReport").disabled = true;
+  $("btnStop")?.classList.add("hidden");
+  $("btnRun").disabled = false;
   $("reportBody").innerHTML =
     '<p class="muted">Report appears when the occurrence finishes.</p>';
   state.lastOccurrence = null;
+  state.occurrenceId = null;
   const flow = state.flows.find((f) => String(f.flowId) === state.selectedFlowId);
   if (!flow) return;
   if (hasSheetCatalog(flow) && !state.selectedUseCaseId) {
@@ -534,6 +554,18 @@ function renderOccurrence(occ) {
   const terminal = ["passed", "failed", "cancelled"].includes(status);
   $("btnLoadReport").disabled = !terminal;
   $("btnRun").disabled = status === "running" || status === "queued";
+  const btnStop = $("btnStop");
+  if (btnStop) {
+    if (status === "running" || status === "queued") {
+      btnStop.classList.remove("hidden");
+      btnStop.disabled = false;
+      const isUc = Boolean(occ.useCaseId);
+      const stopLabel = $("btnStopLabel");
+      if (stopLabel) stopLabel.textContent = isUc ? "Stop use case" : "Stop flow";
+    } else {
+      btnStop.classList.add("hidden");
+    }
+  }
 
   const flow = state.flows.find((f) => String(f.flowId) === String(occ.flowId));
   const occUseCase = occ.useCaseId || "";
@@ -592,6 +624,7 @@ function renderOccurrence(occ) {
   if (terminal) {
     stopPolling();
     $("btnRun").disabled = false;
+    $("btnStop")?.classList.add("hidden");
     loadReport(occ.occurrenceId).catch(() => {});
   }
 }
@@ -674,8 +707,15 @@ async function startRun({ useCaseId = "", keepSheet = false } = {}) {
   if (id && !keepSheet && !state.selectedUseCaseId) {
     state.selectedUseCaseId = id;
   }
-  $("btnRun").disabled = true;
   setLiveIdle();
+  $("btnRun").disabled = true;
+  const btnStop = $("btnStop");
+  if (btnStop) {
+    btnStop.classList.remove("hidden");
+    btnStop.disabled = false;
+    const stopLabel = $("btnStopLabel");
+    if (stopLabel) stopLabel.textContent = id ? "Stop use case" : "Stop flow";
+  }
   try {
     const data = await api(
       `/api/flows/${encodeURIComponent(state.selectedFlowId)}/run`,
@@ -689,10 +729,71 @@ async function startRun({ useCaseId = "", keepSheet = false } = {}) {
       },
     );
     toast(`Started occurrence ${data.occurrenceId.slice(0, 8)}…`);
+    loadHistory().catch(() => {});
     startPolling(data.occurrenceId);
   } catch (err) {
     toast(err.message, true);
     $("btnRun").disabled = false;
+    $("btnStop")?.classList.add("hidden");
+  }
+}
+
+async function stopRunningOccurrence() {
+  const occId = state.occurrenceId || state.lastOccurrence?.occurrenceId;
+  const flowId = state.selectedFlowId;
+  if (!occId && !flowId) return;
+
+  const btnStop = $("btnStop");
+  const stopLabel = $("btnStopLabel");
+  const prevLabel = stopLabel ? stopLabel.textContent : "Stop";
+
+  if (btnStop) {
+    btnStop.disabled = true;
+  }
+  if (stopLabel) {
+    stopLabel.textContent = "Stopping…";
+  }
+
+  try {
+    let res;
+    if (occId) {
+      res = await api(`/api/occurrences/${encodeURIComponent(occId)}/stop`, {
+        method: "POST",
+        body: JSON.stringify({ reason: "Stopped from dashboard UI" }),
+      });
+    } else {
+      res = await api(`/api/flows/${encodeURIComponent(flowId)}/stop`, {
+        method: "POST",
+        body: JSON.stringify({
+          projectId: state.projectId,
+          reason: "Stopped from dashboard UI",
+        }),
+      });
+    }
+
+    toast("Flow stopped");
+    stopPolling();
+
+    const updatedOcc = res?.occurrence;
+    if (updatedOcc) {
+      renderOccurrence(updatedOcc);
+    } else if (occId) {
+      try {
+        const fresh = await api(`/api/occurrences/${encodeURIComponent(occId)}`);
+        renderOccurrence(fresh);
+      } catch {
+        // ignore
+      }
+    }
+    await loadHistory();
+  } catch (err) {
+    toast(`Failed to stop: ${err.message}`, true);
+    if (btnStop) {
+      btnStop.disabled = false;
+    }
+    if (stopLabel) {
+      stopLabel.textContent = prevLabel;
+    }
   }
 }
 
@@ -757,7 +858,7 @@ function renderStats() {
   if (s.passed) parts.push(`${s.passed} passed`);
   if (s.failed) parts.push(`${s.failed} failed`);
   if (s.running) parts.push(`${s.running} running`);
-  hint.textContent = parts.join(" · ") || "Latest 20";
+  hint.textContent = parts.join(" · ") || `Latest ${s.runs}`;
   if (s.failed && !s.passed) hint.classList.add("fail");
   else if (s.passed && !s.failed) hint.classList.add("pass");
 }
@@ -773,8 +874,8 @@ async function loadFlows() {
 
 async function loadHistory() {
   const qs = state.projectId
-    ? `?limit=20&projectId=${encodeURIComponent(state.projectId)}`
-    : "?limit=20";
+    ? `?limit=50&projectId=${encodeURIComponent(state.projectId)}`
+    : "?limit=50";
   const data = await api(`/api/occurrences${qs}`);
   const items = data.occurrences || [];
   state.history = items;
@@ -983,6 +1084,7 @@ function bindUi() {
   });
 
   $("btnRun").addEventListener("click", runSelectedFlow);
+  $("btnStop")?.addEventListener("click", stopRunningOccurrence);
   $("btnLoadReport").addEventListener("click", () =>
     loadReport().catch((e) => toast(e.message, true)),
   );

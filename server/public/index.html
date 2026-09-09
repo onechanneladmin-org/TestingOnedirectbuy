@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Flow Control Plane</title>
-    <link rel="stylesheet" href="/ui/styles.css?v=10" />
+    <link rel="stylesheet" href="/ui/styles.css?v=11" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
@@ -126,6 +126,10 @@
                 <span class="btn-pulse" aria-hidden="true"></span>
                 <span id="btnRunLabel">Run flow</span>
               </button>
+              <button type="button" class="btn danger hidden" id="btnStop" title="Stop running process">
+                <span class="btn-stop-icon" aria-hidden="true">■</span>
+                <span id="btnStopLabel">Stop</span>
+              </button>
             </div>
           </header>
 
@@ -220,6 +224,6 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="/ui/app.js?v=10" type="module"></script>
+    <script src="/ui/app.js?v=12" type="module"></script>
   </body>
 </html>

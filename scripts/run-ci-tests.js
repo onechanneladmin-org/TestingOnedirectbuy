@@ -16,6 +16,9 @@
 const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const {
+  sanitizePlaywrightBrowsersPath,
+} = require("../lib/playwrightBrowsers.cjs");
 
 const ROOT = path.resolve(__dirname, "..");
 const CONFIG_PATH = path.join(
@@ -99,6 +102,16 @@ function resolveFlowTestFiles(config, suite) {
 }
 
 function resolveTestFiles(config, suite) {
+  if (suite && suite.toLowerCase().startsWith("flow:") && !Array.isArray(config.flows)) {
+    const flowsConfigPath = path.join(ROOT, "flows.config.json");
+    if (fs.existsSync(flowsConfigPath)) {
+      const flowsConfig = JSON.parse(fs.readFileSync(flowsConfigPath, "utf8"));
+      if (Array.isArray(flowsConfig.flows)) {
+        return resolveFlowTestFiles(flowsConfig, suite);
+      }
+    }
+  }
+
   // Local flows control file
   if (Array.isArray(config.flows) && config.flows.length > 0) {
     const { testFiles, selectedFlows } = resolveFlowTestFiles(config, suite);
@@ -341,6 +354,7 @@ function main() {
     PW_JSON_REPORT_PATH: path.join("reports", runId, "results.json"),
     PW_JUNIT_REPORT_PATH: path.join("reports", runId, "junit.xml"),
   };
+  sanitizePlaywrightBrowsersPath(env);
 
   // Preserve control-plane telemetry env for Playwright workers
   if (process.env.RUNNING_OCCURRENCE_ID) {

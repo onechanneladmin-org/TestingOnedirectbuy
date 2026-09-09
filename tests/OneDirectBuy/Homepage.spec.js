@@ -1,5 +1,10 @@
 import { test, expect } from "../helpers/softTest.js";
-import { gotoOneDirectBuy } from "../helpers/oneDirectBuyNav.js";
+import {
+  dismissAssistantOverlay,
+  dismissCookieBanner,
+  gotoOneDirectBuy,
+  shopByDepartmentTrigger,
+} from "../helpers/oneDirectBuyNav.js";
 
 /** Full desktop chrome — matches a real shopper on a wide monitor. */
 const DESKTOP = { width: 1920, height: 1080 };
@@ -73,13 +78,11 @@ test.describe("OneDirectBuy — Homepage", () => {
     });
 
     await soft("ODB-UC-026-g", "Shop by Department control visible", async () => {
-      await expect(
-        page
-          .locator(".menu__toggle[role='button']")
-          .filter({ hasText: /Shop by Department/i })
-          .or(page.getByRole("button", { name: /Shop by Department/i }))
-          .first(),
-      ).toBeVisible();
+      await dismissCookieBanner(page);
+      await dismissAssistantOverlay(page);
+      const trigger = shopByDepartmentTrigger(page);
+      await trigger.scrollIntoViewIfNeeded().catch(() => {});
+      await expect(trigger).toBeVisible({ timeout: 15_000 });
     });
 
     await soft("ODB-UC-026-h", "Best Seller Brands section after scroll", async () => {

@@ -6,6 +6,8 @@ import {
 import {
   ensureLoggedInBuyer,
   hasBuyerCredentials,
+  gotoAuthenticatedPage,
+  ONE_DIRECT_BUY_BUYER_CREDENTIALS,
 } from "../helpers/oneDirectBuyAuth.js";
 import {
   openStoresPage,
@@ -25,7 +27,7 @@ async function requireBuyer(page) {
 
 async function openOrders(page) {
   await requireBuyer(page);
-  await gotoOneDirectBuy(page, "/account/orders");
+  await gotoAuthenticatedPage(page, "/account/orders", ONE_DIRECT_BUY_BUYER_CREDENTIALS);
   await expect(page).toHaveURL(/\/account\/orders/);
 }
 

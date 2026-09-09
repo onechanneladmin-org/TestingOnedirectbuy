@@ -1,7 +1,12 @@
 const express = require("express");
 const RunningOccurrence = require("../models/RunningOccurrence");
 const Report = require("../models/Report");
-const { updateStep, upsertReport } = require("../services/runFlow");
+const {
+  updateStep,
+  upsertReport,
+  stopOccurrence,
+  stopAllOccurrences,
+} = require("../services/runFlow");
 
 const router = express.Router();
 
@@ -139,6 +144,39 @@ router.post("/:occurrenceId/report", async (req, res, next) => {
   try {
     const report = await upsertReport(req.params.occurrenceId, req.body || {});
     res.status(201).json(report);
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({ error: err.message });
+    }
+    next(err);
+  }
+});
+
+/** POST /api/occurrences/stop-all — stop all running occurrences */
+router.post("/stop-all", async (req, res, next) => {
+  try {
+    const reason = req.body?.reason || "Stopped all from API";
+    const stopped = await stopAllOccurrences(
+      req.query.projectId || req.body?.projectId,
+      reason,
+    );
+    res.json({ ok: true, count: stopped.length, occurrences: stopped });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /api/occurrences/:occurrenceId/stop (or /cancel) — stop a specific occurrence */
+router.post(["/:occurrenceId/stop", "/:occurrenceId/cancel"], async (req, res, next) => {
+  try {
+    const reason = req.body?.reason || "Stopped by user";
+    const occurrence = await stopOccurrence(req.params.occurrenceId, reason);
+    res.json({
+      ok: true,
+      occurrenceId: occurrence.occurrenceId,
+      status: occurrence.status,
+      occurrence,
+    });
   } catch (err) {
     if (err.status) {
       return res.status(err.status).json({ error: err.message });

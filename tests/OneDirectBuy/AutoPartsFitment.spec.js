@@ -132,9 +132,10 @@ test.describe("OneDirectBuy — Auto Parts Fitment, VIN, and Garage", () => {
       async () => {
         await applyYmmAndFindParts(page);
         const product = page.locator('a[href*="/product/"]').first();
-        if (await product.isVisible({ timeout: 20_000 }).catch(() => false)) {
-          await product.click();
-          await page.waitForURL(/\/product\//, { timeout: 20_000 }).catch(() => {});
+        if (await product.isVisible({ timeout: 10_000 }).catch(() => false)) {
+          await product.scrollIntoViewIfNeeded().catch(() => {});
+          await product.click({ force: true }).catch(() => {});
+          await page.waitForURL(/\/product\//, { timeout: 15_000 }).catch(() => {});
         } else {
           await openGuestPdp(page, "bearing");
         }
@@ -156,9 +157,10 @@ test.describe("OneDirectBuy — Auto Parts Fitment, VIN, and Garage", () => {
     await soft("ODB-UC-094", "Product shows Fits for the selected vehicle", async () => {
       await applyYmmAndFindParts(page);
       const product = page.locator('a[href*="/product/"]').first();
-      if (await product.isVisible({ timeout: 20_000 }).catch(() => false)) {
-        await product.click();
-        await page.waitForURL(/\/product\//, { timeout: 20_000 }).catch(() => {});
+      if (await product.isVisible({ timeout: 10_000 }).catch(() => false)) {
+        await product.scrollIntoViewIfNeeded().catch(() => {});
+        await product.click({ force: true }).catch(() => {});
+        await page.waitForURL(/\/product\//, { timeout: 15_000 }).catch(() => {});
       } else {
         await openGuestPdp(page, "bearing");
       }

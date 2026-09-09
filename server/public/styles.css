@@ -675,6 +675,34 @@ h3 {
   background: transparent;
 }
 
+.btn.danger {
+  background: linear-gradient(120deg, #dc2626, #991b1b);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
+}
+
+.btn.danger:hover:not(:disabled) {
+  background: linear-gradient(120deg, #ef4444, #b91c1c);
+  border-color: #f87171;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn.danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-stop-icon {
+  display: inline-block;
+  font-size: 0.72rem;
+  margin-right: 0.35rem;
+  vertical-align: baseline;
+  line-height: 1;
+}
+
 .btn.sm {
   padding: 0.35rem 0.7rem;
   font-size: 0.8rem;

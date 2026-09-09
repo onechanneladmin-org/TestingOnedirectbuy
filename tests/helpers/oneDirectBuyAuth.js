@@ -1,5 +1,9 @@
 import { expect } from "@playwright/test";
-import { gotoOneDirectBuy, dismissCookieBanner } from "./oneDirectBuyNav.js";
+import {
+  gotoOneDirectBuy,
+  dismissCookieBanner,
+  dismissAssistantOverlay,
+} from "./oneDirectBuyNav.js";
 
 export const ONE_DIRECT_BUY_BUYER_CREDENTIALS = {
   email: process.env.ONEDIRECTBUY_BUYER_EMAIL || "",
@@ -40,31 +44,34 @@ const DEFAULT_PASSWORD = "TestPass123!";
 
 /** Reliably type into Ant Design / React controlled inputs. */
 export async function fillInputField(locator, value) {
-  await expect(locator).toBeVisible({ timeout: 15_000 });
-  await locator.scrollIntoViewIfNeeded();
-  await locator.click();
-  await locator.fill("");
-  await locator.pressSequentially(value, { delay: 30 });
-  await expect(locator).toHaveValue(value, { timeout: 10_000 });
+  await expect(async () => {
+    await expect(locator).toBeVisible({ timeout: 10_000 });
+    await locator.scrollIntoViewIfNeeded().catch(() => {});
+    await locator.click({ timeout: 5_000 });
+    await locator.fill("");
+    await locator.pressSequentially(value, { delay: 20 });
+    await expect(locator).toHaveValue(value, { timeout: 5_000 });
+  }).toPass({ intervals: [500, 1000, 1500], timeout: 25_000 });
 }
 
 /** Fill the OneDirectBuy login form (email + password). */
 export async function fillLoginForm(page, email, password) {
   await dismissCookieBanner(page);
+  await dismissAssistantOverlay(page);
   await expect(
     page.getByRole("heading", { name: /Welcome back/i }),
   ).toBeVisible({ timeout: 30_000 });
 
   const emailInput = page
-    .getByRole("textbox", { name: /^Email address$/i })
+    .locator("#username")
+    .or(page.getByRole("textbox", { name: /^Email address$/i }))
     .or(page.getByPlaceholder("you@example.com"))
-    .or(page.locator("#sign-in input[type='text']"))
     .first();
 
   const passwordInput = page
-    .getByPlaceholder("Enter your password")
+    .locator("#login-password")
+    .or(page.getByPlaceholder("Enter your password"))
     .or(page.getByRole("textbox", { name: /^Password$/i }))
-    .or(page.locator("#sign-in input[type='password']"))
     .or(page.locator("input[type='password']"))
     .first();
 
@@ -125,7 +132,12 @@ export async function expectLoggedIn(page) {
     hasText: /Login successful|Registration successful/i,
   });
   if (await successNotice.isVisible({ timeout: 8_000 }).catch(() => false)) {
-    await page.waitForLoadState("networkidle").catch(() => {});
+    await page
+      .waitForURL((url) => !url.pathname.includes("/account/login"), {
+        timeout: 12_000,
+      })
+      .catch(() => {});
+    await page.waitForTimeout(1000);
   }
 
   await gotoOneDirectBuy(page, "/account/orders");
@@ -247,11 +259,12 @@ export async function registerBuyer(page, overrides = {}) {
 export async function loginBuyer(page, email, password) {
   await gotoOneDirectBuy(page, "/account/login");
   await fillLoginForm(page, email, password);
-  await page
+  const submitBtn = page
     .getByRole("button", { name: /^Sign in$/i })
+    .or(page.locator("button.account-auth__submit"))
     .or(page.getByRole("button", { name: /^Login$/i }))
-    .first()
-    .click();
+    .first();
+  await submitBtn.click();
   await expect(
     page.locator(".ant-notification-notice").filter({
       hasText: /Login successful/i,
