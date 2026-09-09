@@ -6,10 +6,17 @@ on:
       - cicd-prod
   workflow_dispatch:
 
+concurrency:
+  group: deploy-onetest-gke
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   build-and-deploy:
     name: Build & Deploy to GKE
-    runs-on: arc-runner-set
+    runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
@@ -30,6 +37,13 @@ jobs:
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: oneautobackend
+          location: us-east1-b
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Build Docker Image
         run: |
