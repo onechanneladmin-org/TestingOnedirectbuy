@@ -1,0 +1,113 @@
+{
+  "$comment": "Local flow runner — toggle enabled per flow, then run: npm run test:flow. UI: npm run server → http://127.0.0.1:3847/",
+  "workers": 1,
+  "retries": 0,
+  "flows": [
+    {
+      "id": 1,
+      "name": "Smoke Auth (Admin / Brand / Client login)",
+      "enabled": true,
+      "tests": [
+        "tests/OneproducthubV2/LoginAdmin.spec.js",
+        "tests/OneproducthubV2/LoginBrand.spec.js",
+        "tests/OneproducthubV2/LoginClient.spec.js"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Auth & Access",
+      "enabled": true,
+      "tests": [
+        "tests/OneproducthubV2/LoginInvalidCredentials.spec.js",
+        "tests/OneproducthubV2/LoginWrongPortal.spec.js",
+        "tests/OneproducthubV2/Logout.spec.js",
+        "tests/OneproducthubV2/SessionPersistence.spec.js",
+        "tests/OneproducthubV2/ForgotPassword.spec.js",
+        "tests/OneproducthubV2/SignupBrand.spec.js",
+        "tests/OneproducthubV2/SignupClient.spec.js",
+        "tests/OneproducthubV2/RoleSelection.spec.js",
+        "tests/OneproducthubV2/UnauthenticatedGuard.spec.js"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Public pages",
+      "enabled": true,
+      "tests": [
+        "tests/OneproducthubV2/PublicHomeSearch.spec.js",
+        "tests/OneproducthubV2/PublicPolicies.spec.js"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Nav Matrices",
+      "enabled": true,
+      "tests": [
+        "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+        "tests/OneproducthubV2/NavMatrixClient.spec.js"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Admin",
+      "enabled": true,
+      "tests": [
+        "tests/OneproducthubV2/AdminPlatformDashboard.spec.js",
+        "tests/OneproducthubV2/AdminBrandRegistry.spec.js",
+        "tests/OneproducthubV2/AdminBrandDirectoryDrilldown.spec.js",
+        "tests/OneproducthubV2/AdminClientsManagement.spec.js",
+        "tests/OneproducthubV2/AdminProductCatalog.spec.js",
+        "tests/OneproducthubV2/AdminImportExport.spec.js",
+        "tests/OneproducthubV2/AdminAIProductStudio.spec.js",
+        "tests/OneproducthubV2/AdminRbac.spec.js",
+        "tests/OneproducthubV2/AdminSettings.spec.js"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Brand",
+      "enabled": true,
+      "tests": [
+        "tests/OneproducthubV2/BrandDashboard.spec.js",
+        "tests/OneproducthubV2/BrandAddProduct.spec.js",
+        "tests/OneproducthubV2/BrandProductDetail.spec.js",
+        "tests/OneproducthubV2/BrandAIProductStudio.spec.js",
+        "tests/OneproducthubV2/BrandDistribution.spec.js",
+        "tests/OneproducthubV2/BrandClientAccess.spec.js",
+        "tests/OneproducthubV2/BrandDataQuality.spec.js",
+        "tests/OneproducthubV2/BrandExport.spec.js",
+        "tests/OneproducthubV2/BrandImport.spec.js",
+        "tests/OneproducthubV2/BrandProductChangelog.spec.js",
+        "tests/OneproducthubV2/BrandSettings.spec.js",
+        "tests/OneproducthubV2/BrandSubscription.spec.js"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Client",
+      "enabled": true,
+      "tests": [
+        "tests/OneproducthubV2/ClientDashboard.spec.js",
+        "tests/OneproducthubV2/ClientBrandDirectory.spec.js",
+        "tests/OneproducthubV2/ClientProductCatalog.spec.js",
+        "tests/OneproducthubV2/ClientProductChangelog.spec.js",
+        "tests/OneproducthubV2/ClientAccessDrafts.spec.js",
+        "tests/OneproducthubV2/ClientExport.spec.js",
+        "tests/OneproducthubV2/ClientTeam.spec.js",
+        "tests/OneproducthubV2/ClientSettings.spec.js",
+        "tests/OneproducthubV2/ClientSubscription.spec.js",
+        "tests/OneproducthubV2/ClientCannotAccessBrandOnly.spec.js"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "E2E Journeys",
+      "enabled": true,
+      "tests": [
+        "tests/OneproducthubV2/E2E_BrandProductLifecycle.spec.js",
+        "tests/OneproducthubV2/E2E_ClientBrandAccessFlow.spec.js"
+      ]
+    }
+  ]
+}

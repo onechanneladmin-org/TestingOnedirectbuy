@@ -1,0 +1,679 @@
+{
+  "1": {
+    "flowId": 1,
+    "name": "Smoke Auth (Admin / Brand / Client login)",
+    "enabled": true,
+    "tests": [
+      "tests/OneproducthubV2/LoginAdmin.spec.js",
+      "tests/OneproducthubV2/LoginBrand.spec.js",
+      "tests/OneproducthubV2/LoginClient.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "OPH-LOGIN-ADMIN-1",
+        "title": "Admin sign-in reaches Admin Dashboard",
+        "specFile": "tests/OneproducthubV2/LoginAdmin.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "OPH-LOGIN-BRAND-1",
+        "title": "Brand sign-in reaches Workspace Overview",
+        "specFile": "tests/OneproducthubV2/LoginBrand.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "OPH-LOGIN-CLIENT-1",
+        "title": "Client sign-in reaches dashboard",
+        "specFile": "tests/OneproducthubV2/LoginClient.spec.js",
+        "order": 3
+      }
+    ]
+  },
+  "2": {
+    "flowId": 2,
+    "name": "Auth & Access",
+    "enabled": true,
+    "tests": [
+      "tests/OneproducthubV2/LoginInvalidCredentials.spec.js",
+      "tests/OneproducthubV2/LoginWrongPortal.spec.js",
+      "tests/OneproducthubV2/Logout.spec.js",
+      "tests/OneproducthubV2/SessionPersistence.spec.js",
+      "tests/OneproducthubV2/ForgotPassword.spec.js",
+      "tests/OneproducthubV2/SignupBrand.spec.js",
+      "tests/OneproducthubV2/SignupClient.spec.js",
+      "tests/OneproducthubV2/RoleSelection.spec.js",
+      "tests/OneproducthubV2/UnauthenticatedGuard.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "OPH-LOGIN-INVALID-1",
+        "title": "Wrong password shows error and stays on login",
+        "specFile": "tests/OneproducthubV2/LoginInvalidCredentials.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "OPH-LOGIN-WRONG-PORTAL-1",
+        "title": "Brand credentials rejected on client login",
+        "specFile": "tests/OneproducthubV2/LoginWrongPortal.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "OPH-LOGIN-WRONG-PORTAL-2",
+        "title": "Client credentials rejected on brand login",
+        "specFile": "tests/OneproducthubV2/LoginWrongPortal.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "OPH-LOGOUT-1",
+        "title": "Client sign-out returns to public home",
+        "specFile": "tests/OneproducthubV2/Logout.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "OPH-SESSION-PERSIST-1",
+        "title": "Brand session survives full page reload",
+        "specFile": "tests/OneproducthubV2/SessionPersistence.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "OPH-FORGOT-PASSWORD-1",
+        "title": "Forgot password UI opens from brand login",
+        "specFile": "tests/OneproducthubV2/ForgotPassword.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "OPH-SIGNUP-BRAND-1",
+        "title": "Brand signup form reachable with required fields",
+        "specFile": "tests/OneproducthubV2/SignupBrand.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "OPH-SIGNUP-CLIENT-1",
+        "title": "Client signup form reachable with required fields",
+        "specFile": "tests/OneproducthubV2/SignupClient.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "OPH-ROLE-SELECTION-1",
+        "title": "Login shows brand and client portal choices",
+        "specFile": "tests/OneproducthubV2/RoleSelection.spec.js",
+        "order": 9
+      },
+      {
+        "stepId": "OPH-UNAUTH-GUARD-1",
+        "title": "Dashboard hash shows public home for guests",
+        "specFile": "tests/OneproducthubV2/UnauthenticatedGuard.spec.js",
+        "order": 10
+      },
+      {
+        "stepId": "OPH-UNAUTH-GUARD-2",
+        "title": "Products hash shows public home for guests",
+        "specFile": "tests/OneproducthubV2/UnauthenticatedGuard.spec.js",
+        "order": 11
+      }
+    ]
+  },
+  "3": {
+    "flowId": 3,
+    "name": "Public pages",
+    "enabled": true,
+    "tests": [
+      "tests/OneproducthubV2/PublicHomeSearch.spec.js",
+      "tests/OneproducthubV2/PublicPolicies.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "OPH-PUBLIC-HOME-1",
+        "title": "Open public home",
+        "specFile": "tests/OneproducthubV2/PublicHomeSearch.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "OPH-PUBLIC-SEARCH-1",
+        "title": "Search public product catalog",
+        "specFile": "tests/OneproducthubV2/PublicHomeSearch.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "OPH-PUBLIC-POLICIES-HOME-1",
+        "title": "Open public home for policies",
+        "specFile": "tests/OneproducthubV2/PublicPolicies.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "OPH-PUBLIC-PRIVACY-1",
+        "title": "Open Privacy Policy",
+        "specFile": "tests/OneproducthubV2/PublicPolicies.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "OPH-PUBLIC-TERMS-1",
+        "title": "Open Terms of Service",
+        "specFile": "tests/OneproducthubV2/PublicPolicies.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "OPH-PUBLIC-LEGAL-1",
+        "title": "Open Legal & Policies",
+        "specFile": "tests/OneproducthubV2/PublicPolicies.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "OPH-PUBLIC-ABOUT-1",
+        "title": "Open About from footer",
+        "specFile": "tests/OneproducthubV2/PublicPolicies.spec.js",
+        "order": 7
+      }
+    ]
+  },
+  "4": {
+    "flowId": 4,
+    "name": "Nav Matrices",
+    "enabled": true,
+    "tests": [
+      "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+      "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+      "tests/OneproducthubV2/NavMatrixClient.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "OPH-NAV-ADMIN-PLATFORM-1",
+        "title": "Admin nav: Platform",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-WORKSPACE-1",
+        "title": "Admin nav: Workspace",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-BRAND-DIRECTORY-1",
+        "title": "Admin nav: Brand Directory",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-CLIENTS-1",
+        "title": "Admin nav: Clients",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-BRAND-REGISTRY-1",
+        "title": "Admin nav: Brand Registry",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-PRODUCT-CATALOG-1",
+        "title": "Admin nav: Product Catalog",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-AI-PRODUCT-STUDIO-1",
+        "title": "Admin nav: AI Product Studio",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-DISTRIBUTIONS-1",
+        "title": "Admin nav: Distributions",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-EXPORT-CENTER-1",
+        "title": "Admin nav: Export Center",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 9
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-IMPORT-CENTER-1",
+        "title": "Admin nav: Import Center",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 10
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-PRODUCT-CHANGE-LOG-1",
+        "title": "Admin nav: Product Change Log",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 11
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-RBAC-ACCESS-1",
+        "title": "Admin nav: RBAC Access",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 12
+      },
+      {
+        "stepId": "OPH-NAV-ADMIN-SETTINGS-1",
+        "title": "Admin nav: Settings",
+        "specFile": "tests/OneproducthubV2/NavMatrixAdmin.spec.js",
+        "order": 13
+      },
+      {
+        "stepId": "OPH-NAV-BRAND-DASHBOARD-1",
+        "title": "Brand nav: Dashboard",
+        "specFile": "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+        "order": 14
+      },
+      {
+        "stepId": "OPH-NAV-BRAND-AI-PRODUCT-STUDIO-1",
+        "title": "Brand nav: AI Product Studio",
+        "specFile": "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+        "order": 15
+      },
+      {
+        "stepId": "OPH-NAV-BRAND-DISTRIBUTIONS-1",
+        "title": "Brand nav: Distributions",
+        "specFile": "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+        "order": 16
+      },
+      {
+        "stepId": "OPH-NAV-BRAND-CLIENT-ACCESS-1",
+        "title": "Brand nav: Client Access",
+        "specFile": "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+        "order": 17
+      },
+      {
+        "stepId": "OPH-NAV-BRAND-DATA-QUALITY-1",
+        "title": "Brand nav: Data Quality Dashboard",
+        "specFile": "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+        "order": 18
+      },
+      {
+        "stepId": "OPH-NAV-BRAND-EXPORT-CENTER-1",
+        "title": "Brand nav: Export Center",
+        "specFile": "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+        "order": 19
+      },
+      {
+        "stepId": "OPH-NAV-BRAND-IMPORT-CENTER-1",
+        "title": "Brand nav: Import Center",
+        "specFile": "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+        "order": 20
+      },
+      {
+        "stepId": "OPH-NAV-BRAND-PRODUCT-CHANGE-LOG-1",
+        "title": "Brand nav: Product Change Log",
+        "specFile": "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+        "order": 21
+      },
+      {
+        "stepId": "OPH-NAV-BRAND-SETTINGS-1",
+        "title": "Brand nav: Settings",
+        "specFile": "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+        "order": 22
+      },
+      {
+        "stepId": "OPH-NAV-BRAND-SUBSCRIPTION-1",
+        "title": "Brand nav: Subscription",
+        "specFile": "tests/OneproducthubV2/NavMatrixBrand.spec.js",
+        "order": 23
+      },
+      {
+        "stepId": "OPH-NAV-CLIENT-DASHBOARD-1",
+        "title": "Client nav: Dashboard",
+        "specFile": "tests/OneproducthubV2/NavMatrixClient.spec.js",
+        "order": 24
+      },
+      {
+        "stepId": "OPH-NAV-CLIENT-BRAND-DIRECTORY-1",
+        "title": "Client nav: Brand Directory",
+        "specFile": "tests/OneproducthubV2/NavMatrixClient.spec.js",
+        "order": 25
+      },
+      {
+        "stepId": "OPH-NAV-CLIENT-PRODUCT-CATALOG-1",
+        "title": "Client nav: Product Catalog",
+        "specFile": "tests/OneproducthubV2/NavMatrixClient.spec.js",
+        "order": 26
+      },
+      {
+        "stepId": "OPH-NAV-CLIENT-EXPORT-CENTER-1",
+        "title": "Client nav: Export Center",
+        "specFile": "tests/OneproducthubV2/NavMatrixClient.spec.js",
+        "order": 27
+      },
+      {
+        "stepId": "OPH-NAV-CLIENT-PRODUCT-CHANGE-LOG-1",
+        "title": "Client nav: Product Change Log",
+        "specFile": "tests/OneproducthubV2/NavMatrixClient.spec.js",
+        "order": 28
+      },
+      {
+        "stepId": "OPH-NAV-CLIENT-SETTINGS-1",
+        "title": "Client nav: Settings",
+        "specFile": "tests/OneproducthubV2/NavMatrixClient.spec.js",
+        "order": 29
+      },
+      {
+        "stepId": "OPH-NAV-CLIENT-SUBSCRIPTION-1",
+        "title": "Client nav: Subscription",
+        "specFile": "tests/OneproducthubV2/NavMatrixClient.spec.js",
+        "order": 30
+      }
+    ]
+  },
+  "5": {
+    "flowId": 5,
+    "name": "Admin",
+    "enabled": true,
+    "tests": [
+      "tests/OneproducthubV2/AdminPlatformDashboard.spec.js",
+      "tests/OneproducthubV2/AdminBrandRegistry.spec.js",
+      "tests/OneproducthubV2/AdminBrandDirectoryDrilldown.spec.js",
+      "tests/OneproducthubV2/AdminClientsManagement.spec.js",
+      "tests/OneproducthubV2/AdminProductCatalog.spec.js",
+      "tests/OneproducthubV2/AdminImportExport.spec.js",
+      "tests/OneproducthubV2/AdminAIProductStudio.spec.js",
+      "tests/OneproducthubV2/AdminRbac.spec.js",
+      "tests/OneproducthubV2/AdminSettings.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "OPH-ADMIN-DASHBOARD",
+        "title": "Admin platform dashboard overview",
+        "specFile": "tests/OneproducthubV2/AdminPlatformDashboard.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "OPH-ADMIN-BRAND-REGISTRY",
+        "title": "Open brand registry with review controls",
+        "specFile": "tests/OneproducthubV2/AdminBrandRegistry.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "OPH-ADMIN-BRAND-DIRECTORY",
+        "title": "Open brand directory and inspect a brand",
+        "specFile": "tests/OneproducthubV2/AdminBrandDirectoryDrilldown.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "OPH-ADMIN-CLIENTS",
+        "title": "Open clients management",
+        "specFile": "tests/OneproducthubV2/AdminClientsManagement.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "OPH-ADMIN-PRODUCT-CATALOG",
+        "title": "Browse admin product catalog",
+        "specFile": "tests/OneproducthubV2/AdminProductCatalog.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "OPH-ADMIN-IMPORT-EXPORT",
+        "title": "Open import and export centers",
+        "specFile": "tests/OneproducthubV2/AdminImportExport.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "OPH-ADMIN-AI-STUDIO",
+        "title": "Open AI studio without add-product for admin",
+        "specFile": "tests/OneproducthubV2/AdminAIProductStudio.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "OPH-ADMIN-RBAC",
+        "title": "Open RBAC access page",
+        "specFile": "tests/OneproducthubV2/AdminRbac.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "OPH-ADMIN-SETTINGS",
+        "title": "Open admin settings",
+        "specFile": "tests/OneproducthubV2/AdminSettings.spec.js",
+        "order": 9
+      }
+    ]
+  },
+  "6": {
+    "flowId": 6,
+    "name": "Brand",
+    "enabled": true,
+    "tests": [
+      "tests/OneproducthubV2/BrandDashboard.spec.js",
+      "tests/OneproducthubV2/BrandAddProduct.spec.js",
+      "tests/OneproducthubV2/BrandProductDetail.spec.js",
+      "tests/OneproducthubV2/BrandAIProductStudio.spec.js",
+      "tests/OneproducthubV2/BrandDistribution.spec.js",
+      "tests/OneproducthubV2/BrandClientAccess.spec.js",
+      "tests/OneproducthubV2/BrandDataQuality.spec.js",
+      "tests/OneproducthubV2/BrandExport.spec.js",
+      "tests/OneproducthubV2/BrandImport.spec.js",
+      "tests/OneproducthubV2/BrandProductChangelog.spec.js",
+      "tests/OneproducthubV2/BrandSettings.spec.js",
+      "tests/OneproducthubV2/BrandSubscription.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "OPH-BRAND-DASHBOARD",
+        "title": "Brand dashboard workspace overview",
+        "specFile": "tests/OneproducthubV2/BrandDashboard.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "OPH-BRAND-ADD-OPEN",
+        "title": "Open add product form",
+        "specFile": "tests/OneproducthubV2/BrandAddProduct.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "OPH-BRAND-ADD-FILL",
+        "title": "Fill required product fields",
+        "specFile": "tests/OneproducthubV2/BrandAddProduct.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "OPH-BRAND-ADD-SAVE",
+        "title": "Save product",
+        "specFile": "tests/OneproducthubV2/BrandAddProduct.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "OPH-BRAND-ADD-VERIFY",
+        "title": "Verify product created",
+        "specFile": "tests/OneproducthubV2/BrandAddProduct.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "OPH-BRAND-PRODUCT-DETAIL",
+        "title": "Open product detail from studio",
+        "specFile": "tests/OneproducthubV2/BrandProductDetail.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "OPH-BRAND-AI-STUDIO",
+        "title": "Open AI Product Studio with filters",
+        "specFile": "tests/OneproducthubV2/BrandAIProductStudio.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "OPH-BRAND-DISTRIBUTION",
+        "title": "Open distributions / channel sync",
+        "specFile": "tests/OneproducthubV2/BrandDistribution.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "OPH-BRAND-CLIENT-ACCESS",
+        "title": "Open client access hub",
+        "specFile": "tests/OneproducthubV2/BrandClientAccess.spec.js",
+        "order": 9
+      },
+      {
+        "stepId": "OPH-BRAND-DATA-QUALITY",
+        "title": "Open data quality dashboard",
+        "specFile": "tests/OneproducthubV2/BrandDataQuality.spec.js",
+        "order": 10
+      },
+      {
+        "stepId": "OPH-BRAND-EXPORT",
+        "title": "Open brand export center",
+        "specFile": "tests/OneproducthubV2/BrandExport.spec.js",
+        "order": 11
+      },
+      {
+        "stepId": "OPH-BRAND-IMPORT",
+        "title": "Open brand import center",
+        "specFile": "tests/OneproducthubV2/BrandImport.spec.js",
+        "order": 12
+      },
+      {
+        "stepId": "OPH-BRAND-CHANGELOG",
+        "title": "Open brand product change log",
+        "specFile": "tests/OneproducthubV2/BrandProductChangelog.spec.js",
+        "order": 13
+      },
+      {
+        "stepId": "OPH-BRAND-SETTINGS",
+        "title": "Open brand settings",
+        "specFile": "tests/OneproducthubV2/BrandSettings.spec.js",
+        "order": 14
+      },
+      {
+        "stepId": "OPH-BRAND-SETTINGS-PROFILE",
+        "title": "Deep-link brand settings profile",
+        "specFile": "tests/OneproducthubV2/BrandSettings.spec.js",
+        "order": 15
+      },
+      {
+        "stepId": "OPH-BRAND-SUBSCRIPTION",
+        "title": "View brand subscription plans",
+        "specFile": "tests/OneproducthubV2/BrandSubscription.spec.js",
+        "order": 16
+      }
+    ]
+  },
+  "7": {
+    "flowId": 7,
+    "name": "Client",
+    "enabled": true,
+    "tests": [
+      "tests/OneproducthubV2/ClientDashboard.spec.js",
+      "tests/OneproducthubV2/ClientBrandDirectory.spec.js",
+      "tests/OneproducthubV2/ClientProductCatalog.spec.js",
+      "tests/OneproducthubV2/ClientProductChangelog.spec.js",
+      "tests/OneproducthubV2/ClientAccessDrafts.spec.js",
+      "tests/OneproducthubV2/ClientExport.spec.js",
+      "tests/OneproducthubV2/ClientTeam.spec.js",
+      "tests/OneproducthubV2/ClientSettings.spec.js",
+      "tests/OneproducthubV2/ClientSubscription.spec.js",
+      "tests/OneproducthubV2/ClientCannotAccessBrandOnly.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "OPH-CLIENT-DASHBOARD",
+        "title": "Client dashboard welcome overview",
+        "specFile": "tests/OneproducthubV2/ClientDashboard.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "OPH-CLIENT-DASHBOARD-NAV",
+        "title": "Navigate to brand directory from dashboard",
+        "specFile": "tests/OneproducthubV2/ClientDashboard.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "OPH-CLIENT-BRAND-DIRECTORY",
+        "title": "Browse client brand directory",
+        "specFile": "tests/OneproducthubV2/ClientBrandDirectory.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "OPH-CLIENT-PRODUCT-CATALOG",
+        "title": "Open client product catalog",
+        "specFile": "tests/OneproducthubV2/ClientProductCatalog.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "OPH-CLIENT-CHANGELOG",
+        "title": "Open client product change log",
+        "specFile": "tests/OneproducthubV2/ClientProductChangelog.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "OPH-CLIENT-ACCESS-DRAFTS",
+        "title": "Open client access drafts",
+        "specFile": "tests/OneproducthubV2/ClientAccessDrafts.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "OPH-CLIENT-EXPORT",
+        "title": "Open client export center",
+        "specFile": "tests/OneproducthubV2/ClientExport.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "OPH-CLIENT-TEAM",
+        "title": "Open client team invite page",
+        "specFile": "tests/OneproducthubV2/ClientTeam.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "OPH-CLIENT-SETTINGS",
+        "title": "Open client settings without brand-only nav",
+        "specFile": "tests/OneproducthubV2/ClientSettings.spec.js",
+        "order": 9
+      },
+      {
+        "stepId": "OPH-CLIENT-SUBSCRIPTION",
+        "title": "View client subscription plans",
+        "specFile": "tests/OneproducthubV2/ClientSubscription.spec.js",
+        "order": 10
+      },
+      {
+        "stepId": "OPH-CLIENT-GATE-IMPORT",
+        "title": "Client blocked from import center deep link",
+        "specFile": "tests/OneproducthubV2/ClientCannotAccessBrandOnly.spec.js",
+        "order": 11
+      },
+      {
+        "stepId": "OPH-CLIENT-GATE-DATA-QUALITY",
+        "title": "Client blocked from data quality deep link",
+        "specFile": "tests/OneproducthubV2/ClientCannotAccessBrandOnly.spec.js",
+        "order": 12
+      }
+    ]
+  },
+  "8": {
+    "flowId": 8,
+    "name": "E2E Journeys",
+    "enabled": true,
+    "tests": [
+      "tests/OneproducthubV2/E2E_BrandProductLifecycle.spec.js",
+      "tests/OneproducthubV2/E2E_ClientBrandAccessFlow.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "OPH-E2E-CREATE-PRODUCT",
+        "title": "Create brand product",
+        "specFile": "tests/OneproducthubV2/E2E_BrandProductLifecycle.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "OPH-E2E-VERIFY-STUDIO",
+        "title": "Verify product in AI Product Studio",
+        "specFile": "tests/OneproducthubV2/E2E_BrandProductLifecycle.spec.js",
+        "order": 2,
+        "dependsOn": "OPH-E2E-CREATE-PRODUCT"
+      },
+      {
+        "stepId": "OPH-E2E-CLIENT-DIRECTORY",
+        "title": "Client opens brand directory",
+        "specFile": "tests/OneproducthubV2/E2E_ClientBrandAccessFlow.spec.js",
+        "order": 3,
+        "dependsOn": "OPH-E2E-VERIFY-STUDIO"
+      },
+      {
+        "stepId": "OPH-E2E-BRAND-CLIENT-ACCESS",
+        "title": "Brand opens client access hub",
+        "specFile": "tests/OneproducthubV2/E2E_ClientBrandAccessFlow.spec.js",
+        "order": 4,
+        "dependsOn": "OPH-E2E-CLIENT-DIRECTORY"
+      }
+    ]
+  }
+}

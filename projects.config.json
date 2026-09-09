@@ -1,5 +1,5 @@
 {
-  "$comment": "Hub projects for the Flow Control Plane. root is relative to this repo unless absolute. flowsConfigRelativeTo=hub means the JSON lives in this repo, not the sibling project.",
+  "$comment": "All automation projects are bundled below projects/ so local and container deployments use the same paths.",
   "defaultProjectId": "onedirectbuy",
   "projects": [
     {
@@ -11,14 +11,14 @@
     {
       "id": "onechanneladmin",
       "name": "Testing-OneChannelAdmin",
-      "root": "../Testing-OneChannelAdmin",
+      "root": "projects/Testing-OneChannelAdmin",
       "flowsConfig": "server/data/external-flows/onechanneladmin.flows.json",
       "flowsConfigRelativeTo": "hub"
     },
     {
       "id": "oneproducthubv2",
       "name": "Testing-OneProductHubV2",
-      "root": "../Testing-OneProductHubV2",
+      "root": "projects/Testing-OneProductHubV2",
       "flowsConfig": "flows.config.json"
     }
   ]
