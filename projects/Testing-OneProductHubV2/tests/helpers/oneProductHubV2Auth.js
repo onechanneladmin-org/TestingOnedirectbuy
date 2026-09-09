@@ -93,14 +93,19 @@ export async function openLoginForRole(page, role) {
   await page.goto(ONE_PRODUCT_HUB_V2_BASE_URL);
   await page.waitForLoadState("domcontentloaded");
 
-  const loginButton = page.getByRole("button", {
-    name: /^log\s*in$/i,
-  });
-  await expect(loginButton).toBeVisible({ timeout: VISIBILITY_TIMEOUT });
-  await loginButton.click();
-
   const roleButton = page.getByRole("button", { name: `Continue as ${role}` });
-  await expect(roleButton).toBeVisible({ timeout: VISIBILITY_TIMEOUT });
+  await expect(async () => {
+    if (await roleButton.isVisible().catch(() => false)) return;
+    const loginButton = page.getByRole("button", {
+      name: /^log\s*in$/i,
+    });
+    await expect(loginButton).toBeVisible({ timeout: 5_000 });
+    await loginButton.click({ timeout: 5_000 });
+    await expect(roleButton).toBeVisible({ timeout: 5_000 });
+  }).toPass({
+    timeout: 30_000,
+    intervals: [500, 1_000, 2_000],
+  });
   await roleButton.click();
   await capturePageOrModal(page, `Role selection — Continue as ${role}`);
 }
