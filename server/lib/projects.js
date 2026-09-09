@@ -41,6 +41,7 @@ function loadProjectsConfig() {
           root: ROOT,
           flowsConfig: path.join(ROOT, "flows.config.json"),
           available: true,
+          runnable: true,
         },
       ],
     };
@@ -49,12 +50,16 @@ function loadProjectsConfig() {
   const projects = cfg.projects.map((entry) => {
     const id = String(entry.id || "").trim();
     const root = resolveRoot(entry.root);
+    const flowsConfig = resolveFlowsConfig(entry, root);
     return {
       id,
       name: String(entry.name || id).trim(),
       root,
-      flowsConfig: resolveFlowsConfig(entry, root),
-      available: Boolean(id && fs.existsSync(root)),
+      flowsConfig,
+      // Configured projects remain selectable in container deployments so
+      // persisted flow catalogs can still be viewed without sibling repos.
+      available: Boolean(id),
+      runnable: Boolean(id && fs.existsSync(root)),
     };
   });
 
@@ -85,7 +90,7 @@ function getProject(projectId) {
 
 function requireAvailableProject(projectId) {
   const project = getProject(projectId);
-  if (!project.available) {
+  if (!project.runnable) {
     const err = new Error(
       `Project folder not found: ${project.name} (${project.root})`,
     );
@@ -100,6 +105,7 @@ function serializeProject(project) {
     id: project.id,
     name: project.name,
     available: project.available,
+    runnable: project.runnable,
     root: project.root,
   };
 }

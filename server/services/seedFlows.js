@@ -234,9 +234,9 @@ async function seedFlows(projectId) {
   const upserted = [];
 
   for (const project of targets) {
-    if (!project.available) {
+    if (!fs.existsSync(project.flowsConfig)) {
       console.warn(
-        `[seed] skip ${project.id}: folder missing at ${project.root}`,
+        `[seed] skip ${project.id}: flows config missing at ${project.flowsConfig}`,
       );
       continue;
     }
@@ -247,8 +247,10 @@ async function seedFlows(projectId) {
       continue;
     }
 
-    let catalog = loadProjectCatalog(project);
-    const extracted = extractCatalog(project.root, flowsConfig);
+    let catalog = project.runnable ? loadProjectCatalog(project) : {};
+    const extracted = project.runnable
+      ? extractCatalog(project.root, flowsConfig)
+      : {};
     for (const [key, value] of Object.entries(extracted)) {
       const existing = catalog[key];
       const existingSteps = Array.isArray(existing?.steps) ? existing.steps : [];
