@@ -320,7 +320,11 @@ function main() {
   if (result.stderr) process.stderr.write(result.stderr);
 
   const playwrightExit = result.status ?? 1;
-  const runnerError = [result.error?.message, result.stderr]
+  const runnerError = [
+    result.error?.message,
+    result.stderr,
+    playwrightExit !== 0 ? result.stdout : "",
+  ]
     .filter(Boolean)
     .join("\n")
     .trim()
