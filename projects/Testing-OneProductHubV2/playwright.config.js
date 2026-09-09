@@ -134,6 +134,10 @@ export default defineConfig({
       undefined,
 
     headless: useHeadless,
+    launchOptions:
+      testEnv === "production"
+        ? { args: ["--disable-dev-shm-usage"] }
+        : undefined,
 
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
@@ -142,10 +146,10 @@ export default defineConfig({
     screenshot: "only-on-failure",
 
     /* Video on failure */
-    video: "retain-on-failure",
+    video: testEnv === "production" ? "off" : "retain-on-failure",
 
     /* Trace on failure */
-    trace: "retain-on-failure",
+    trace: testEnv === "production" ? "off" : "retain-on-failure",
 
     ignoreHTTPSErrors: process.env.IGNORE_HTTPS_ERRORS === "1",
   },
