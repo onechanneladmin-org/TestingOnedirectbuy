@@ -93,7 +93,9 @@ export async function openLoginForRole(page, role) {
   await page.goto(ONE_PRODUCT_HUB_V2_BASE_URL);
   await page.waitForLoadState("domcontentloaded");
 
-  const loginButton = page.getByRole("button", { name: "Login" });
+  const loginButton = page.getByRole("button", {
+    name: /^log\s*in$/i,
+  });
   await expect(loginButton).toBeVisible({ timeout: VISIBILITY_TIMEOUT });
   await loginButton.click();
 

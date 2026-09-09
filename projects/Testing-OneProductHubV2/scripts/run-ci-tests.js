@@ -296,13 +296,9 @@ function main() {
     args.push("--headed");
   }
 
-  const pwCli = path.join(
-    ROOT,
-    "node_modules",
-    "@playwright",
-    "test",
-    "cli.js",
-  );
+  const pwCli =
+    process.env.PLAYWRIGHT_CLI_PATH ||
+    path.join(ROOT, "node_modules", "@playwright", "test", "cli.js");
   if (!fs.existsSync(pwCli)) {
     console.error(`Playwright CLI not found: ${pwCli}`);
     process.exit(1);

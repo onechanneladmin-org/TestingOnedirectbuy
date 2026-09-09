@@ -15,14 +15,13 @@ const {
 
 const HUB_ROOT = path.resolve(__dirname, "..");
 
-function playwrightCli(projectRoot) {
-  return path.join(
-    projectRoot,
-    "node_modules",
-    "@playwright",
-    "test",
-    "cli.js",
-  );
+function resolvePlaywrightCli(projectRoot) {
+  const candidates = [
+    process.env.PLAYWRIGHT_CLI_PATH,
+    path.join(projectRoot, "node_modules", "@playwright", "test", "cli.js"),
+    path.join(HUB_ROOT, "node_modules", "@playwright", "test", "cli.js"),
+  ].filter(Boolean);
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[0];
 }
 
 function main() {
@@ -78,6 +77,7 @@ function main() {
     RUNNING_OCCURRENCE_ID: occurrenceId,
     STATUS_API_URL: meta.statusApiUrl || process.env.STATUS_API_URL || "",
     MONGODB_URI: meta.mongoUri || process.env.MONGODB_URI || "",
+    PLAYWRIGHT_CLI_PATH: resolvePlaywrightCli(projectRoot),
     // Always real exit for control-plane (UI must not fake PASSED)
     CI_SOFT_PASS: "0",
   };
@@ -124,7 +124,7 @@ function main() {
       console.error("No test files in meta.tests and no run-ci-tests.js");
       process.exit(1);
     }
-    const pwCli = playwrightCli(projectRoot);
+    const pwCli = resolvePlaywrightCli(projectRoot);
     if (!fs.existsSync(pwCli)) {
       console.error(`Playwright CLI not found: ${pwCli}`);
       console.error("Run npm install in that project folder first.");
