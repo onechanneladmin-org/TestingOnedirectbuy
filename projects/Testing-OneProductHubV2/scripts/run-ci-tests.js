@@ -115,7 +115,11 @@ function countIssues(runDir) {
   }
 }
 
-function writeSummary(runDir, runId, { suite, testFiles, exitCode, softPass, configPath }) {
+function writeSummary(
+  runDir,
+  runId,
+  { suite, testFiles, exitCode, softPass, configPath, runnerError = "" },
+) {
   let parsedResults = null;
   const resultsPath = path.join(runDir, "results.json");
   if (fs.existsSync(resultsPath)) {
@@ -139,6 +143,7 @@ function writeSummary(runDir, runId, { suite, testFiles, exitCode, softPass, con
     effectiveExitCode: softPass ? 0 : exitCode,
     browser: "chromium",
     issueCount,
+    runnerError,
     config: path.relative(ROOT, configPath).replace(/\\/g, "/"),
     testFiles,
     reports: {
@@ -308,17 +313,25 @@ function main() {
   const result = spawnSync(process.execPath, [pwCli, ...args], {
     cwd: ROOT,
     env,
-    stdio: "inherit",
+    encoding: "utf8",
     windowsHide: false,
   });
+  if (result.stdout) process.stdout.write(result.stdout);
+  if (result.stderr) process.stderr.write(result.stderr);
 
   const playwrightExit = result.status ?? 1;
+  const runnerError = [result.error?.message, result.stderr]
+    .filter(Boolean)
+    .join("\n")
+    .trim()
+    .slice(-8_000);
   writeSummary(runDir, runId, {
     suite,
     testFiles,
     exitCode: playwrightExit,
     softPass,
     configPath: CONFIG_PATH,
+    runnerError,
   });
 
   if (process.env.RUNNING_OCCURRENCE_ID) {
