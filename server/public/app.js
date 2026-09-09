@@ -895,10 +895,11 @@ function renderProjectSwitcher() {
     .map((p) => {
       const selected = p.id === state.projectId ? "true" : "false";
       const missing = p.available ? "" : " unavailable";
+      const status = p.runnable ? "ready" : "catalog only";
       return `<li>
         <button type="button" class="project-option${p.id === state.projectId ? " selected" : ""}${missing}" role="option" aria-selected="${selected}" data-id="${escapeAttr(p.id)}" ${p.available ? "" : "disabled"}>
           <span class="project-option-name">${escapeHtml(p.name)}</span>
-          <span class="project-option-meta">${p.available ? "ready" : "folder missing"}</span>
+          <span class="project-option-meta">${p.available ? status : "unavailable"}</span>
         </button>
       </li>`;
     })
@@ -919,7 +920,7 @@ async function switchProject(projectId) {
   }
   const project = state.projects.find((p) => p.id === next);
   if (project && !project.available) {
-    toast(`${project.name} folder was not found`, true);
+    toast(`${project.name} is unavailable`, true);
     closeProjectMenu();
     return;
   }
