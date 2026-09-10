@@ -1,0 +1,7 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-PUBLIC-HOME-1	Public pages	Guest	Open public home with Log In	Open public home with Log In	P0	Yes	Working
+OPH-PUBLIC-SEARCH-1	Public pages	Guest	Search policies hub from public home	Search policies hub from public home	P0	Yes	Working
+OPH-PUBLIC-PRIVACY-1	Public pages	Guest	Open Privacy Policy	Open Privacy Policy	P0	Yes	Working
+OPH-PUBLIC-TERMS-1	Public pages	Guest	Open Terms of Service	Open Terms of Service	P0	Yes	Working
+OPH-PUBLIC-LEGAL-1	Public pages	Guest	Open Legal & Policies hub	Open Legal & Policies hub	P0	Yes	Working
+OPH-PUBLIC-ABOUT-1	Public pages	Guest	Open About from footer	Open About from footer	P0	Yes	Working

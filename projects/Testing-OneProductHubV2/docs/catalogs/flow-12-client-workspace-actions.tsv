@@ -1,0 +1,11 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-CLIENT-BLOG-1	Client workspace actions	Client	Open Blog & Guides from sidebar	Open Blog & Guides from sidebar	P0	Yes	Automated
+OPH-CLIENT-DIRECTORY-SEARCH-1	Client workspace actions	Client	Search brand directory	Search brand directory	P0	Yes	Automated
+OPH-CLIENT-REQUEST-ACCESS-1	Client workspace actions	Client	Request access / Edit draft control when brands exist	Request access / Edit draft control when brands exist	P0	Yes	Automated
+OPH-CLIENT-CATALOG-SEARCH-1	Client workspace actions	Client	Search product catalog	Search product catalog	P0	Yes	Automated
+OPH-CLIENT-NOTIFICATIONS-1	Client workspace actions	Client	Open activity and notifications	Open activity and notifications	P0	Yes	Automated
+OPH-CLIENT-MANAGE-PLAN-1	Client workspace actions	Client	Manage plan from client dashboard	Plans: Free Growth Scale	P0	Yes	Automated
+OPH-CLIENT-SETTINGS-SECTIONS-1	Client workspace actions	Client	Open profile security account and Save profile	Open profile security account and Save profile	P0	Yes	Automated
+OPH-CLIENT-TEAM-INVITE-1	Client workspace actions	Client	Fill team invite name and email without sending	Fill team invite name and email without sending	P0	Yes	Automated
+UC-149	Client workspace actions	Client	Submit a live access request that creates a pending row	Depends on available brands	P2	No	Missing
+UC-150	Client workspace actions	Client	Complete client plan checkout	Paid path	P2	No	Missing

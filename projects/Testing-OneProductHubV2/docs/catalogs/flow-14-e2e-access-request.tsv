@@ -1,0 +1,4 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-E2E-REQUEST-ACCESS-1	E2E access request	Client	Client opens directory and request access	Client opens directory and request access	P0	Yes	Automated
+OPH-E2E-BRAND-REVIEW-ACCESS-1	E2E access request	Brand	Brand reviews pending client access requests	Brand reviews pending client access requests	P0	Yes	Automated
+UC-154	E2E access request	Brand	Approve request then client sees catalog	Needs a disposable request pair	P2	No	Missing

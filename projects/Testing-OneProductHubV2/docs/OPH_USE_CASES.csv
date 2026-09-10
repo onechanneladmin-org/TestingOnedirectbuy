@@ -1,0 +1,155 @@
+UC_ID,Flow_ID,Flow_Name,Actor,Use_Case,Status,Spec_File,Soft_Step_ID,Notes
+UC-001,1,Smoke Auth,Admin,Admin can sign in and land on Admin Dashboard,Existing,LoginAdmin.spec.js,OPH-LOGIN-ADMIN-1,Covered before this pass
+UC-002,1,Smoke Auth,Brand,Brand can sign in and land on Workspace Overview,Existing,LoginBrand.spec.js,OPH-LOGIN-BRAND-1,Covered before this pass
+UC-003,1,Smoke Auth,Client,Client can sign in and land on Welcome back dashboard,Existing,LoginClient.spec.js,OPH-LOGIN-CLIENT-1,Covered before this pass
+UC-004,2,Auth & Access,Guest,Wrong password shows error and stays on login,Existing,LoginInvalidCredentials.spec.js,OPH-LOGIN-INVALID-1,
+UC-005,2,Auth & Access,Guest,Brand credentials rejected on client portal,Existing,LoginWrongPortal.spec.js,OPH-LOGIN-WRONG-PORTAL-1,
+UC-006,2,Auth & Access,Guest,Client credentials rejected on brand portal,Existing,LoginWrongPortal.spec.js,OPH-LOGIN-WRONG-PORTAL-2,
+UC-007,2,Auth & Access,Client,Client sign-out returns to public home,Existing,Logout.spec.js,OPH-LOGOUT-1,
+UC-008,2,Auth & Access,Brand,Brand session survives full page reload,Existing,SessionPersistence.spec.js,OPH-SESSION-PERSIST-1,
+UC-009,2,Auth & Access,Guest,Forgot password UI opens from brand login,Existing,ForgotPassword.spec.js,OPH-FORGOT-PASSWORD-1,
+UC-010,2,Auth & Access,Guest,Brand signup form is reachable with email field,Existing,SignupBrand.spec.js,OPH-SIGNUP-BRAND-1,
+UC-011,2,Auth & Access,Guest,Client signup form is reachable with email field,Existing,SignupClient.spec.js,OPH-SIGNUP-CLIENT-1,
+UC-012,2,Auth & Access,Guest,Role selection shows Brand and Client choices,Existing,RoleSelection.spec.js,OPH-ROLE-SELECTION-1,
+UC-013,2,Auth & Access,Guest,Guest #/dashboard shows public home,Existing,UnauthenticatedGuard.spec.js,OPH-UNAUTH-GUARD-1,
+UC-014,2,Auth & Access,Guest,Guest #/products shows public home,Existing,UnauthenticatedGuard.spec.js,OPH-UNAUTH-GUARD-2,
+UC-015,3,Public pages,Guest,Open public home with Log In,Existing,PublicHomeSearch.spec.js,OPH-PUBLIC-HOME-1,
+UC-016,3,Public pages,Guest,Search policies hub from public home,Existing,PublicHomeSearch.spec.js,OPH-PUBLIC-SEARCH-1,
+UC-017,3,Public pages,Guest,Open Privacy Policy,Existing,PublicPolicies.spec.js,OPH-PUBLIC-PRIVACY-1,
+UC-018,3,Public pages,Guest,Open Terms of Service,Existing,PublicPolicies.spec.js,OPH-PUBLIC-TERMS-1,
+UC-019,3,Public pages,Guest,Open Legal & Policies hub,Existing,PublicPolicies.spec.js,OPH-PUBLIC-LEGAL-1,
+UC-020,3,Public pages,Guest,Open About from footer,Existing,PublicPolicies.spec.js,OPH-PUBLIC-ABOUT-1,
+UC-021,4,Nav Matrices,Admin,Walk admin sidebar destinations,Existing,NavMatrixAdmin.spec.js,OPH-NAV-ADMIN-*,Originally missed Blog Client Access Data Quality Subscription
+UC-022,4,Nav Matrices,Brand,Walk brand sidebar destinations,Existing,NavMatrixBrand.spec.js,OPH-NAV-BRAND-*,Originally missed Blog & Guides
+UC-023,4,Nav Matrices,Client,Walk client sidebar destinations,Existing,NavMatrixClient.spec.js,OPH-NAV-CLIENT-*,Originally missed Blog & Guides
+UC-024,5,Admin,Admin,Open Admin Dashboard platform overview,Existing,AdminPlatformDashboard.spec.js,OPH-ADMIN-DASHBOARD,
+UC-025,5,Admin,Admin,Open Brand Registry review controls,Existing,AdminBrandRegistry.spec.js,OPH-ADMIN-BRAND-REGISTRY,
+UC-026,5,Admin,Admin,Open Brand Directory and inspect a brand,Existing,AdminBrandDirectoryDrilldown.spec.js,OPH-ADMIN-BRAND-DIRECTORY,
+UC-027,5,Admin,Admin,Open Clients management,Existing,AdminClientsManagement.spec.js,OPH-ADMIN-CLIENTS,
+UC-028,5,Admin,Admin,Browse admin product catalog,Existing,AdminProductCatalog.spec.js,OPH-ADMIN-PRODUCT-CATALOG,
+UC-029,5,Admin,Admin,Open import and export centers,Existing,AdminImportExport.spec.js,OPH-ADMIN-IMPORT-EXPORT,
+UC-030,5,Admin,Admin,Open AI studio without add-product for admin,Existing,AdminAIProductStudio.spec.js,OPH-ADMIN-AI-STUDIO,
+UC-031,5,Admin,Admin,Open RBAC access page,Existing,AdminRbac.spec.js,OPH-ADMIN-RBAC,
+UC-032,5,Admin,Admin,Open admin settings,Existing,AdminSettings.spec.js,OPH-ADMIN-SETTINGS,
+UC-033,6,Brand,Brand,Open workspace overview metrics,Existing,BrandDashboard.spec.js,OPH-BRAND-DASHBOARD,
+UC-034,6,Brand,Brand,Create product with required fields,Existing,BrandAddProduct.spec.js,OPH-BRAND-ADD-*,
+UC-035,6,Brand,Brand,Open product detail from studio,Existing,BrandProductDetail.spec.js,OPH-BRAND-PRODUCT-DETAIL,
+UC-036,6,Brand,Brand,Open AI Product Studio with filters,Existing,BrandAIProductStudio.spec.js,OPH-BRAND-AI-STUDIO,
+UC-037,6,Brand,Brand,Open distributions / channel sync,Existing,BrandDistribution.spec.js,OPH-BRAND-DISTRIBUTION,
+UC-038,6,Brand,Brand,Open client access hub,Existing,BrandClientAccess.spec.js,OPH-BRAND-CLIENT-ACCESS,
+UC-039,6,Brand,Brand,Open data quality dashboard,Existing,BrandDataQuality.spec.js,OPH-BRAND-DATA-QUALITY,
+UC-040,6,Brand,Brand,Open export center,Existing,BrandExport.spec.js,OPH-BRAND-EXPORT,
+UC-041,6,Brand,Brand,Open import center,Existing,BrandImport.spec.js,OPH-BRAND-IMPORT,
+UC-042,6,Brand,Brand,Open product change log,Existing,BrandProductChangelog.spec.js,OPH-BRAND-CHANGELOG,
+UC-043,6,Brand,Brand,Open settings and profile deep-link,Existing,BrandSettings.spec.js,OPH-BRAND-SETTINGS*,
+UC-044,6,Brand,Brand,View subscription plans without checkout,Existing,BrandSubscription.spec.js,OPH-BRAND-SUBSCRIPTION,
+UC-045,7,Client,Client,Client dashboard welcome and brand summary,Existing,ClientDashboard.spec.js,OPH-CLIENT-DASHBOARD,
+UC-046,7,Client,Client,Navigate to brand directory from dashboard,Existing,ClientDashboard.spec.js,OPH-CLIENT-DASHBOARD-NAV,
+UC-047,7,Client,Client,Browse brand directory,Existing,ClientBrandDirectory.spec.js,OPH-CLIENT-BRAND-DIRECTORY,
+UC-048,7,Client,Client,Open product catalog,Existing,ClientProductCatalog.spec.js,OPH-CLIENT-PRODUCT-CATALOG,
+UC-049,7,Client,Client,Open product change log,Existing,ClientProductChangelog.spec.js,OPH-CLIENT-CHANGELOG,
+UC-050,7,Client,Client,Open access drafts,Existing,ClientAccessDrafts.spec.js,OPH-CLIENT-ACCESS-DRAFTS,
+UC-051,7,Client,Client,Open export center,Existing,ClientExport.spec.js,OPH-CLIENT-EXPORT,
+UC-052,7,Client,Client,Open team invite page,Existing,ClientTeam.spec.js,OPH-CLIENT-TEAM,
+UC-053,7,Client,Client,Open settings without brand-only nav,Existing,ClientSettings.spec.js,OPH-CLIENT-SETTINGS,
+UC-054,7,Client,Client,View subscription plans,Existing,ClientSubscription.spec.js,OPH-CLIENT-SUBSCRIPTION,
+UC-055,7,Client,Client,Client blocked from import deep link,Existing,ClientCannotAccessBrandOnly.spec.js,OPH-CLIENT-GATE-IMPORT,
+UC-056,7,Client,Client,Client blocked from data quality deep link,Existing,ClientCannotAccessBrandOnly.spec.js,OPH-CLIENT-GATE-DATA-QUALITY,
+UC-057,8,E2E Journeys,Brand,Create product and see it in AI Studio,Existing,E2E_BrandProductLifecycle.spec.js,OPH-E2E-CREATE-PRODUCT,
+UC-058,8,E2E Journeys,Client+Brand,Client directory and brand access hub together,Existing,E2E_ClientBrandAccessFlow.spec.js,OPH-E2E-CLIENT-DIRECTORY,
+UC-059,9,Public marketing,Guest,Start Free opens client B2B registration,New script,PublicStartFree.spec.js,OPH-PUBLIC-START-FREE-1,Verified on live site: Start Free -> Create Client Account
+UC-060,9,Public marketing,Guest,Book a Demo CTA opens demo request surface,New script,PublicBookDemo.spec.js,OPH-PUBLIC-BOOK-DEMO-1,
+UC-061,9,Public marketing,Guest,Open public pricing plans (Starter/Growth/Scale),New script,PublicPricingFaq.spec.js,OPH-PUBLIC-PRICING-1,
+UC-062,9,Public marketing,Guest,Expand home FAQ What is OneProductHub,New script,PublicPricingFaq.spec.js,OPH-PUBLIC-FAQ-1,
+UC-063,9,Public marketing,Guest,Open Product Data Hub footer page,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-DATA-HUB-1,
+UC-064,9,Public marketing,Guest,Open Product Catalog Management footer page,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-CATALOG-MGMT-1,
+UC-065,9,Public marketing,Guest,Open AI Enrichment footer page,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-AI-ENRICHMENT-1,
+UC-066,9,Public marketing,Guest,Open Brand Data Sharing footer page,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-BRAND-SHARING-1,
+UC-067,9,Public marketing,Guest,Open Client Access Requests footer page,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-CLIENT-ACCESS-REQ-1,
+UC-068,9,Public marketing,Guest,Open Multichannel Sync footer page,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-MULTICHANNEL-1,
+UC-069,9,Public marketing,Guest,Open Website Sync footer page,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-WEBSITE-SYNC-1,
+UC-070,9,Public marketing,Guest,Open Solutions Brands footer page,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-SOLUTION-BRANDS-1,
+UC-071,9,Public marketing,Guest,Open Solutions Retailers footer page,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-SOLUTION-RETAIL-1,
+UC-072,9,Public marketing,Guest,Open product-data Variants page,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-VARIANTS-1,
+UC-073,9,Public marketing,Guest,Open product-data Fitment page,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-FITMENT-1,
+UC-074,9,Public marketing,Guest,Open Blog from footer,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-BLOG-1,
+UC-075,9,Public marketing,Guest,Open Resources from footer,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-RESOURCES-1,
+UC-076,9,Public marketing,Guest,Open Contact from footer,New script,PublicMarketingPages.spec.js,OPH-PUBLIC-CONTACT-1,
+UC-077,10,Auth hardening,Guest,Brand Create Account stays disabled without terms,New script,SignupValidation.spec.js,OPH-SIGNUP-BRAND-TERMS-1,Live form: Create Account disabled
+UC-078,10,Auth hardening,Guest,Brand signup shows identity tax address signatory fields,New script,SignupValidation.spec.js,OPH-SIGNUP-BRAND-FIELDS-1,
+UC-079,10,Auth hardening,Guest,Client B2B signup business types and terms gate,New script,SignupValidation.spec.js,OPH-SIGNUP-CLIENT-B2B-1,Types: Retailer Wholesaler Distributor E-commerce Marketplace Other
+UC-080,10,Auth hardening,Guest,Submit brand password reset email,New script,ForgotPasswordSubmit.spec.js,OPH-FORGOT-PASSWORD-SUBMIT-1,
+UC-081,10,Auth hardening,Brand,Brand sign-out returns to public home,New script,LogoutBrandAdmin.spec.js,OPH-LOGOUT-BRAND-1,
+UC-082,10,Auth hardening,Admin,Admin sign-out returns to public home,New script,LogoutBrandAdmin.spec.js,OPH-LOGOUT-ADMIN-1,
+UC-083,10,Auth hardening,Guest,Empty credentials stay on brand login,New script,AuthEdgeCases.spec.js,OPH-LOGIN-EMPTY-1,
+UC-084,10,Auth hardening,Client,Client session survives full page reload,New script,AuthEdgeCases.spec.js,OPH-SESSION-PERSIST-CLIENT-1,
+UC-085,10,Auth hardening,Guest,Guest #/settings shows public home,New script,AuthEdgeCases.spec.js,OPH-UNAUTH-GUARD-SETTINGS-1,
+UC-086,10,Auth hardening,Guest,Guest #/import shows public home,New script,AuthEdgeCases.spec.js,OPH-UNAUTH-GUARD-IMPORT-1,
+UC-087,11,Brand workspace actions,Brand,Open Blog & Guides from sidebar,New script,BrandBlogGuides.spec.js,OPH-BRAND-BLOG-1,Live sidebar item missing from old suite
+UC-088,11,Brand workspace actions,Brand,AI credits chip is visible on dashboard,New script,BrandWorkspaceActions.spec.js,OPH-BRAND-AI-CREDITS-1,Live: 50 / 50 AI credits
+UC-089,11,Brand workspace actions,Brand,Open activity and notifications,New script,BrandWorkspaceActions.spec.js,OPH-BRAND-NOTIFICATIONS-1,
+UC-090,11,Brand workspace actions,Brand,View all products from dashboard,New script,BrandWorkspaceActions.spec.js,OPH-BRAND-VIEW-ALL-1,
+UC-091,11,Brand workspace actions,Brand,Empty add-product form cannot save,New script,BrandAddProductValidation.spec.js,OPH-BRAND-ADD-VALIDATION-1,
+UC-092,11,Brand workspace actions,Brand,Search AI Product Studio catalog,New script,BrandStudioSearchFilter.spec.js,OPH-BRAND-STUDIO-SEARCH-1,
+UC-093,11,Brand workspace actions,Brand,Use studio All filter chip,New script,BrandStudioSearchFilter.spec.js,OPH-BRAND-STUDIO-FILTER-1,
+UC-094,11,Brand workspace actions,Brand,Walk brand settings sections and Save profile,New script,BrandSettingsSubscription.spec.js,OPH-BRAND-SETTINGS-SECTIONS-1,Profile General Notifications Email Security Branding Categories Account
+UC-095,11,Brand workspace actions,Brand,Choose Plan / Contact Sales visible without checkout,New script,BrandSettingsSubscription.spec.js,OPH-BRAND-CHOOSE-PLAN-1,Plans: Launch Accelerate Turbo Mach
+UC-096,11,Brand workspace actions,Brand,Switch pending approved revoked access tabs,New script,BrandDataOpsActions.spec.js,OPH-BRAND-ACCESS-TABS-1,
+UC-097,11,Brand workspace actions,Brand,Import center upload or template actions,New script,BrandDataOpsActions.spec.js,OPH-BRAND-IMPORT-ACTIONS-1,
+UC-098,11,Brand workspace actions,Brand,Export center format or generate actions,New script,BrandDataOpsActions.spec.js,OPH-BRAND-EXPORT-ACTIONS-1,
+UC-099,11,Brand workspace actions,Brand,Search or filter product change log,New script,BrandDataOpsActions.spec.js,OPH-BRAND-CHANGELOG-SEARCH-1,
+UC-100,4,Nav Matrices,Brand,Nav matrix includes Blog & Guides,New script,NavMatrixBrand.spec.js,OPH-NAV-BRAND-BLOG-GUIDES-1,
+UC-101,12,Client workspace actions,Client,Open Blog & Guides from sidebar,New script,ClientBlogGuides.spec.js,OPH-CLIENT-BLOG-1,
+UC-102,12,Client workspace actions,Client,Search brand directory,New script,ClientCatalogAccessActions.spec.js,OPH-CLIENT-DIRECTORY-SEARCH-1,
+UC-103,12,Client workspace actions,Client,Request access / Edit draft control when brands exist,New script,ClientCatalogAccessActions.spec.js,OPH-CLIENT-REQUEST-ACCESS-1,
+UC-104,12,Client workspace actions,Client,Search product catalog,New script,ClientCatalogAccessActions.spec.js,OPH-CLIENT-CATALOG-SEARCH-1,
+UC-105,12,Client workspace actions,Client,Open activity and notifications,New script,ClientAccountActions.spec.js,OPH-CLIENT-NOTIFICATIONS-1,
+UC-106,12,Client workspace actions,Client,Manage plan from client dashboard,New script,ClientAccountActions.spec.js,OPH-CLIENT-MANAGE-PLAN-1,Plans: Free Growth Scale
+UC-107,12,Client workspace actions,Client,Open profile security account and Save profile,New script,ClientAccountActions.spec.js,OPH-CLIENT-SETTINGS-SECTIONS-1,
+UC-108,12,Client workspace actions,Client,Fill team invite name and email without sending,New script,ClientAccountActions.spec.js,OPH-CLIENT-TEAM-INVITE-1,
+UC-109,4,Nav Matrices,Client,Nav matrix includes Blog & Guides,New script,NavMatrixClient.spec.js,OPH-NAV-CLIENT-BLOG-GUIDES-1,
+UC-110,13,Admin governance actions,Admin,Open Blog & Guides from sidebar,New script,AdminBlogGuides.spec.js,OPH-ADMIN-BLOG-1,
+UC-111,13,Admin governance actions,Admin,Dashboard shows pending client and brand approvals,New script,AdminGovernanceActions.spec.js,OPH-ADMIN-PENDING-1,
+UC-112,13,Admin governance actions,Admin,RBAC Permissions Roles Users plus create/bulk/refresh,New script,AdminGovernanceActions.spec.js,OPH-ADMIN-RBAC-TABS-1,Route #/rbac-admin
+UC-113,13,Admin governance actions,Admin,Subscription editor Preview Edit plans Stripe Save to API,New script,AdminGovernanceActions.spec.js,OPH-ADMIN-SUBSCRIPTION-EDITOR-1,
+UC-114,13,Admin governance actions,Admin,Open admin Client Access hub,New script,AdminGovernanceActions.spec.js,OPH-ADMIN-CLIENT-ACCESS-1,Was missing from old admin nav matrix
+UC-115,13,Admin governance actions,Admin,Open admin Data Quality dashboard,New script,AdminGovernanceActions.spec.js,OPH-ADMIN-DATA-QUALITY-1,Was missing from old admin nav matrix
+UC-116,13,Admin governance actions,Admin,Walk admin settings including Audit and Request form,New script,AdminGovernanceActions.spec.js,OPH-ADMIN-SETTINGS-SECTIONS-1,
+UC-117,4,Nav Matrices,Admin,Nav matrix includes Client Access,New script,NavMatrixAdmin.spec.js,OPH-NAV-ADMIN-CLIENT-ACCESS-1,
+UC-118,4,Nav Matrices,Admin,Nav matrix includes Data Quality Dashboard,New script,NavMatrixAdmin.spec.js,OPH-NAV-ADMIN-DATA-QUALITY-1,
+UC-119,4,Nav Matrices,Admin,Nav matrix includes Blog & Guides,New script,NavMatrixAdmin.spec.js,OPH-NAV-ADMIN-BLOG-GUIDES-1,
+UC-120,4,Nav Matrices,Admin,Nav matrix includes Subscription,New script,NavMatrixAdmin.spec.js,OPH-NAV-ADMIN-SUBSCRIPTION-1,
+UC-121,14,E2E access request,Client,Client opens directory and request access,New script,E2E_ClientRequestAccess.spec.js,OPH-E2E-REQUEST-ACCESS-1,
+UC-122,14,E2E access request,Brand,Brand reviews pending client access requests,New script,E2E_ClientRequestAccess.spec.js,OPH-E2E-BRAND-REVIEW-ACCESS-1,
+UC-123,9,Public marketing,Guest,Open Solutions Manufacturers page,Remaining gap,,,Footer page not scripted
+UC-124,9,Public marketing,Guest,Open Solutions Distributors page,Remaining gap,,,Footer page not scripted
+UC-125,9,Public marketing,Guest,Open Solutions Dealers page,Remaining gap,,,Footer page not scripted
+UC-126,9,Public marketing,Guest,Open Solutions Ecommerce Teams page,Remaining gap,,,Footer page not scripted
+UC-127,9,Public marketing,Guest,Open Solutions Automotive page,Remaining gap,,,Footer page not scripted
+UC-128,9,Public marketing,Guest,Open Solutions Rental page,Remaining gap,,,Footer page not scripted
+UC-129,9,Public marketing,Guest,Open Solutions Medical page,Remaining gap,,,Footer page not scripted
+UC-130,9,Public marketing,Guest,Open product-data Categories page,Remaining gap,,,
+UC-131,9,Public marketing,Guest,Open product-data Bundles page,Remaining gap,,,
+UC-132,9,Public marketing,Guest,Open product-data Digital Assets page,Remaining gap,,,
+UC-133,9,Public marketing,Guest,Open product-data Documents page,Remaining gap,,,
+UC-134,9,Public marketing,Guest,Open product-data Compliance page,Remaining gap,,,
+UC-135,9,Public marketing,Guest,Open product-data Multilingual page,Remaining gap,,,
+UC-136,9,Public marketing,Guest,Hero carousel previous/next cards,Remaining gap,,,UI-only marketing
+UC-137,9,Public marketing,Guest,See full brand / client capabilities,Remaining gap,,,
+UC-138,9,Public marketing,Guest,Accept cookie banner,Remaining gap,,,Not always present
+UC-139,10,Auth hardening,Guest,Submit complete brand B2B registration,Remaining gap,,,Creates a real account — keep manual
+UC-140,10,Auth hardening,Guest,Submit complete client B2B registration,Remaining gap,,,Creates a real account — keep manual
+UC-141,11,Brand workspace actions,Brand,Edit existing product and save,Remaining gap,,,Mutates catalog
+UC-142,11,Brand workspace actions,Brand,Delete or archive a product,Remaining gap,,,Destructive
+UC-143,11,Brand workspace actions,Brand,Duplicate a product,Remaining gap,,,Mutates catalog
+UC-144,11,Brand workspace actions,Brand,Run AI generate on a product,Remaining gap,,,Consumes AI credits
+UC-145,11,Brand workspace actions,Brand,Connect a live distribution channel,Remaining gap,,,Needs channel credentials
+UC-146,11,Brand workspace actions,Brand,Upload a real import file and map columns,Remaining gap,,,Needs fixture file
+UC-147,11,Brand workspace actions,Brand,Complete Stripe checkout / upgrade,Remaining gap,,,Paid path
+UC-148,11,Brand workspace actions,Brand,Change password in settings security,Remaining gap,,,Would lock test account
+UC-149,12,Client workspace actions,Client,Submit a live access request that creates a pending row,Remaining gap,,,Depends on available brands
+UC-150,12,Client workspace actions,Client,Complete client plan checkout,Remaining gap,,,Paid path
+UC-151,13,Admin governance actions,Admin,Approve or deny a live brand registry request,Remaining gap,,,Mutates production registry
+UC-152,13,Admin governance actions,Admin,Approve or deny a live client signup,Remaining gap,,,Mutates production clients
+UC-153,13,Admin governance actions,Admin,Create RBAC permission/role/user,Remaining gap,,,Mutates RBAC
+UC-154,14,E2E access request,Brand,Approve request then client sees catalog,Remaining gap,,,Needs a disposable request pair

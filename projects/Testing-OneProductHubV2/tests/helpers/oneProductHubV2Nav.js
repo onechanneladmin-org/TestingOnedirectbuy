@@ -47,14 +47,34 @@ export async function waitForAppShell(page) {
     .catch(() => {});
 }
 
+/** Assert the current public landing page is visible. */
+export async function expectPublicHome(page) {
+  await expect(
+    page.getByRole("heading", {
+      name: /Enrich Product Data with AI/i,
+    }),
+  ).toBeVisible({ timeout: STEP_TIMEOUT });
+  await expect(
+    page.getByRole("button", { name: /^log\s*in$/i }),
+  ).toBeVisible({ timeout: STEP_TIMEOUT });
+}
+
+/**
+ * Click a public footer navigation control by accessible name.
+ * @param {import('@playwright/test').Page} page
+ * @param {string | RegExp} name
+ */
+export async function clickFooterNav(page, name) {
+  const button = page.getByRole("button", { name }).last();
+  await expect(button).toBeVisible({ timeout: STEP_TIMEOUT });
+  await button.scrollIntoViewIfNeeded().catch(() => {});
+  await button.click();
+}
+
 /** Sign out from the authenticated shell and return to the public home page. */
 export async function signOut(page) {
   await page.getByRole("button", { name: "Sign Out" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Find Product Information" })
-  ).toBeVisible({
-    timeout: STEP_TIMEOUT,
-  });
+  await expectPublicHome(page);
   await capturePageOrModal(page, "Public home after sign-out");
 }
 

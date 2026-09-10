@@ -11,6 +11,7 @@ const CLIENT_NAV = [
   { id: "OPH-NAV-CLIENT-PRODUCT-CATALOG-1", label: "Product Catalog", heading: /Product Catalog|Catalog/i },
   { id: "OPH-NAV-CLIENT-EXPORT-CENTER-1", label: "Export Center", heading: "Product Export" },
   { id: "OPH-NAV-CLIENT-PRODUCT-CHANGE-LOG-1", label: "Product Change Log", heading: /Change Log|Changelog|Product Change/i },
+  { id: "OPH-NAV-CLIENT-BLOG-GUIDES-1", label: "Blog & Guides", heading: /Blog|Guide|Article|Insight|Resource/i },
   { id: "OPH-NAV-CLIENT-SETTINGS-1", label: "Settings", heading: /Settings|Profile/i },
   { id: "OPH-NAV-CLIENT-SUBSCRIPTION-1", label: "Subscription", heading: /Subscription/i },
 ];

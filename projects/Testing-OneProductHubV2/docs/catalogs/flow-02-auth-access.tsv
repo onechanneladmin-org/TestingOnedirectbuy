@@ -1,0 +1,12 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-LOGIN-INVALID-1	Auth & Access	Guest	Wrong password shows error and stays on login	Wrong password shows error and stays on login	P0	Yes	Working
+OPH-LOGIN-WRONG-PORTAL-1	Auth & Access	Guest	Brand credentials rejected on client portal	Brand credentials rejected on client portal	P0	Yes	Working
+OPH-LOGIN-WRONG-PORTAL-2	Auth & Access	Guest	Client credentials rejected on brand portal	Client credentials rejected on brand portal	P0	Yes	Working
+OPH-LOGOUT-1	Auth & Access	Client	Client sign-out returns to public home	Client sign-out returns to public home	P0	Yes	Working
+OPH-SESSION-PERSIST-1	Auth & Access	Brand	Brand session survives full page reload	Brand session survives full page reload	P0	Yes	Working
+OPH-FORGOT-PASSWORD-1	Auth & Access	Guest	Forgot password UI opens from brand login	Forgot password UI opens from brand login	P0	Yes	Working
+OPH-SIGNUP-BRAND-1	Auth & Access	Guest	Brand signup form is reachable with email field	Brand signup form is reachable with email field	P0	Yes	Working
+OPH-SIGNUP-CLIENT-1	Auth & Access	Guest	Client signup form is reachable with email field	Client signup form is reachable with email field	P0	Yes	Working
+OPH-ROLE-SELECTION-1	Auth & Access	Guest	Role selection shows Brand and Client choices	Role selection shows Brand and Client choices	P0	Yes	Working
+OPH-UNAUTH-GUARD-1	Auth & Access	Guest	Guest #/dashboard shows public home	Guest #/dashboard shows public home	P0	Yes	Working
+OPH-UNAUTH-GUARD-2	Auth & Access	Guest	Guest #/products shows public home	Guest #/products shows public home	P0	Yes	Working

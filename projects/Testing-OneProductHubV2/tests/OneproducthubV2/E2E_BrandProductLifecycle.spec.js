@@ -6,22 +6,26 @@ import {
 } from "../helpers/oneProductHubV2Nav.js";
 
 async function selectCategory(page, categoryName) {
-  await page
-    .getByRole("combobox")
-    .filter({ hasText: /Select or type a category|category/i })
-    .click();
+  await page.getByText(/^Select a category$/i).first().click();
 
-  const search = page.getByPlaceholder("Search or type a new category…");
+  const search = page.getByPlaceholder(/Search or type a new category/i).first();
   await expect(search).toBeVisible({ timeout: STEP_TIMEOUT });
   await search.fill(categoryName);
 
-  const existing = page.getByRole("option", { name: categoryName }).first();
+  const existing = page
+    .getByRole("option", { name: new RegExp(`^${categoryName}$`, "i") })
+    .or(page.getByText(new RegExp(`^${categoryName}$`, "i")))
+    .first();
   if (await existing.isVisible().catch(() => false)) {
     await existing.click();
     return;
   }
 
-  await page.getByText(new RegExp(`Create\\s+"?${categoryName}"?`, "i")).click();
+  await page
+    .getByText(new RegExp(`Add\\s*"?${categoryName}"?`, "i"))
+    .or(page.getByText(/Add new category/i))
+    .first()
+    .click();
 }
 
 test.describe("One Product Hub V2 — E2E brand product lifecycle", () => {
@@ -40,10 +44,28 @@ test.describe("One Product Hub V2 — E2E brand product lifecycle", () => {
       await page.getByRole("textbox", { name: /SKU/i }).fill(uniqueSku);
       await page.getByRole("spinbutton", { name: /Price/i }).fill("15");
 
-      const brandSelect = page.locator("select").filter({ hasText: "NewBrand1" }).first();
-      await brandSelect.selectOption({ label: "NewBrand1" });
+      const preferred =
+        process.env.ONEPRODUCTHUB_BRAND_NAME ||
+        process.env.ONEPRODUCTHUB_V2_BRAND_NAME ||
+        "TestBrand";
+      const brandSelect = page
+        .locator("select")
+        .filter({ hasText: /TestBrand|NewBrand1|Select a brand/i })
+        .or(page.getByLabel(/^Brand\b/i))
+        .first();
+      const labels = (await brandSelect.locator("option").allTextContents())
+        .map((text) => text.trim())
+        .filter(Boolean);
+      const match =
+        labels.find((label) => label === preferred) ||
+        labels.find((label) => /testbrand|newbrand/i.test(label)) ||
+        labels.find((label) => !/^select/i.test(label));
+      if (!match) {
+        throw new Error(`No usable brand option found: ${labels.join(", ")}`);
+      }
+      await brandSelect.selectOption({ label: match });
 
-      await selectCategory(page, "Kitchen");
+      await selectCategory(page, "Bedding");
 
       await page
         .getByRole("textbox", { name: /Description/i })

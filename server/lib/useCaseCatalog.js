@@ -39,6 +39,8 @@ function loadUseCaseCatalog(relativeOrAbsolute, projectRoot = ROOT) {
     priority: cols.indexOf("Priority"),
     automation: cols.indexOf("Automation"),
     currentStatus: cols.indexOf("Current Onedirectbuy Status"),
+    currentStatusAlt: cols.indexOf("Current Status"),
+    status: cols.indexOf("Status"),
   };
 
   return lines.slice(1).map((line) => {
@@ -52,7 +54,10 @@ function loadUseCaseCatalog(relativeOrAbsolute, projectRoot = ROOT) {
       priority: idx.priority >= 0 ? parts[idx.priority] || "" : "",
       automation: idx.automation >= 0 ? parts[idx.automation] || "" : "",
       currentStatus:
-        idx.currentStatus >= 0 ? parts[idx.currentStatus] || "" : "",
+        (idx.currentStatus >= 0 ? parts[idx.currentStatus] : "") ||
+        (idx.currentStatusAlt >= 0 ? parts[idx.currentStatusAlt] : "") ||
+        (idx.status >= 0 ? parts[idx.status] : "") ||
+        "",
     };
   });
 }

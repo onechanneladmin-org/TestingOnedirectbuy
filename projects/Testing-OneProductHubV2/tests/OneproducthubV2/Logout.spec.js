@@ -10,7 +10,9 @@ test.describe("One Product Hub V2 — sign out", () => {
     await soft("OPH-LOGOUT-1", "Client sign-out returns to public home", async () => {
       await signInAsClient(page);
       await signOut(page);
-      await expect(page.getByRole("button", { name: "Login" })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /^log\s*in$/i }),
+      ).toBeVisible();
     });
   });
 });

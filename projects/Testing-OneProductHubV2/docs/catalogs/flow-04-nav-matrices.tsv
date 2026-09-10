@@ -1,0 +1,10 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-NAV-ADMIN-	Nav Matrices	Admin	Walk admin sidebar destinations	Originally missed Blog Client Access Data Quality Subscription	P0	Yes	Working
+OPH-NAV-BRAND-	Nav Matrices	Brand	Walk brand sidebar destinations	Originally missed Blog & Guides	P0	Yes	Working
+OPH-NAV-CLIENT-	Nav Matrices	Client	Walk client sidebar destinations	Originally missed Blog & Guides	P0	Yes	Working
+OPH-NAV-BRAND-BLOG-GUIDES-1	Nav Matrices	Brand	Nav matrix includes Blog & Guides	Nav matrix includes Blog & Guides	P0	Yes	Automated
+OPH-NAV-CLIENT-BLOG-GUIDES-1	Nav Matrices	Client	Nav matrix includes Blog & Guides	Nav matrix includes Blog & Guides	P0	Yes	Automated
+OPH-NAV-ADMIN-CLIENT-ACCESS-1	Nav Matrices	Admin	Nav matrix includes Client Access	Nav matrix includes Client Access	P0	Yes	Automated
+OPH-NAV-ADMIN-DATA-QUALITY-1	Nav Matrices	Admin	Nav matrix includes Data Quality Dashboard	Nav matrix includes Data Quality Dashboard	P0	Yes	Automated
+OPH-NAV-ADMIN-BLOG-GUIDES-1	Nav Matrices	Admin	Nav matrix includes Blog & Guides	Nav matrix includes Blog & Guides	P0	Yes	Automated
+OPH-NAV-ADMIN-SUBSCRIPTION-1	Nav Matrices	Admin	Nav matrix includes Subscription	Nav matrix includes Subscription	P0	Yes	Automated

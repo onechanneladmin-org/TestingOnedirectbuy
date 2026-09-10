@@ -17,11 +17,15 @@ const ADMIN_NAV = [
   { id: "OPH-NAV-ADMIN-PRODUCT-CATALOG-1", label: "Product Catalog", heading: /Product Catalog|Catalog/i },
   { id: "OPH-NAV-ADMIN-AI-PRODUCT-STUDIO-1", label: "AI Product Studio", heading: /Product Catalog|AI Product|Studio/i },
   { id: "OPH-NAV-ADMIN-DISTRIBUTIONS-1", label: "Distributions", heading: "Product Distribution" },
+  { id: "OPH-NAV-ADMIN-CLIENT-ACCESS-1", label: "Client Access", heading: /Client Access/i },
+  { id: "OPH-NAV-ADMIN-DATA-QUALITY-1", label: "Data Quality Dashboard", heading: /Data Quality/i },
   { id: "OPH-NAV-ADMIN-EXPORT-CENTER-1", label: "Export Center", heading: "Product Export" },
   { id: "OPH-NAV-ADMIN-IMPORT-CENTER-1", label: "Import Center", heading: /Import/i },
   { id: "OPH-NAV-ADMIN-PRODUCT-CHANGE-LOG-1", label: "Product Change Log", heading: /Change Log|Changelog|Product Change/i },
+  { id: "OPH-NAV-ADMIN-BLOG-GUIDES-1", label: "Blog & Guides", heading: /Blog|Guide|Article|Insight|Resource/i },
   { id: "OPH-NAV-ADMIN-RBAC-ACCESS-1", label: "RBAC Access", heading: /RBAC/i },
   { id: "OPH-NAV-ADMIN-SETTINGS-1", label: "Settings", heading: /Settings|Profile/i },
+  { id: "OPH-NAV-ADMIN-SUBSCRIPTION-1", label: "Subscription", heading: /Subscription/i },
 ];
 
 test.describe("One Product Hub V2 — admin nav matrix", () => {

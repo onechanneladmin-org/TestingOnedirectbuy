@@ -1,0 +1,22 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-BRAND-BLOG-1	Brand workspace actions	Brand	Open Blog & Guides from sidebar	Live sidebar item missing from old suite	P0	Yes	Automated
+OPH-BRAND-AI-CREDITS-1	Brand workspace actions	Brand	AI credits chip is visible on dashboard	Live: 50 / 50 AI credits	P0	Yes	Automated
+OPH-BRAND-NOTIFICATIONS-1	Brand workspace actions	Brand	Open activity and notifications	Open activity and notifications	P0	Yes	Automated
+OPH-BRAND-VIEW-ALL-1	Brand workspace actions	Brand	View all products from dashboard	View all products from dashboard	P0	Yes	Automated
+OPH-BRAND-ADD-VALIDATION-1	Brand workspace actions	Brand	Empty add-product form cannot save	Empty add-product form cannot save	P0	Yes	Automated
+OPH-BRAND-STUDIO-SEARCH-1	Brand workspace actions	Brand	Search AI Product Studio catalog	Search AI Product Studio catalog	P0	Yes	Automated
+OPH-BRAND-STUDIO-FILTER-1	Brand workspace actions	Brand	Use studio All filter chip	Use studio All filter chip	P0	Yes	Automated
+OPH-BRAND-SETTINGS-SECTIONS-1	Brand workspace actions	Brand	Walk brand settings sections and Save profile	Profile General Notifications Email Security Branding Categories Account	P0	Yes	Automated
+OPH-BRAND-CHOOSE-PLAN-1	Brand workspace actions	Brand	Choose Plan / Contact Sales visible without checkout	Plans: Launch Accelerate Turbo Mach	P0	Yes	Automated
+OPH-BRAND-ACCESS-TABS-1	Brand workspace actions	Brand	Switch pending approved revoked access tabs	Switch pending approved revoked access tabs	P0	Yes	Automated
+OPH-BRAND-IMPORT-ACTIONS-1	Brand workspace actions	Brand	Import center upload or template actions	Import center upload or template actions	P0	Yes	Automated
+OPH-BRAND-EXPORT-ACTIONS-1	Brand workspace actions	Brand	Export center format or generate actions	Export center format or generate actions	P0	Yes	Automated
+OPH-BRAND-CHANGELOG-SEARCH-1	Brand workspace actions	Brand	Search or filter product change log	Search or filter product change log	P0	Yes	Automated
+UC-141	Brand workspace actions	Brand	Edit existing product and save	Mutates catalog	P2	No	Missing
+UC-142	Brand workspace actions	Brand	Delete or archive a product	Destructive	P2	No	Missing
+UC-143	Brand workspace actions	Brand	Duplicate a product	Mutates catalog	P2	No	Missing
+UC-144	Brand workspace actions	Brand	Run AI generate on a product	Consumes AI credits	P2	No	Missing
+UC-145	Brand workspace actions	Brand	Connect a live distribution channel	Needs channel credentials	P2	No	Missing
+UC-146	Brand workspace actions	Brand	Upload a real import file and map columns	Needs fixture file	P2	No	Missing
+UC-147	Brand workspace actions	Brand	Complete Stripe checkout / upgrade	Paid path	P2	No	Missing
+UC-148	Brand workspace actions	Brand	Change password in settings security	Would lock test account	P2	No	Missing

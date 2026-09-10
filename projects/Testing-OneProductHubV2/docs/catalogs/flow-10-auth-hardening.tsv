@@ -1,0 +1,13 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-SIGNUP-BRAND-TERMS-1	Auth hardening	Guest	Brand Create Account stays disabled without terms	Live form: Create Account disabled	P0	Yes	Automated
+OPH-SIGNUP-BRAND-FIELDS-1	Auth hardening	Guest	Brand signup shows identity tax address signatory fields	Brand signup shows identity tax address signatory fields	P0	Yes	Automated
+OPH-SIGNUP-CLIENT-B2B-1	Auth hardening	Guest	Client B2B signup business types and terms gate	Types: Retailer Wholesaler Distributor E-commerce Marketplace Other	P0	Yes	Automated
+OPH-FORGOT-PASSWORD-SUBMIT-1	Auth hardening	Guest	Submit brand password reset email	Submit brand password reset email	P0	Yes	Automated
+OPH-LOGOUT-BRAND-1	Auth hardening	Brand	Brand sign-out returns to public home	Brand sign-out returns to public home	P0	Yes	Automated
+OPH-LOGOUT-ADMIN-1	Auth hardening	Admin	Admin sign-out returns to public home	Admin sign-out returns to public home	P0	Yes	Automated
+OPH-LOGIN-EMPTY-1	Auth hardening	Guest	Empty credentials stay on brand login	Empty credentials stay on brand login	P0	Yes	Automated
+OPH-SESSION-PERSIST-CLIENT-1	Auth hardening	Client	Client session survives full page reload	Client session survives full page reload	P0	Yes	Automated
+OPH-UNAUTH-GUARD-SETTINGS-1	Auth hardening	Guest	Guest #/settings shows public home	Guest #/settings shows public home	P0	Yes	Automated
+OPH-UNAUTH-GUARD-IMPORT-1	Auth hardening	Guest	Guest #/import shows public home	Guest #/import shows public home	P0	Yes	Automated
+UC-139	Auth hardening	Guest	Submit complete brand B2B registration	Creates a real account — keep manual	P2	No	Missing
+UC-140	Auth hardening	Guest	Submit complete client B2B registration	Creates a real account — keep manual	P2	No	Missing

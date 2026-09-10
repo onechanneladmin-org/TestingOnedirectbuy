@@ -88,12 +88,14 @@ export async function ensureApiRewrite(page) {
  * @param {import('@playwright/test').Page} page
  * @param {"Client" | "Brand"} role
  */
-export async function openLoginForRole(page, role) {
+export async function openRoleSelection(page) {
   await ensureApiRewrite(page);
   await page.goto(ONE_PRODUCT_HUB_V2_BASE_URL);
   await page.waitForLoadState("domcontentloaded");
 
-  const roleButton = page.getByRole("button", { name: `Continue as ${role}` });
+  const roleButton = page.getByRole("button", {
+    name: /Continue as (Brand|Client)/,
+  }).first();
   await expect(async () => {
     if (await roleButton.isVisible().catch(() => false)) return;
     const loginButton = page.getByRole("button", {
@@ -106,6 +108,15 @@ export async function openLoginForRole(page, role) {
     timeout: 30_000,
     intervals: [500, 1_000, 2_000],
   });
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {"Client" | "Brand"} role
+ */
+export async function openLoginForRole(page, role) {
+  await openRoleSelection(page);
+  const roleButton = page.getByRole("button", { name: `Continue as ${role}` });
   await roleButton.click();
   await capturePageOrModal(page, `Role selection — Continue as ${role}`);
 }

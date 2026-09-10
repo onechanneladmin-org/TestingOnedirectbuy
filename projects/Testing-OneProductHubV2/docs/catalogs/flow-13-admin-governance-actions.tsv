@@ -1,0 +1,11 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-ADMIN-BLOG-1	Admin governance actions	Admin	Open Blog & Guides from sidebar	Open Blog & Guides from sidebar	P0	Yes	Automated
+OPH-ADMIN-PENDING-1	Admin governance actions	Admin	Dashboard shows pending client and brand approvals	Dashboard shows pending client and brand approvals	P0	Yes	Automated
+OPH-ADMIN-RBAC-TABS-1	Admin governance actions	Admin	RBAC Permissions Roles Users plus create/bulk/refresh	Route #/rbac-admin	P0	Yes	Automated
+OPH-ADMIN-SUBSCRIPTION-EDITOR-1	Admin governance actions	Admin	Subscription editor Preview Edit plans Stripe Save to API	Subscription editor Preview Edit plans Stripe Save to API	P0	Yes	Automated
+OPH-ADMIN-CLIENT-ACCESS-1	Admin governance actions	Admin	Open admin Client Access hub	Was missing from old admin nav matrix	P0	Yes	Automated
+OPH-ADMIN-DATA-QUALITY-1	Admin governance actions	Admin	Open admin Data Quality dashboard	Was missing from old admin nav matrix	P0	Yes	Automated
+OPH-ADMIN-SETTINGS-SECTIONS-1	Admin governance actions	Admin	Walk admin settings including Audit and Request form	Walk admin settings including Audit and Request form	P0	Yes	Automated
+UC-151	Admin governance actions	Admin	Approve or deny a live brand registry request	Mutates production registry	P2	No	Missing
+UC-152	Admin governance actions	Admin	Approve or deny a live client signup	Mutates production clients	P2	No	Missing
+UC-153	Admin governance actions	Admin	Create RBAC permission/role/user	Mutates RBAC	P2	No	Missing

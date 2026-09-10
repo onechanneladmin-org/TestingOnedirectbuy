@@ -1,0 +1,13 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-CLIENT-DASHBOARD	Client	Client	Client dashboard welcome and brand summary	Client dashboard welcome and brand summary	P0	Yes	Working
+OPH-CLIENT-DASHBOARD-NAV	Client	Client	Navigate to brand directory from dashboard	Navigate to brand directory from dashboard	P0	Yes	Working
+OPH-CLIENT-BRAND-DIRECTORY	Client	Client	Browse brand directory	Browse brand directory	P0	Yes	Working
+OPH-CLIENT-PRODUCT-CATALOG	Client	Client	Open product catalog	Open product catalog	P0	Yes	Working
+OPH-CLIENT-CHANGELOG	Client	Client	Open product change log	Open product change log	P0	Yes	Working
+OPH-CLIENT-ACCESS-DRAFTS	Client	Client	Open access drafts	Open access drafts	P0	Yes	Working
+OPH-CLIENT-EXPORT	Client	Client	Open export center	Open export center	P0	Yes	Working
+OPH-CLIENT-TEAM	Client	Client	Open team invite page	Open team invite page	P0	Yes	Working
+OPH-CLIENT-SETTINGS	Client	Client	Open settings without brand-only nav	Open settings without brand-only nav	P0	Yes	Working
+OPH-CLIENT-SUBSCRIPTION	Client	Client	View subscription plans	View subscription plans	P0	Yes	Working
+OPH-CLIENT-GATE-IMPORT	Client	Client	Client blocked from import deep link	Client blocked from import deep link	P0	Yes	Working
+OPH-CLIENT-GATE-DATA-QUALITY	Client	Client	Client blocked from data quality deep link	Client blocked from data quality deep link	P0	Yes	Working
