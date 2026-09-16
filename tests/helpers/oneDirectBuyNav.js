@@ -7,19 +7,18 @@ const DEFAULT_TIMEOUT = 15_000;
 
 /** Dismiss cookie consent banner when shown. */
 export async function dismissCookieBanner(page) {
-  const dialog = page.getByRole("dialog", { name: /We value your privacy/i });
-  const acceptAll = page.getByRole("button", { name: /Accept all/i });
-  const rejectOptional = page.getByRole("button", { name: /Reject optional/i });
+  const acceptAll = page.getByRole("button", { name: /Accept all/i }).first();
+  const rejectOptional = page
+    .getByRole("button", { name: /Reject optional/i })
+    .first();
 
-  if (await dialog.isVisible({ timeout: 5000 }).catch(() => false)) {
-    if (await acceptAll.isVisible().catch(() => false)) {
-      await acceptAll.click({ force: true, timeout: 3000 }).catch(() => {});
-    } else if (await rejectOptional.isVisible().catch(() => false)) {
-      await rejectOptional.click({ force: true, timeout: 3000 }).catch(() => {});
-    }
-    await expect(dialog).toBeHidden({ timeout: 5000 }).catch(() => {});
-  } else if (await acceptAll.isVisible({ timeout: 2000 }).catch(() => false)) {
-    await acceptAll.click({ force: true, timeout: 2000 }).catch(() => {});
+  if (await acceptAll.isVisible({ timeout: 4_000 }).catch(() => false)) {
+    await acceptAll.click({ force: true }).catch(() => {});
+    await acceptAll.waitFor({ state: "hidden", timeout: 5_000 }).catch(() => {});
+    return;
+  }
+  if (await rejectOptional.isVisible({ timeout: 1_000 }).catch(() => false)) {
+    await rejectOptional.click({ force: true }).catch(() => {});
   }
 }
 
@@ -42,6 +41,62 @@ export async function dismissAssistantOverlay(page) {
       await page.waitForTimeout(200);
     }
   }
+
+  const conversations = page.getByRole("heading", { name: /^Conversations$/i });
+  if (await conversations.first().isVisible().catch(() => false)) {
+    const close = page
+      .getByRole("button", { name: /^Close$/i })
+      .or(page.getByRole("button", { name: /^Close modal$/i }))
+      .or(page.getByRole("button", { name: /^Close conversations$/i }))
+      .first();
+    if (await close.isVisible().catch(() => false)) {
+      await close.click({ force: true }).catch(() => {});
+    } else {
+      await page.keyboard.press("Escape").catch(() => {});
+    }
+  }
+}
+
+export async function resetDesktopStorefront(page, size = { width: 1920, height: 1080 }) {
+  try {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.clearDeviceMetricsOverride");
+    await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: false });
+    await cdp.send("Emulation.setEmulatedMedia", {
+      features: [
+        { name: "hover", value: "hover" },
+        { name: "pointer", value: "fine" },
+      ],
+    });
+  } catch {
+    /* ignore */
+  }
+  await page.setViewportSize(size);
+}
+
+/** Force mobile layout: storefront chrome keys off pointer/hover and mobile metrics. */
+export async function emulateMobileStorefront(page, size = { width: 390, height: 844 }) {
+  await page.setViewportSize(size);
+  try {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true });
+    await cdp.send("Emulation.setDeviceMetricsOverride", {
+      width: size.width,
+      height: size.height,
+      deviceScaleFactor: 2,
+      mobile: true,
+    });
+    await cdp.send("Emulation.setEmulatedMedia", {
+      features: [
+        { name: "hover", value: "none" },
+        { name: "pointer", value: "coarse" },
+      ],
+    });
+  } catch {
+    // headed/CDP session may already exist
+  }
+  await dismissCookieBanner(page);
+  await dismissAssistantOverlay(page);
 }
 
 /** Navigate to a OneDirectBuy path and dismiss cookies. */
@@ -71,6 +126,7 @@ export async function waitForShopProducts(page) {
   const countLabel = page.getByText(/[1-9]\d*\s+Products found/i);
   const productOrAdd = page
     .locator("button.add-to-cart")
+    .or(page.getByRole("button", { name: /^Add To Cart$/i }))
     .or(
       page.locator(
         'article a[href*="/product/"], .ps-product a[href*="/product/"], .ps-shop-items a[href*="/product/"], a[href*="/product/"]',
@@ -82,11 +138,8 @@ export async function waitForShopProducts(page) {
   const hasCount = await countLabel
     .isVisible({ timeout: 30_000 })
     .catch(() => false);
-  if (!hasCount) {
-    await expect(productOrAdd).toBeVisible({ timeout: 120_000 });
-  } else {
-    await expect(productOrAdd).toBeVisible({ timeout: 60_000 });
-  }
+  if (hasCount) return;
+  await expect(productOrAdd).toBeVisible({ timeout: 120_000 });
 }
 
 /** Sort control on shop/search listing (not the header Product category combobox). */
@@ -98,9 +151,13 @@ export function shopSortSelect(page) {
     .first();
 }
 
-/** Header keyword field (desktop chrome). */
+/** Header keyword field (desktop chrome). Live UI is a combobox, not a textbox. */
 export function headerSearchInput(page) {
-  return page.getByRole("textbox", { name: /Search products/i });
+  return page
+    .getByRole("combobox", { name: /Search products/i })
+    .or(page.getByPlaceholder(/I.?m shopping for/i))
+    .or(page.getByRole("textbox", { name: /Search products/i }))
+    .first();
 }
 
 /** Live autocomplete panel under the header search box. */
@@ -116,6 +173,7 @@ export function searchSuggestionPanel(page) {
  */
 export async function typeForSearchSuggestions(page, keyword = "bearing") {
   await dismissCookieBanner(page);
+  await dismissAssistantOverlay(page);
   const box = headerSearchInput(page);
   await expect(box).toBeVisible({ timeout: DEFAULT_TIMEOUT });
   await box.click();
@@ -153,6 +211,7 @@ export function breadcrumbHomeLink(page) {
 /** Run a header keyword search like a shopper (type + Search). */
 export async function searchProducts(page, keyword) {
   await dismissCookieBanner(page);
+  await dismissAssistantOverlay(page);
   const box = headerSearchInput(page);
   await expect(box).toBeVisible({ timeout: DEFAULT_TIMEOUT });
   await box.fill(keyword);
@@ -198,8 +257,8 @@ export async function openKnownProductDetail(page, keyword = "bearing") {
       .first();
     await expect(productLink).toBeVisible({ timeout: 20_000 });
     await Promise.all([
-      page.waitForURL(/\/product\//, { timeout: 20_000 }),
-      productLink.click(),
+      page.waitForURL(/\/product\//, { timeout: 20_000, waitUntil: "domcontentloaded" }),
+      productLink.click({ force: true }),
     ]);
   } catch {
     // Resilient fallback: directly open known in-stock product detail page
@@ -215,119 +274,126 @@ export async function openKnownProductDetail(page, keyword = "bearing") {
 /** PDP Add to cart control (live site uses a link or button; pick the visible one). */
 export function productAddToCartControl(page) {
   return page
-    .getByRole("link", { name: /^Add to cart$/i })
-    .or(page.getByRole("button", { name: /^Add To Cart$|^Add to cart$/i }))
-    .or(page.locator("a, button").filter({ hasText: /^Add to cart$/i }))
+    .locator("a, button")
+    .filter({ hasText: /add\s*to\s*cart/i })
     .filter({ visible: true })
     .first();
 }
 
 async function waitForCartAddSuccess(page) {
-  // Toast is the fastest signal on shop-grid add.
-  const addedNotice = page.locator(".ant-notification-notice, .ant-message-notice").filter({
-    hasText: /Cart Updated|added to your cart|successfully added/i,
-  });
+  const addedNotice = page
+    .locator(".ant-notification-notice, .ant-message-notice, .ant-message")
+    .filter({
+      hasText: /cart updated|added( to (your )?cart)?|successfully added|item added|added successfully/i,
+    })
+    .or(page.getByText(/cart updated|added to (your )?cart|item added/i));
   if (
     await addedNotice
       .first()
-      .isVisible({ timeout: 6_000 })
+      .isVisible({ timeout: 8_000 })
       .catch(() => false)
   ) {
     return true;
   }
 
-  // Header badge: live UI uses "1 Cart", "2 Cart", … or a cart icon with count
   if (
     await page
       .getByRole("link", { name: /[1-9]\d*\s*Cart/i })
-      .or(page.locator(".ps-cart--mini, .header__extra [href*='cart']"))
       .first()
-      .isVisible({ timeout: 3_000 })
+      .isVisible({ timeout: 2_000 })
       .catch(() => false)
   ) {
     return true;
   }
 
-  if (/shopping-cart/i.test(page.url())) {
+  const badge = page.locator(
+    ".ps-cart span, .header-cart .badge, [class*='cart'] .badge, .ps-cart__number",
+  );
+  if (await badge.first().isVisible({ timeout: 1_000 }).catch(() => false)) {
+    const text = ((await badge.first().innerText().catch(() => "")) || "").trim();
+    if (/^[1-9]\d*$/.test(text)) return true;
+  }
+
+  if (/shopping-cart/i.test(page.url()) && !(await page.getByText(/Your cart is empty/i).isVisible().catch(() => false))) {
     return true;
   }
 
-  // If on PDP and Add button was clicked, give short grace period
-  return true;
+  return false;
 }
 
-/** Add the first available product to cart from the shop page. */
-export async function addFirstProductToCartFromShop(page) {
+async function cartPageHasLines(page) {
+  await gotoOneDirectBuy(page, "/account/shopping-cart");
+  await waitForCartReady(page);
+  if (
+    await page
+      .getByRole("heading", { name: /Your cart is empty/i })
+      .isVisible()
+      .catch(() => false)
+  ) {
+    return false;
+  }
+  return Boolean(
+    await page
+      .getByText(/\d+\s+items?/i)
+      .or(page.locator(".ps-cart-line"))
+      .or(page.getByRole("button", { name: /^Remove item$/i }))
+      .first()
+      .isVisible()
+      .catch(() => false),
+  );
+}
+
+async function clickVisibleAddToCart(page) {
+  await dismissAssistantOverlay(page);
+  await page.keyboard.press("Escape").catch(() => {});
+  const add = page
+    .getByRole("button", { name: /^Add To Cart$/i })
+    .or(productAddToCartControl(page))
+    .first();
+  if (await add.isVisible({ timeout: 12_000 }).catch(() => false)) {
+    await add.scrollIntoViewIfNeeded().catch(() => {});
+    await add.click({ force: true });
+    return true;
+  }
+  return page.evaluate(() => {
+    const el = [...document.querySelectorAll("a, button")].find((node) =>
+      /add\s*to\s*cart/i.test((node.textContent || "").replace(/\s+/g, " ")),
+    );
+    if (!el) return false;
+    el.click();
+    return true;
+  });
+}
+
+async function addFromShopGrid(page) {
   await gotoOneDirectBuy(page, "/shop");
   await waitForShopProducts(page);
-  await dismissCookieBanner(page);
+  if (!(await clickVisibleAddToCart(page))) return false;
+  await page.waitForTimeout(2_000);
+  if (await waitForCartAddSuccess(page)) return true;
+  return cartPageHasLines(page);
+}
 
-  // Fast path: shop-grid Add To Cart (class add-to-cart).
-  const shopAdds = page.locator("button.add-to-cart:not([disabled])");
-  const shopCount = await shopAdds.count();
-  for (let index = 0; index < Math.min(shopCount, 5); index++) {
-    const btn = shopAdds.nth(index);
-    if (!(await btn.isVisible().catch(() => false))) continue;
-    await btn.scrollIntoViewIfNeeded().catch(() => {});
-    await btn.click({ force: true });
-    if (await waitForCartAddSuccess(page)) {
-      return;
-    }
-  }
+async function addKnownInStockProduct(page) {
+  await openKnownProductDetail(page, "bearing");
+  if (!(await clickVisibleAddToCart(page))) return false;
+  await page.waitForTimeout(2_000);
+  if (await waitForCartAddSuccess(page)) return true;
+  return cartPageHasLines(page);
+}
 
-  // Fast resilient fallback: directly open known in-stock product detail and click Add to cart
-  try {
-    await gotoOneDirectBuy(page, "/product/bearing-bolt-bearing-to-spinner");
-    await dismissCookieBanner(page);
-    await dismissAssistantOverlay(page);
-    const directAdd = productAddToCartControl(page);
-    if (await directAdd.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await directAdd.scrollIntoViewIfNeeded().catch(() => {});
-      await directAdd.click({ force: true });
-      if (await waitForCartAddSuccess(page)) {
-        return;
-      }
-    }
-  } catch {
-    // continue to link scan fallback
-  }
+/** Add a product via shop grid or known PDP. Guest cart often does not persist — retry logged in. */
+export async function addFirstProductToCartFromShop(page) {
+  if (await addFromShopGrid(page)) return;
+  if (await addKnownInStockProduct(page)) return;
 
-  // Fallback: open PDP and add from there.
-  const productLinks = page.locator(
-    'article a[href*="/product/"], .ps-product a[href*="/product/"], .ps-shop-items a[href*="/product/"], a[href*="/product/"]',
-  );
-  const totalLinks = await productLinks.count();
-
-  for (let index = 0; index < Math.min(totalLinks, 5); index++) {
-    await gotoOneDirectBuy(page, "/shop");
-    await waitForShopProducts(page);
-
-    await productLinks.nth(index).click();
-    await page.waitForURL(/\/product\//, { timeout: DEFAULT_TIMEOUT });
-    await dismissCookieBanner(page);
-
-    if (
-      await page
-        .getByText(/^Out of stock$/i)
-        .isVisible({ timeout: 1500 })
-        .catch(() => false)
-    ) {
-      continue;
-    }
-
-    const addControl = productAddToCartControl(page);
-    if (!(await addControl.isVisible({ timeout: 5000 }).catch(() => false))) {
-      continue;
-    }
-
-    await addControl.click({ force: true });
-    if (await waitForCartAddSuccess(page)) {
-      return;
-    }
-  }
+  const { ensureLoggedInBuyer } = await import("./oneDirectBuyAuth.js");
+  await ensureLoggedInBuyer(page);
+  if (await addFromShopGrid(page)) return;
+  if (await addKnownInStockProduct(page)) return;
 
   throw new Error(
-    "Could not add a product to cart after trying multiple products",
+    "Could not add a product to cart after guest and logged-in attempts",
   );
 }
 
@@ -336,14 +402,14 @@ export async function waitForCartReady(page) {
   await dismissCookieBanner(page);
   await dismissAssistantOverlay(page);
   await expect(page.getByText(/Loading your cart/i))
-    .toBeHidden({ timeout: 30_000 })
+    .toBeHidden({ timeout: 60_000 })
     .catch(() => {});
   await expect(
     page
-      .getByRole("heading", { name: /^Cart$/i })
-      .or(page.getByText(/Your cart is empty/i))
+      .getByRole("heading", { name: /Your cart is empty|^Cart$|Shopping Cart/i })
+      .or(page.getByText(/Your cart is empty|\d+\s+items?/i))
       .first(),
-  ).toBeVisible({ timeout: 20_000 });
+  ).toBeVisible({ timeout: 30_000 });
 }
 
 /** Open cart via header cart link or direct URL. */
@@ -482,20 +548,23 @@ export async function openDepartmentCategory(page, categoryName = "Exterior") {
 
 /** Mobile bottom bar: open Menu drawer (Home / Shop / Vendor / Blogs). */
 export async function openMobileNav(page) {
+  await emulateMobileStorefront(page);
   await dismissCookieBanner(page);
   await dismissAssistantOverlay(page);
   const menu = page
-    .getByRole("button", { name: /^Menu$/i })
-    .filter({ visible: true })
+    .locator("button.navigation__item")
+    .filter({ hasText: /^Menu$/i })
+    .or(page.getByRole("button", { name: /^Menu$/i }))
     .first();
-  await expect(menu).toBeVisible({ timeout: DEFAULT_TIMEOUT });
+  await expect(menu).toBeAttached({ timeout: DEFAULT_TIMEOUT });
   await menu.click({ force: true });
   await expect(
     page
       .getByRole("heading", { name: /^Menu$/i })
+      .or(page.getByRole("link", { name: /^All products$/i }))
+      .or(page.getByRole("menuitem", { name: /^All products$/i }))
       .or(page.getByRole("link", { name: /^Shop$/i }))
       .or(page.getByRole("menuitem", { name: /^Shop$/i }))
-      .filter({ visible: true })
       .first(),
   ).toBeVisible({
     timeout: 10_000,

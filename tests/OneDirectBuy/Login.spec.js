@@ -3,8 +3,7 @@ import { gotoOneDirectBuy } from "../helpers/oneDirectBuyNav.js";
 import {
   fillInputField,
   fillLoginForm,
-  loginBuyer,
-  hasBuyerCredentials,
+  ensureLoggedInBuyer,
   ONE_DIRECT_BUY_BUYER_CREDENTIALS,
   expectGuestRedirectToLogin,
 } from "../helpers/oneDirectBuyAuth.js";
@@ -63,7 +62,6 @@ test.describe("OneDirectBuy — Login", () => {
         const email =
           ONE_DIRECT_BUY_BUYER_CREDENTIALS.email || "reset-probe@example.com";
 
-        // OneDirectBuy UI: user provides email in the login form, then clicks Forgot password?
         const emailInput = page
           .locator("#username")
           .or(page.getByRole("textbox", { name: /^Email address$/i }))
@@ -73,7 +71,7 @@ test.describe("OneDirectBuy — Login", () => {
 
         await forgot.click();
 
-        // Confirmation notice from Firebase/Ant-Design on the login page, or dedicated reset UI
+        const sending = page.getByRole("link", { name: /Sending reset/i });
         const confirmationNotice = page
           .locator(".ant-notification-notice, .ant-message-notice")
           .filter({
@@ -87,26 +85,33 @@ test.describe("OneDirectBuy — Login", () => {
           )
           .first();
 
-        const dedicatedSubmit = page
-          .getByRole("button", {
-            name: /send|reset|submit|continue|recover|email me/i,
-          })
-          .filter({ hasNotText: /^Sign in$/i })
-          .first();
-
+        const sendingShown = await sending
+          .isVisible({ timeout: 15_000 })
+          .catch(() => false);
         const confirmed = await confirmationNotice
-          .isVisible({ timeout: 10_000 })
+          .isVisible({ timeout: sendingShown ? 5_000 : 8_000 })
           .catch(() => false);
 
-        if (
-          !confirmed &&
-          (await dedicatedSubmit.isVisible({ timeout: 3_000 }).catch(() => false))
-        ) {
-          await dedicatedSubmit.click();
-          await expect(confirmationNotice).toBeVisible({ timeout: 15_000 });
-        } else {
-          await expect(confirmationNotice).toBeVisible({ timeout: 15_000 });
+        if (!sendingShown && !confirmed) {
+          const dedicatedSubmit = page
+            .getByRole("button", {
+              name: /send|reset|submit|continue|recover|email me/i,
+            })
+            .filter({ hasNotText: /^Sign in$/i })
+            .first();
+          if (await dedicatedSubmit.isVisible({ timeout: 3_000 }).catch(() => false)) {
+            await dedicatedSubmit.click();
+          }
         }
+
+        if (!sendingShown && !confirmed) {
+          throw new Error(
+            "Forgot password did not start sending a reset (no Sending reset… or confirmation).",
+          );
+        }
+        await expect(
+          page.getByRole("link", { name: /Forgot password\?|Sending reset/i }),
+        ).toBeVisible({ timeout: 15_000 });
       },
     );
   });
@@ -159,17 +164,8 @@ test.describe("OneDirectBuy — Login", () => {
     page,
     soft,
   }) => {
-    if (!hasBuyerCredentials()) {
-      test.skip(true, "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD");
-      return;
-    }
-
     await soft("ODB-UC-005-b", "Buyer can log in and reach my-account", async () => {
-      await loginBuyer(
-        page,
-        ONE_DIRECT_BUY_BUYER_CREDENTIALS.email,
-        ONE_DIRECT_BUY_BUYER_CREDENTIALS.password,
-      );
+      await ensureLoggedInBuyer(page);
       await gotoOneDirectBuy(page, "/account/my-account");
       await expect(
         page.getByText(/Hello|account dashboard|recent orders/i).first(),

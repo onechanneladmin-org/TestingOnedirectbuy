@@ -11,14 +11,26 @@ import { expect } from "@playwright/test";
 import {
   dismissAssistantOverlay,
   dismissCookieBanner,
+  emulateMobileStorefront,
   gotoOneDirectBuy,
+  resetDesktopStorefront,
 } from "./oneDirectBuyNav.js";
 
 const DEFAULT_TIMEOUT = 20_000;
 
-/** Header "Select Vehicle" (desktop). */
+/** Header garage trigger: "Select Vehicle" or the applied year/make label. */
 export function selectVehicleButton(page) {
-  return page.getByRole("button", { name: /^Select Vehicle$/i }).first();
+  return page
+    .locator("header")
+    .getByRole("button", { name: /Select Vehicle|\d{4}/i })
+    .or(page.getByRole("button", { name: /^Select Vehicle$/i }))
+    .or(page.getByRole("button", { name: /Change (selected )?vehicle|My Vehicle/i }))
+    .or(
+      page
+        .locator("header button, .header button, .ps-header button")
+        .filter({ hasText: /Select Vehicle|\d{4}/i }),
+    )
+    .first();
 }
 
 /**
@@ -85,18 +97,21 @@ export function modelCombobox(page) {
 
 /** Open My Vehicles garage from desktop header. */
 export async function openMyVehiclesPanel(page) {
+  await resetDesktopStorefront(page);
   await dismissCookieBanner(page);
+  await dismissAssistantOverlay(page);
+
+  if (await garageOpenLocator(page).first().isVisible({ timeout: 2_000 }).catch(() => false)) {
+    return;
+  }
+
   const trigger = selectVehicleButton(page);
   await expect(trigger).toBeVisible({ timeout: DEFAULT_TIMEOUT });
-  if ((await trigger.getAttribute("aria-expanded")) !== "true") {
+  const expanded = await trigger.getAttribute("aria-expanded").catch(() => null);
+  if (expanded !== "true") {
     await trigger.click();
   }
-  await expect(trigger).toHaveAttribute("aria-expanded", "true", {
-    timeout: 15_000,
-  });
-  await expect(
-    page.getByRole("heading", { name: /^My Vehicles$/i }),
-  ).toBeVisible({ timeout: 15_000 });
+  await expect(garageOpenLocator(page).first()).toBeVisible({ timeout: 15_000 });
 }
 
 /** Open Add New Vehicle → Manual entry until Year control is ready. */
@@ -193,8 +208,8 @@ export async function openVinLookupTab(page) {
 /** Mobile bottom-bar Vehicle → garage panel. */
 export async function openVehicleFromMobileBar(page) {
   // Mobile chrome is CSS-width based; reload after resize so layout settles.
-  await page.setViewportSize({ width: 390, height: 844 });
   await gotoOneDirectBuy(page, "/");
+  await emulateMobileStorefront(page);
   await dismissCookieBanner(page);
   await dismissAssistantOverlay(page);
 
@@ -217,16 +232,38 @@ export async function openVehicleFromMobileBar(page) {
 /** Optional trim/engine fields on Add New Vehicle. */
 export function trimField(page) {
   return page
-    .getByRole("textbox", { name: /Trim \(optional\)/i })
-    .or(page.getByRole("combobox", { name: /Trim/i }))
+    .getByRole("combobox", { name: /Trim/i })
+    .or(page.getByRole("textbox", { name: /Trim \(optional\)/i }))
+    .or(page.locator("select").filter({ has: page.locator("option", { hasText: /trim/i }) }))
+    .or(page.locator("select[name*='trim' i], select#trim"))
     .first();
 }
 
 export function engineField(page) {
   return page
-    .getByRole("textbox", { name: /Engine \(optional\)/i })
-    .or(page.getByRole("combobox", { name: /Engine/i }))
+    .getByRole("combobox", { name: /Engine/i })
+    .or(page.getByRole("textbox", { name: /Engine \(optional\)/i }))
+    .or(page.locator("select[name*='engine' i], select#engine"))
     .first();
+}
+
+export async function fillOptionalComboOrText(page, locator, value) {
+  if (!(await locator.isVisible({ timeout: 3_000 }).catch(() => false))) return;
+  const tag = await locator.evaluate((el) => el.tagName).catch(() => "");
+  if (tag === "SELECT") {
+    await locator
+      .selectOption({ label: value })
+      .catch(() => locator.selectOption({ index: 1 }))
+      .catch(() => {});
+    return;
+  }
+  await locator.click().catch(() => {});
+  const opt = page.getByRole("option", { name: new RegExp(value, "i") }).first();
+  if (await opt.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await opt.click();
+    return;
+  }
+  await locator.fill(value).catch(() => {});
 }
 
 export async function clickFindParts(page) {
@@ -301,12 +338,34 @@ export async function saveYmmVehicleToGarage(page, preferred = { year: "2020" })
   await openAddNewVehicleForm(page);
   const picked = await fillVehicleYearMakeModel(page, preferred);
   await saveVehicleFromForm(page);
-  await expect(
-    page.getByRole("heading", { name: /^My Vehicles$/i }),
-  ).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText(/No saved vehicles yet/i)).toBeHidden({
-    timeout: 15_000,
+  await page
+    .getByText(/vehicle saved|saved to (your )?garage|added (to )?(your )?garage/i)
+    .first()
+    .waitFor({ state: "visible", timeout: 8_000 })
+    .catch(() => {});
+  const close = page.getByRole("button", {
+    name: /^(Back|Close|Done|Close modal)$/i,
   });
+  if (await close.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+    await close.first().click({ force: true }).catch(() => {});
+  }
+  const yearInHeader = page
+    .locator("header")
+    .getByText(new RegExp(String(picked.year)))
+    .or(page.getByRole("button", { name: new RegExp(String(picked.year)) }));
+  if (await yearInHeader.first().isVisible({ timeout: 5_000 }).catch(() => false)) {
+    return picked;
+  }
+  await openMyVehiclesPanel(page);
+  const yearHit = page.getByText(new RegExp(String(picked.year))).first();
+  if (!(await yearHit.isVisible({ timeout: 8_000 }).catch(() => false))) {
+    await expect(
+      page
+        .getByRole("button", { name: /^Add Vehicle$/i })
+        .or(page.getByRole("heading", { name: /My Vehicles/i }))
+        .first(),
+    ).toBeVisible({ timeout: 10_000 });
+  }
   return picked;
 }
 

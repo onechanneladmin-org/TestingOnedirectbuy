@@ -6,10 +6,7 @@ import {
   openVendorStoreList,
   openSellerApplication,
 } from "../helpers/oneDirectBuySeller.js";
-import {
-  ensureLoggedInBuyer,
-  hasBuyerCredentials,
-} from "../helpers/oneDirectBuyAuth.js";
+import { ensureLoggedInBuyer } from "../helpers/oneDirectBuyAuth.js";
 
 const DESKTOP = { width: 1920, height: 1080 };
 
@@ -155,10 +152,6 @@ test.describe("OneDirectBuy — Seller Onboarding (public)", () => {
 test.describe("OneDirectBuy — Seller Onboarding (authenticated checks)", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(DESKTOP);
-    if (!hasBuyerCredentials()) {
-      test.skip(true, "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD");
-      return;
-    }
     await ensureLoggedInBuyer(page);
   });
 

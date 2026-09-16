@@ -6,7 +6,6 @@
  * the journey so ISSUES.json does not fill with cascade noise.
  */
 import { test, expect } from "../helpers/softTest.js";
-import { hasBuyerCredentials } from "../helpers/oneDirectBuyAuth.js";
 import {
   assertSiteReachable,
   requireSoft,
@@ -31,14 +30,6 @@ test.describe("OneDirectBuy — Buyer purchase journey", () => {
     soft,
   }) => {
     test.setTimeout(6 * 60_000);
-
-    if (!hasBuyerCredentials()) {
-      test.skip(
-        true,
-        "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD in .env",
-      );
-      return;
-    }
 
     /** @type {{ productHref: string; stockMismatch?: string }} */
     let cartState = { productHref: "" };

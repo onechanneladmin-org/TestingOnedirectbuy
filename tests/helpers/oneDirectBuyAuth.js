@@ -251,7 +251,16 @@ export async function registerBuyer(page, overrides = {}) {
   await gotoOneDirectBuy(page, "/account/register");
   await fillRegisterForm(page, { name, email, password });
   await page.getByRole("button", { name: /Create your account/i }).click();
-  await expectLoggedIn(page);
+  await expect(
+    page.locator(".ant-notification-notice").filter({
+      hasText: /Registration successful/i,
+    }),
+  ).toBeVisible({ timeout: 45_000 });
+  try {
+    await expectLoggedIn(page);
+  } catch {
+    await loginBuyer(page, email, password);
+  }
   return { email, password, name };
 }
 
@@ -284,25 +293,59 @@ async function sessionIsAuthenticated(page) {
   return !page.url().includes("/account/login");
 }
 
-/** Ensure a logged-in buyer using configured credentials. */
-export async function ensureLoggedInBuyer(page) {
-  if (!hasBuyerCredentials()) {
-    throw new Error(
-      "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD in .env"
-    );
-  }
-  if (await sessionIsAuthenticated(page)) {
+/**
+ * Resolve buyer credentials: env secrets first, otherwise a throwaway
+ * storefront registration so authenticated cases can run without .env.
+ */
+export async function resolveBuyerCredentials(page) {
+  if (hasBuyerCredentials()) {
     return ONE_DIRECT_BUY_BUYER_CREDENTIALS;
   }
-  await loginBuyer(
-    page,
-    ONE_DIRECT_BUY_BUYER_CREDENTIALS.email,
-    ONE_DIRECT_BUY_BUYER_CREDENTIALS.password
-  );
+  const created = await registerBuyer(page);
+  ONE_DIRECT_BUY_BUYER_CREDENTIALS.email = created.email;
+  ONE_DIRECT_BUY_BUYER_CREDENTIALS.password = created.password;
   return ONE_DIRECT_BUY_BUYER_CREDENTIALS;
 }
 
-/** Logged-out visit to a protected account route → Welcome back login. */
+/** Ensure a logged-in buyer using env secrets or a provisioned account. */
+export async function ensureLoggedInBuyer(page) {
+  const creds = await resolveBuyerCredentials(page);
+  if (await sessionIsAuthenticated(page)) {
+    return creds;
+  }
+  await loginBuyer(page, creds.email, creds.password);
+  return creds;
+}
+
+/** Wipe Firebase/session storage so the next visit is a true guest. */
+export async function wipeBuyerSession(page) {
+  await page.context().clearCookies();
+  await page.evaluate(async () => {
+    try {
+      localStorage.clear();
+    } catch {
+      /* ignore */
+    }
+    try {
+      sessionStorage.clear();
+    } catch {
+      /* ignore */
+    }
+    if (!indexedDB.databases) return;
+    const dbs = await indexedDB.databases();
+    await Promise.all(
+      (dbs || []).map(
+        (db) =>
+          new Promise((resolve) => {
+            if (!db.name) return resolve();
+            const req = indexedDB.deleteDatabase(db.name);
+            req.onsuccess = req.onerror = req.onblocked = () => resolve();
+          }),
+      ),
+    );
+  });
+  await page.goto("about:blank");
+}
 export async function expectGuestRedirectToLogin(page, path) {
   await page.context().clearCookies();
   await gotoOneDirectBuy(page, path);

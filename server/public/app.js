@@ -7,6 +7,8 @@ const state = {
   selectedFlowId: null,
   selectedUseCaseId: null,
   expandedUseCaseIds: new Set(),
+  checkedFlowIds: new Set(),
+  queueWatch: null,
   occurrenceId: null,
   lastOccurrence: null,
   history: [],
@@ -94,6 +96,49 @@ function sheetGroupOrder(f) {
   return flowIdSortKey(f.flowId);
 }
 
+function listedFlowsInOrder() {
+  const flows = filteredFlows();
+  const sheet = flows
+    .filter(isSheetFlow)
+    .sort((a, b) => sheetGroupOrder(a) - sheetGroupOrder(b));
+  const other = flows
+    .filter((f) => !isSheetFlow(f))
+    .sort((a, b) => flowIdSortKey(a.flowId) - flowIdSortKey(b.flowId));
+  return [...sheet, ...other];
+}
+
+function selectedFlowIdsInOrder() {
+  return listedFlowsInOrder()
+    .map((f) => String(f.flowId))
+    .filter((id) => state.checkedFlowIds.has(id));
+}
+
+function syncSelectAllBox() {
+  const box = $("flowSelectAll");
+  if (!box) return;
+  const ids = listedFlowsInOrder().map((f) => String(f.flowId));
+  const selected = ids.filter((id) => state.checkedFlowIds.has(id));
+  box.checked = ids.length > 0 && selected.length === ids.length;
+  box.indeterminate = selected.length > 0 && selected.length < ids.length;
+}
+
+function updateQueueRunButtons() {
+  const n = selectedFlowIdsInOrder().length;
+  const railBtn = $("btnRunSelected");
+  if (railBtn) {
+    railBtn.disabled = n === 0 || Boolean(state.queueWatch);
+    railBtn.textContent = n ? `Run selected (${n})` : "Run selected";
+  }
+  const btnLabel = $("btnRunLabel");
+  if (btnLabel && n > 1) {
+    btnLabel.textContent = `Run ${n} flows`;
+  } else if (btnLabel && n === 1 && !state.selectedUseCaseId) {
+    btnLabel.textContent = "Run selected";
+  } else if (btnLabel) {
+    setRunLabels(Boolean(state.selectedUseCaseId));
+  }
+}
+
 function childCount(s) {
   return Array.isArray(s?.children) ? s.children.length : 0;
 }
@@ -137,8 +182,14 @@ function flowItemHtml(f) {
     String(f.flowId) === String(state.selectedFlowId) && !state.selectedUseCaseId
       ? "active"
       : "";
+  const checked = state.checkedFlowIds.has(String(f.flowId));
   return `
-        <li>
+        <li class="flow-row">
+          <label class="flow-check" title="Queue this flow">
+            <input type="checkbox" class="flow-checkbox" data-id="${escapeAttr(
+              f.flowId,
+            )}" ${checked ? "checked" : ""} />
+          </label>
           <button type="button" class="flow-item ${active}" data-id="${escapeAttr(f.flowId)}">
             <span class="name">${escapeHtml(f.name)}</span>
             <span class="meta">
@@ -231,6 +282,18 @@ function renderFlowList() {
       selectFlow(btn.dataset.id, btn.dataset.uc || null);
     });
   });
+  list.querySelectorAll(".flow-checkbox").forEach((box) => {
+    box.addEventListener("click", (ev) => ev.stopPropagation());
+    box.addEventListener("change", () => {
+      const id = String(box.dataset.id);
+      if (box.checked) state.checkedFlowIds.add(id);
+      else state.checkedFlowIds.delete(id);
+      syncSelectAllBox();
+      updateQueueRunButtons();
+    });
+  });
+  syncSelectAllBox();
+  updateQueueRunButtons();
 }
 
 function hasSheetCatalog(flow) {
@@ -543,11 +606,12 @@ function renderOccurrence(occ) {
   $("runBadge").className = `status-pill ${status}`;
   $("runBadge").textContent = status;
 
+  const passed = occ.passed ?? occ.progress?.passed ?? 0;
+  const failed = occ.failed ?? occ.progress?.failed ?? 0;
+  const skipped = occ.skipped ?? occ.progress?.skipped ?? 0;
   const pct = occ.progress?.percent ?? 0;
   $("progressFill").style.width = `${pct}%`;
-  $("progressLabel").textContent = `${occ.stepsCompleted || 0} / ${
-    occ.stepsTotal || 0
-  } steps`;
+  $("progressLabel").textContent = `${passed} passed · ${failed} failed · ${skipped} skipped`;
   $("progressPct").textContent = `${pct}%`;
   $("occurrenceId").textContent = occ.occurrenceId;
 
@@ -755,6 +819,9 @@ async function stopRunningOccurrence() {
   }
 
   try {
+    await api("/api/flows/queue", { method: "DELETE" }).catch(() => {});
+    stopQueueWatch();
+
     let res;
     if (occId) {
       res = await api(`/api/occurrences/${encodeURIComponent(occId)}/stop`, {
@@ -771,7 +838,7 @@ async function stopRunningOccurrence() {
       });
     }
 
-    toast("Flow stopped");
+    toast("Stopped — remaining queue cleared");
     stopPolling();
 
     const updatedOcc = res?.occurrence;
@@ -798,10 +865,96 @@ async function stopRunningOccurrence() {
 }
 
 async function runSelectedFlow() {
+  const queued = selectedFlowIdsInOrder();
+  if (queued.length > 1 || (queued.length === 1 && !state.selectedUseCaseId)) {
+    await runFlowQueue(queued);
+    return;
+  }
   await startRun({
     useCaseId: state.selectedUseCaseId || "",
     keepSheet: !state.selectedUseCaseId,
   });
+}
+
+async function runFlowQueue(flowIds) {
+  const ids = (flowIds || selectedFlowIdsInOrder()).filter(Boolean);
+  if (!ids.length) {
+    toast("Select one or more flows to run", true);
+    return;
+  }
+  $("btnRun").disabled = true;
+  const railBtn = $("btnRunSelected");
+  if (railBtn) railBtn.disabled = true;
+  const btnStop = $("btnStop");
+  if (btnStop) {
+    btnStop.classList.remove("hidden");
+    btnStop.disabled = false;
+    const stopLabel = $("btnStopLabel");
+    if (stopLabel) stopLabel.textContent = "Stop queue";
+  }
+  try {
+    const data = await api("/api/flows/queue", {
+      method: "POST",
+      body: JSON.stringify({
+        flowIds: ids,
+        headed: Boolean($("headedMode")?.checked),
+        projectId: state.projectId,
+      }),
+    });
+    const firstId =
+      data.firstOccurrence?.occurrenceId || data.activeOccurrenceId;
+    const firstFlow = data.firstOccurrence?.flowId || ids[0];
+    toast(`Queued ${ids.length} flow(s) — running one at a time`);
+    if (firstFlow) selectFlow(firstFlow);
+    if (firstId) {
+      startPolling(firstId);
+      watchQueue(ids.length);
+    }
+    loadHistory().catch(() => {});
+  } catch (err) {
+    toast(err.message, true);
+    $("btnRun").disabled = false;
+    updateQueueRunButtons();
+    $("btnStop")?.classList.add("hidden");
+  }
+}
+
+function stopQueueWatch() {
+  if (state.queueWatch) {
+    clearInterval(state.queueWatch);
+    state.queueWatch = null;
+  }
+}
+
+function watchQueue(total) {
+  stopQueueWatch();
+  state.queueWatch = setInterval(async () => {
+    try {
+      const q = await api("/api/flows/queue");
+      const remaining = q.remainingCount || 0;
+      const active = q.activeOccurrenceId;
+      if (active && active !== state.occurrenceId) {
+        const occ = await api(`/api/occurrences/${encodeURIComponent(active)}`);
+        if (occ.flowId && String(occ.flowId) !== String(state.selectedFlowId)) {
+          selectFlow(occ.flowId);
+        }
+        startPolling(active);
+      }
+      const stopLabel = $("btnStopLabel");
+      if (stopLabel && (active || remaining)) {
+        stopLabel.textContent = remaining
+          ? `Stop queue (${remaining} left)`
+          : "Stop queue";
+      }
+      if (!active && remaining === 0) {
+        stopQueueWatch();
+        updateQueueRunButtons();
+        toast("Queue finished");
+      }
+    } catch {
+      // keep polling; occurrence poller surfaces errors
+    }
+  }, 1500);
 }
 
 function projectStats() {
@@ -893,7 +1046,7 @@ async function loadHistory() {
             <span class="status-pill ${escapeAttr(o.status)}" style="padding:0.1rem 0.4rem">${escapeHtml(
               o.status,
             )}</span>
-            <span>${o.stepsCompleted || 0}/${o.stepsTotal || 0}</span>
+            ${historyCountsHtml(o)}
             <span>${formatTime(o.startedAt || o.createdAt)}</span>
           </span>
         </button>
@@ -923,6 +1076,19 @@ async function loadHistory() {
       }
     });
   });
+}
+
+function historyCountsHtml(o) {
+  const passed = Number(o.passed || 0);
+  const failed = Number(o.failed || 0);
+  const skipped = Number(o.skipped || 0);
+  return `<span class="history-counts" title="${passed + failed + skipped}/${
+    o.stepsTotal || 0
+  } steps">
+            <span class="pass">${passed} passed</span>
+            <span class="fail">${failed} failed</span>
+            <span class="skip">${skipped} skipped</span>
+          </span>`;
 }
 
 function formatTime(iso) {
@@ -1084,6 +1250,16 @@ function bindUi() {
   });
 
   $("btnRun").addEventListener("click", runSelectedFlow);
+  $("btnRunSelected")?.addEventListener("click", () =>
+    runFlowQueue(selectedFlowIdsInOrder()),
+  );
+  $("flowSelectAll")?.addEventListener("change", () => {
+    const box = $("flowSelectAll");
+    const ids = listedFlowsInOrder().map((f) => String(f.flowId));
+    if (box.checked) ids.forEach((id) => state.checkedFlowIds.add(id));
+    else ids.forEach((id) => state.checkedFlowIds.delete(id));
+    renderFlowList();
+  });
   $("btnStop")?.addEventListener("click", stopRunningOccurrence);
   $("btnLoadReport").addEventListener("click", () =>
     loadReport().catch((e) => toast(e.message, true)),

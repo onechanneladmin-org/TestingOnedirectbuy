@@ -118,7 +118,12 @@ test.describe("OneDirectBuy — Category & Product Listing", () => {
     soft,
   }) => {
     await soft("ODB-UC-050", "Pagination Previous / Next controls present", async () => {
-      await expect(page.getByText(/Previous Page/i).first()).toBeVisible();
+      const prev = page
+        .getByRole("listitem", { name: /Previous Page/i })
+        .or(page.getByText(/Previous Page/i))
+        .first();
+      await prev.scrollIntoViewIfNeeded().catch(() => {});
+      await expect(prev).toBeAttached({ timeout: 20_000 });
       const next = page.getByRole("button").filter({ hasText: /Next|›|»/i }).or(
         page.getByText(/Next Page/i),
       );

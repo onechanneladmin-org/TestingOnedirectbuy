@@ -3,9 +3,8 @@ import { gotoOneDirectBuy, dismissCookieBanner } from "../helpers/oneDirectBuyNa
 import {
   fillRegisterForm,
   uniqueTestEmail,
-  hasBuyerCredentials,
-  ONE_DIRECT_BUY_BUYER_CREDENTIALS,
   expectGuestRedirectToLogin,
+  wipeBuyerSession,
 } from "../helpers/oneDirectBuyAuth.js";
 
 const DESKTOP = { width: 1920, height: 1080 };
@@ -94,17 +93,36 @@ test.describe("OneDirectBuy — Buyer Account (public)", () => {
     page,
     soft,
   }) => {
-    if (!hasBuyerCredentials()) {
-      test.skip(true, "Needs ONEDIRECTBUY_BUYER_EMAIL for duplicate signup");
-      return;
-    }
-
     await soft("ODB-UC-002", "Existing email shows already/exists notice", async () => {
+      const email = uniqueTestEmail();
+      const password = "TestPass123!";
       await gotoOneDirectBuy(page, "/account/register");
       await fillRegisterForm(page, {
         name: "Duplicate Test",
-        email: ONE_DIRECT_BUY_BUYER_CREDENTIALS.email,
-        password: "TestPass123!",
+        email,
+        password,
+      });
+      await page.getByRole("button", { name: /Create your account/i }).click();
+      await expect(
+        page.locator(".ant-notification-notice").filter({
+          hasText: /Registration successful/i,
+        }),
+      ).toBeVisible({ timeout: 45_000 });
+
+      await wipeBuyerSession(page);
+      await gotoOneDirectBuy(page, "/account/register");
+      await expect(
+        page
+          .getByRole("heading", { name: /Create your account/i })
+          .or(page.getByRole("textbox", { name: /^Full name$/i }))
+          .or(page.getByRole("button", { name: /Create your account/i }))
+          .first(),
+      ).toBeVisible({ timeout: 30_000 });
+
+      await fillRegisterForm(page, {
+        name: "Duplicate Test",
+        email,
+        password,
       });
       await page.getByRole("button", { name: /Create your account/i }).click();
       await expect(
@@ -113,6 +131,7 @@ test.describe("OneDirectBuy — Buyer Account (public)", () => {
           .filter({ hasText: /already|exists|in use|failed|email/i })
           .first(),
       ).toBeVisible({ timeout: 20_000 });
+      await expect(page).toHaveURL(/\/account\/register/);
     });
   });
 

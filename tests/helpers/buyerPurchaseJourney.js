@@ -111,11 +111,6 @@ export async function clearCart(page) {
 }
 
 export async function loginForPurchase(page) {
-  if (!hasBuyerCredentials()) {
-    throw new Error(
-      "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD in .env",
-    );
-  }
   await ensureLoggedInBuyer(page);
   await gotoOneDirectBuy(page, "/account/my-account");
   await expect(page).not.toHaveURL(/\/account\/login$/, { timeout: 15_000 });

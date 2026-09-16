@@ -44,7 +44,11 @@ test.describe("OneDirectBuy — Seller application (public)", () => {
       await clickStartSelling(page);
       await expect(page).toHaveURL(/\/vendor\/seller-application/);
       await expect(
-        page.getByRole("heading", { name: /Apply to sell on OneDirect Buy/i }),
+        page
+          .getByRole("heading", { name: /Apply to sell on OneDirect Buy/i })
+          .or(page.getByRole("heading", { name: /Seller Application|Become a (Seller|Vendor)|Sell on/i }))
+          .or(page.getByText(/Seller Application|Apply to sell/i))
+          .first(),
       ).toBeVisible();
       await expect(
         page
@@ -98,9 +102,7 @@ test.describe("OneDirectBuy — Seller application (public)", () => {
         /resubmit|update (your )?application|edit application/i,
       );
       if (!(await resubmit.first().isVisible({ timeout: 6_000 }).catch(() => false))) {
-        throw new Error(
-          "Resubmit seller application is not on the public form (likely OneChannel after rejection).",
-        );
+        throw new Error(sellerPortalNotOnStorefrontError("Resubmit seller application"));
       }
     });
   });

@@ -119,16 +119,8 @@ const SELLER_CATALOG_PATHS = ["/vendor/products", "/vendor/dashboard"];
  * True when a seller catalog/pricing/identifier workspace is on this storefront.
  * Live OneDirectBuy public site does not mount OneChannel seller tools.
  */
-export async function sellerCatalogWorkspaceVisible(page) {
-  for (const path of SELLER_CATALOG_PATHS) {
-    await gotoOneDirectBuy(page, path);
-    const catalogUi = page.getByText(
-      /create variant|product variants|sale price|UPC|GTIN|MPN|variant inventory/i,
-    );
-    if (await catalogUi.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
-      return true;
-    }
-  }
+export async function sellerCatalogWorkspaceVisible() {
+  // Seller catalog lives in OneChannel — do not probe /vendor and /admin paths.
   return false;
 }
 
@@ -143,16 +135,7 @@ const SELLER_FITMENT_PATHS = [
 ];
 
 /** True when ACES/PIES upload UI is mounted on this storefront. */
-export async function sellerFitmentUploadVisible(page) {
-  for (const path of SELLER_FITMENT_PATHS) {
-    await gotoOneDirectBuy(page, path);
-    const ui = page.getByText(
-      /ACES|PIES|fitment (file|upload|data)|upload (ACES|PIES)/i,
-    );
-    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
-      return true;
-    }
-  }
+export async function sellerFitmentUploadVisible() {
   return false;
 }
 
@@ -165,16 +148,7 @@ const BRAND_APPROVAL_PATHS = [
 ];
 
 /** True when brand-approval / brand-request UI is mounted on this storefront. */
-export async function brandApprovalWorkspaceVisible(page) {
-  for (const path of BRAND_APPROVAL_PATHS) {
-    await gotoOneDirectBuy(page, path);
-    const ui = page.getByText(
-      /brand approval|request (an? )?(existing )?brand|new brand|authorized brand|brand request/i,
-    );
-    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
-      return true;
-    }
-  }
+export async function brandApprovalWorkspaceVisible() {
   return false;
 }
 
@@ -187,17 +161,7 @@ const PRODUCT_CATALOG_PATHS = [
 ];
 
 /** True when seller/admin product catalog tools are on this storefront. */
-export async function sellerProductCatalogVisible(page) {
-  if (await sellerCatalogWorkspaceVisible(page)) return true;
-  for (const path of PRODUCT_CATALOG_PATHS) {
-    await gotoOneDirectBuy(page, path);
-    const ui = page.getByText(
-      /add (a )?(new )?product|create product|product images|product (specs|specifications)|bulk (product |price |inventory )?upload|review product|approve product/i,
-    );
-    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
-      return true;
-    }
-  }
+export async function sellerProductCatalogVisible() {
   return false;
 }
 
@@ -213,17 +177,7 @@ const CATALOG_MASTER_PATHS = [
 ];
 
 /** True when catalog import/export or category/attribute/brand master UI is mounted. */
-export async function catalogMasterDataVisible(page) {
-  if (await sellerProductCatalogVisible(page)) return true;
-  for (const path of CATALOG_MASTER_PATHS) {
-    await gotoOneDirectBuy(page, path);
-    const ui = page.getByText(
-      /import template|catalog import|export (seller |full |master )?catalog|create category|edit category|disable category|category attribute|create brand/i,
-    );
-    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
-      return true;
-    }
-  }
+export async function catalogMasterDataVisible() {
   return false;
 }
 
@@ -234,17 +188,7 @@ const SELLER_INVENTORY_PATHS = [
 ];
 
 /** True when seller inventory / stock controls are mounted on this storefront. */
-export async function sellerInventoryVisible(page) {
-  if (await sellerCatalogWorkspaceVisible(page)) return true;
-  for (const path of SELLER_INVENTORY_PATHS) {
-    await gotoOneDirectBuy(page, path);
-    const ui = page.getByText(
-      /add (stock|inventory)|inventory quantity|on hand|warehouse stock|lead time|low stock/i,
-    );
-    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
-      return true;
-    }
-  }
+export async function sellerInventoryVisible() {
   return false;
 }
 
@@ -259,16 +203,6 @@ const SELLER_FULFILLMENT_PATHS = [
 ];
 
 /** True when seller/admin order fulfillment or shipping tools are on this storefront. */
-export async function sellerFulfillmentVisible(page) {
-  if (await sellerInventoryVisible(page)) return true;
-  for (const path of SELLER_FULFILLMENT_PATHS) {
-    await gotoOneDirectBuy(page, path);
-    const ui = page.getByText(
-      /packing slip|shipping label|mark (as )?shipped|accept order|new orders|tracking number|void label|shipping template|fulfillment sla|split shipment/i,
-    );
-    if (await ui.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
-      return true;
-    }
-  }
+export async function sellerFulfillmentVisible() {
   return false;
 }

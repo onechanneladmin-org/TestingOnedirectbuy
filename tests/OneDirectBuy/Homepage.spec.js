@@ -62,7 +62,10 @@ test.describe("OneDirectBuy — Homepage", () => {
         page.getByRole("combobox", { name: /Product category/i }),
       ).toBeVisible();
       await expect(
-        page.getByRole("textbox", { name: /Search products/i }),
+        page
+          .getByRole("combobox", { name: /Search products/i })
+          .or(page.getByPlaceholder(/I.?m shopping for/i))
+          .first(),
       ).toBeVisible();
       await expect(page.getByRole("button", { name: /^Search$/i })).toBeVisible();
       await expect(

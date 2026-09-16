@@ -7,6 +7,7 @@ const {
   stopOccurrence,
   stopAllOccurrences,
 } = require("../services/runFlow");
+const { countByStatus } = require("../../lib/applyLiveStep");
 
 const router = express.Router();
 
@@ -23,11 +24,33 @@ router.get("/", async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(limit)
       .select(
-        "occurrenceId projectId flowId flowName status startedAt finishedAt stepsCompleted stepsTotal currentStepId exitCode createdAt",
+        "occurrenceId projectId flowId flowName status startedAt finishedAt stepsCompleted stepsTotal currentStepId exitCode createdAt steps",
       )
       .lean();
 
-    res.json({ count: occurrences.length, occurrences });
+    res.json({
+      count: occurrences.length,
+      occurrences: occurrences.map((o) => {
+        const counts = countByStatus(o.steps);
+        return {
+          occurrenceId: o.occurrenceId,
+          projectId: o.projectId || "",
+          flowId: o.flowId,
+          flowName: o.flowName,
+          status: o.status,
+          startedAt: o.startedAt,
+          finishedAt: o.finishedAt,
+          currentStepId: o.currentStepId,
+          exitCode: o.exitCode,
+          createdAt: o.createdAt,
+          stepsCompleted: counts.passed + counts.failed + counts.skipped,
+          stepsTotal: counts.total || o.stepsTotal || 0,
+          passed: counts.passed,
+          failed: counts.failed,
+          skipped: counts.skipped,
+        };
+      }),
+    });
   } catch (err) {
     next(err);
   }
@@ -45,18 +68,9 @@ router.get("/:occurrenceId", async (req, res, next) => {
         .json({ error: `Occurrence not found: ${req.params.occurrenceId}` });
     }
 
-    const pending = (occurrence.steps || []).filter(
-      (s) => s.status === "pending",
-    ).length;
-    const running = (occurrence.steps || []).filter(
-      (s) => s.status === "running",
-    ).length;
-    const passed = (occurrence.steps || []).filter(
-      (s) => s.status === "passed",
-    ).length;
-    const failed = (occurrence.steps || []).filter(
-      (s) => s.status === "failed" || s.status === "blocked",
-    ).length;
+    const counts = countByStatus(occurrence.steps);
+    const stepsTotal = counts.total || occurrence.stepsTotal || 0;
+    const stepsCompleted = counts.passed + counts.failed + counts.skipped;
 
     res.json({
       occurrenceId: occurrence.occurrenceId,
@@ -67,8 +81,11 @@ router.get("/:occurrenceId", async (req, res, next) => {
       startedAt: occurrence.startedAt,
       finishedAt: occurrence.finishedAt,
       currentStepId: occurrence.currentStepId,
-      stepsCompleted: occurrence.stepsCompleted,
-      stepsTotal: occurrence.stepsTotal,
+      stepsCompleted,
+      stepsTotal,
+      passed: counts.passed,
+      failed: counts.failed,
+      skipped: counts.skipped,
       workerPid: occurrence.workerPid,
       exitCode: occurrence.exitCode,
       runDir: occurrence.runDir,
@@ -76,16 +93,13 @@ router.get("/:occurrenceId", async (req, res, next) => {
       liveIssues: occurrence.liveIssues || [],
       useCaseId: occurrence.envSummary?.useCaseId || "",
       progress: {
-        pending,
-        running,
-        passed,
-        failed,
+        pending: counts.pending,
+        running: counts.running,
+        passed: counts.passed,
+        failed: counts.failed,
+        skipped: counts.skipped,
         percent:
-          occurrence.stepsTotal > 0
-            ? Math.round(
-                (occurrence.stepsCompleted / occurrence.stepsTotal) * 100,
-              )
-            : 0,
+          stepsTotal > 0 ? Math.round((stepsCompleted / stepsTotal) * 100) : 0,
       },
       steps: occurrence.steps,
     });

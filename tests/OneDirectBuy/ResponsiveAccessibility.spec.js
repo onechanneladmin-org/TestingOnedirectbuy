@@ -26,18 +26,23 @@ test.describe("OneDirectBuy — Responsive UI (mobile 390×844)", () => {
       await expect(page.getByRole("button", { name: /^Search$/i })).toBeVisible();
       await expect(page.getByRole("button", { name: /^Cart$/i })).toBeVisible();
       await expect(
-        page.getByPlaceholder(/Search something/i),
+        page
+          .getByPlaceholder(/Search something|I.?m shopping for/i)
+          .first(),
       ).toBeVisible();
     });
   });
 
   test("ODB-UC-491b: mobile Menu drawer opens Shop link", async ({ page, soft }) => {
-    await soft("ODB-UC-491b", "Menu → Home / Shop / Vendor / Blogs", async () => {
+    await soft("ODB-UC-491b", "Menu → Home / All products / Vendor / Blogs", async () => {
       await gotoOneDirectBuy(page, "/");
       await openMobileNav(page);
       await expect(page.getByRole("heading", { name: /^Menu$/i })).toBeVisible();
       await expect(
-        page.getByRole("link", { name: /^Shop$/i }).first(),
+        page
+          .getByRole("link", { name: /^All products$/i })
+          .or(page.getByRole("link", { name: /^Shop$/i }))
+          .first(),
       ).toBeVisible();
       await expect(
         page.getByRole("menuitem", { name: /^Home$/i }).or(

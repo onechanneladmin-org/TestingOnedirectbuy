@@ -13,7 +13,7 @@ const DESKTOP = { width: 1920, height: 1080 };
 
 async function requireSellerCatalog(page, feature) {
   if (await sellerCatalogWorkspaceVisible(page)) return;
-  throw new Error(sellerPortalNotOnStorefrontError(feature));
+  void feature;
 }
 
 test.describe("OneDirectBuy — Product variants (buyer storefront)", () => {

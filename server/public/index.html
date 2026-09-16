@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Flow Control Plane</title>
-    <link rel="stylesheet" href="/ui/styles.css?v=11" />
+    <link rel="stylesheet" href="/ui/styles.css?v=13" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
@@ -85,6 +85,15 @@
         <div class="rail-head">
           <h2>Flows</h2>
           <p id="flowCount" class="muted">Loading…</p>
+          <div class="rail-queue">
+            <label class="check rail-select-all">
+              <input type="checkbox" id="flowSelectAll" />
+              <span>Select all</span>
+            </label>
+            <button type="button" class="btn primary sm" id="btnRunSelected" disabled>
+              Run selected
+            </button>
+          </div>
         </div>
         <div class="rail-filters">
           <button type="button" class="chip active" data-filter="all">All</button>
@@ -217,13 +226,13 @@
       <aside class="history">
         <div class="rail-head">
           <h2>Recent runs</h2>
-          <p class="muted">Latest occurrences</p>
+          <p class="muted">Passed · failed · skipped</p>
         </div>
         <ul id="runHistory" class="run-history"></ul>
       </aside>
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="/ui/app.js?v=12" type="module"></script>
+    <script src="/ui/app.js?v=14" type="module"></script>
   </body>
 </html>

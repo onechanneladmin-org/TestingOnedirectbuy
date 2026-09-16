@@ -3,10 +3,7 @@ import {
   openFirstStoreDetail,
   expectProductSellerInfo,
 } from "../helpers/oneDirectBuySeller.js";
-import {
-  ensureLoggedInBuyer,
-  hasBuyerCredentials,
-} from "../helpers/oneDirectBuyAuth.js";
+import { ensureLoggedInBuyer } from "../helpers/oneDirectBuyAuth.js";
 import { gotoOneDirectBuy } from "../helpers/oneDirectBuyNav.js";
 
 const DESKTOP = { width: 1920, height: 1080 };
@@ -54,10 +51,6 @@ test.describe("OneDirectBuy — Seller Messaging (storefront UI)", () => {
 test.describe("OneDirectBuy — Seller Messaging (authenticated buyer)", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(DESKTOP);
-    if (!hasBuyerCredentials()) {
-      test.skip(true, "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD");
-      return;
-    }
     await ensureLoggedInBuyer(page);
   });
 

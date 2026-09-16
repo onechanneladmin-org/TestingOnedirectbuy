@@ -34,6 +34,94 @@ const {
 /** @type {Map<string, { timer?: NodeJS.Timeout }>} */
 const activeWatchers = new Map();
 
+/** Sequential flow queue — one Playwright process at a time. */
+const flowRunQueue = [];
+let flowQueueRunningId = null;
+
+function flowQueueSnapshot() {
+  return {
+    activeOccurrenceId: flowQueueRunningId,
+    remaining: flowRunQueue.map((item) => ({
+      flowId: item.flowId,
+      projectId: item.projectId || "",
+      useCaseId: item.useCaseId || "",
+    })),
+    remainingCount: flowRunQueue.length,
+  };
+}
+
+function clearFlowRunQueue() {
+  flowRunQueue.length = 0;
+}
+
+function releaseQueueSlot(occurrenceId) {
+  if (!occurrenceId || String(flowQueueRunningId) !== String(occurrenceId)) {
+    return;
+  }
+  flowQueueRunningId = null;
+  setImmediate(() => {
+    pumpFlowQueue().catch((err) => {
+      console.error("[runQueue] pump failed:", err);
+    });
+  });
+}
+
+async function pumpFlowQueue() {
+  if (flowQueueRunningId) return null;
+  while (flowRunQueue.length) {
+    const next = flowRunQueue.shift();
+    try {
+      const occ = await startFlowRun(next.flowId, next);
+      flowQueueRunningId = occ.occurrenceId;
+      console.log(
+        `[runQueue] started flow=${next.flowId} occ=${occ.occurrenceId.slice(0, 8)} remaining=${flowRunQueue.length}`,
+      );
+      return occ;
+    } catch (err) {
+      console.error(
+        `[runQueue] skipped flow=${next.flowId}:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+  return null;
+}
+
+/**
+ * Enqueue flows and start the first if idle. Runs one at a time in given order.
+ * @param {string[]} flowIds
+ * @param {{ headed?: boolean; projectId?: string; visibleTerminal?: boolean }} [opts]
+ */
+async function enqueueFlowRuns(flowIds, opts = {}) {
+  const ids = (flowIds || []).map((id) => String(id).trim()).filter(Boolean);
+  if (!ids.length) {
+    const err = new Error("No flowIds to queue");
+    err.status = 400;
+    throw err;
+  }
+  for (const flowId of ids) {
+    flowRunQueue.push({
+      flowId,
+      headed: Boolean(opts.headed),
+      projectId: opts.projectId,
+      visibleTerminal: opts.visibleTerminal,
+    });
+  }
+  const first = await pumpFlowQueue();
+  return {
+    queued: ids.length,
+    ...flowQueueSnapshot(),
+    firstOccurrence: first
+      ? {
+          occurrenceId: first.occurrenceId,
+          flowId: first.flowId,
+          flowName: first.flowName,
+          status: first.status,
+        }
+      : null,
+  };
+}
+
 function mapChildForOccurrence(c, i) {
   return {
     stepId: c.stepId,
@@ -145,6 +233,10 @@ async function startFlowRun(flowId, opts = {}) {
       runner: hasCiRunner ? "ci-tests" : "playwright",
     },
   });
+
+  if (!flowQueueRunningId) {
+    flowQueueRunningId = occurrenceId;
+  }
 
   // Ensure empty live-step feed for this occurrence
   try {
@@ -324,6 +416,9 @@ async function startFlowRun(flowId, opts = {}) {
           MONGODB_URI,
           ODB_PAUSE_ON_EXIT: "0",
           ...(serialWorkers ? { PW_WORKERS: "1" } : {}),
+          ...(opts.headed
+            ? { PW_HEADED: "1", HEADLESS: "false", PW_HEADLESS: "0" }
+            : { PW_HEADLESS: "1", HEADLESS: "true" }),
         };
         sanitizePlaywrightBrowsersPath(childEnv);
         return childEnv;
@@ -646,6 +741,7 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   console.log(
     `[runFlow] finalized ${occurrenceId} status=${occurrence.status} steps=${occurrence.stepsCompleted}/${occurrence.stepsTotal} passed=${passedSteps} failed=${failedSteps} issues=${occurrence.liveIssueCount || issueCount} exit=${realExit}`,
   );
+  releaseQueueSlot(occurrenceId);
 }
 
 async function updateStep(occurrenceId, payload) {
@@ -954,6 +1050,7 @@ async function stopOccurrence(occurrenceId, reason = "Stopped by user") {
   console.log(
     `[runFlow] stopped occurrence ${occurrenceId} flow=${occurrence.flowId} status=cancelled`,
   );
+  releaseQueueSlot(occurrenceId);
   return (updatedOccurrence || occurrence).toObject();
 }
 
@@ -999,6 +1096,7 @@ async function stopFlowRun(flowId, projectId, reason = "Stopped by user") {
  * @param {string} [reason]
  */
 async function stopAllOccurrences(projectId, reason = "Stopped by user") {
+  clearFlowRunQueue();
   const query = { status: { $in: ["running", "queued"] } };
   if (projectId) query.projectId = String(projectId);
   const running = await RunningOccurrence.find(query);
@@ -1015,6 +1113,10 @@ async function stopAllOccurrences(projectId, reason = "Stopped by user") {
 
 module.exports = {
   startFlowRun,
+  enqueueFlowRuns,
+  pumpFlowQueue,
+  clearFlowRunQueue,
+  flowQueueSnapshot,
   finalizeOccurrence,
   updateStep,
   upsertReport,

@@ -1,6 +1,6 @@
 const express = require("express");
 const Flow = require("../models/Flow");
-const { startFlowRun, stopFlowRun } = require("../services/runFlow");
+const { startFlowRun, stopFlowRun, enqueueFlowRuns, clearFlowRunQueue, flowQueueSnapshot } = require("../services/runFlow");
 const { seedFlows } = require("../services/seedFlows");
 const { defaultProjectId } = require("../lib/projects");
 
@@ -79,6 +79,49 @@ router.get("/", async (req, res, next) => {
       count: flows.length,
       flows: flows.map(mapFlow),
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** GET /api/flows/queue — sequential run queue status */
+router.get("/queue", async (_req, res, next) => {
+  try {
+    res.json({ ok: true, ...flowQueueSnapshot() });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /api/flows/queue — enqueue flows and run one at a time */
+router.post("/queue", async (req, res, next) => {
+  try {
+    const projectId = projectFromReq(req);
+    const headed = Boolean(req.body?.headed);
+    const visibleTerminal =
+      req.body?.visibleTerminal !== undefined
+        ? Boolean(req.body.visibleTerminal)
+        : undefined;
+    const flowIds = Array.isArray(req.body?.flowIds) ? req.body.flowIds : [];
+    const result = await enqueueFlowRuns(flowIds, {
+      headed,
+      visibleTerminal,
+      projectId,
+    });
+    res.status(202).json({ ok: true, projectId, ...result });
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({ error: err.message });
+    }
+    next(err);
+  }
+});
+
+/** DELETE /api/flows/queue — drop remaining queued flows (does not stop the active run) */
+router.delete("/queue", async (_req, res, next) => {
+  try {
+    clearFlowRunQueue();
+    res.json({ ok: true, ...flowQueueSnapshot() });
   } catch (err) {
     next(err);
   }

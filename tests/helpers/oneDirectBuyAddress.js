@@ -23,6 +23,7 @@ export function testAddressData(suffix = "") {
     state: "Florida",
     zip: "34746",
     country: "United States",
+    phone: "4075550100",
   };
 }
 
@@ -143,6 +144,12 @@ export async function fillAddressForm(page, data) {
         .catch(() => countrySelect.selectOption({ value: "US" }))
         .catch(() => countrySelect.selectOption({ label: "US" }))
         .catch(() => {});
+    } else {
+      await countrySelect.click().catch(() => {});
+      const opt = page.getByRole("option", { name: new RegExp(data.country, "i") }).first();
+      if (await opt.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await opt.click();
+      }
     }
   }
 
@@ -161,6 +168,15 @@ export async function fillAddressForm(page, data) {
         .catch(() => stateSelect.selectOption({ value: "FL" }))
         .catch(() => {});
       await page.waitForTimeout(500);
+    } else {
+      await stateSelect.click().catch(() => {});
+      const opt = page
+        .getByRole("option", { name: new RegExp(`^(${data.state}|FL|Florida)$`, "i") })
+        .first();
+      if (await opt.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await opt.click();
+        await page.waitForTimeout(500);
+      }
     }
   }
 
@@ -194,6 +210,30 @@ export async function fillAddressForm(page, data) {
   await zip.scrollIntoViewIfNeeded().catch(() => {});
   await expect(zip).toBeVisible({ timeout: 10_000 });
   await fillInputField(zip, data.zip);
+
+  const phone = page
+    .locator("#address-phone, #phone, input[name='phone'], input[type='tel']")
+    .or(page.getByRole("textbox", { name: /phone/i }))
+    .or(page.getByPlaceholder(/phone/i))
+    .first();
+  if (await phone.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await fillInputField(phone, data.phone || "4075550100");
+  }
+
+  const stillInvalid = page.locator("input:invalid, select:invalid");
+  const invalidCount = await stillInvalid.count().catch(() => 0);
+  for (let i = 0; i < invalidCount; i++) {
+    const field = stillInvalid.nth(i);
+    const type = ((await field.getAttribute("type")) || "").toLowerCase();
+    const name = ((await field.getAttribute("name")) || (await field.getAttribute("id")) || "").toLowerCase();
+    if (type === "tel" || /phone/.test(name)) {
+      await fillInputField(field, data.phone || "4075550100").catch(() => {});
+    } else if (/zip|postal/.test(name)) {
+      await fillInputField(field, data.zip).catch(() => {});
+    } else if (/city/.test(name)) {
+      await fillInputField(field, data.city).catch(() => {});
+    }
+  }
 }
 
 /** Click primary save CTA on address forms. */
@@ -293,6 +333,7 @@ export async function deleteAddressByLabel(page, label) {
   const del = card
     .locator("button.account-addresses__action-btn--danger")
     .or(card.getByRole("button", { name: /^Delete$/i }))
+    .or(card.getByRole("button", { name: /delete address/i }))
     .first();
   await expect(del).toBeVisible({ timeout: 10_000 });
   await del.click();
@@ -300,8 +341,8 @@ export async function deleteAddressByLabel(page, label) {
   // Live UI: modal "Delete this address?" with Cancel + Delete.
   const confirmModal = page
     .locator(".ant-modal")
-    .filter({ hasText: /Delete this address/i })
-    .or(page.getByRole("dialog").filter({ hasText: /Delete this address/i }));
+    .filter({ hasText: /Delete this address|delete/i })
+    .or(page.getByRole("dialog").filter({ hasText: /Delete this address|delete/i }));
   if (await confirmModal.first().isVisible({ timeout: 5_000 }).catch(() => false)) {
     await confirmModal
       .first()
@@ -318,8 +359,31 @@ export async function deleteAddressByLabel(page, label) {
   }
 
   await expect(confirmModal.first()).toBeHidden({ timeout: 10_000 }).catch(() => {});
+  await page.reload({ waitUntil: "domcontentloaded" }).catch(() => {});
+  await dismissCookieBanner(page);
+  await dismissAddressDialogs(page);
+  const leftover = page.locator("article.account-addresses__card").filter({ hasText: label });
+  if (await leftover.count() > 0) {
+    await openAddressesPage(page);
+    await dismissAddressDialogs(page);
+    page.once("dialog", (dialog) => dialog.accept().catch(() => {}));
+    const again = leftover
+      .locator("button.account-addresses__action-btn--danger")
+      .or(leftover.getByRole("button", { name: /^Delete$/i }))
+      .first();
+    if (await again.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await again.click({ force: true });
+      const modal2 = page.locator(".ant-modal").filter({ hasText: /Delete/i });
+      if (await modal2.first().isVisible({ timeout: 4_000 }).catch(() => false)) {
+        await modal2.first().getByRole("button", { name: /^Delete$/i }).click();
+      }
+    }
+  }
   await expect(
-    page.locator("article.account-addresses__card").filter({ hasText: label }),
+    page
+      .locator("article.account-addresses__card")
+      .filter({ hasText: label })
+      .filter({ visible: true }),
   ).toHaveCount(0, { timeout: 20_000 });
 }
 
