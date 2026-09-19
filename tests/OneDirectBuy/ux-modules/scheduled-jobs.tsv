@@ -1,0 +1,4 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-064	Scheduled Jobs	System	Scheduled job runs once per period — duplicate trigger records only one logical run	Scheduled job runs once per period — duplicate trigger records only one logical run	P0	Yes	Working
+ODB-UX-065	Scheduled Jobs	System	Missed job recovery — scheduler restart logs missed critical periods per policy	Missed job recovery — scheduler restart logs missed critical periods per policy	P0	Yes	Working
+ODB-UX-066	Scheduled Jobs	System	Missed job recovery — run policy executes missed period once on restart	Missed job recovery — run policy executes missed period once on restart	P0	Yes	Working

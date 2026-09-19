@@ -58,6 +58,7 @@ function mapFlow(f) {
     enabled: f.enabled,
     tests: f.tests,
     catalog: f.catalog || "",
+    group: f.group || "",
     createdAt: iso(f.createdAt),
     updatedAt: iso(f.updatedAt),
     stepsTotal: (f.steps || []).length,

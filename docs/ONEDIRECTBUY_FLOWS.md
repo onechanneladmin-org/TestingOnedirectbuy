@@ -59,6 +59,7 @@ Each flow section follows the same template:
 | **10.1** | Admin Backend Login | Admin | Yes | No (gated) |
 | **11** | Responsive UI & Accessibility | Cross-cutting | No | Yes |
 | **12** | Buyer Address Book | Buyer | Yes | No (gated) |
+| **30–48** | UX Modules (backend unit/integration) | System | No | Yes (skips if backend repo missing) |
 
 Run a single flow locally:
 
@@ -904,8 +905,53 @@ When `ONEDIRECTBUY_SELLER_*` and portal routes exist, automate those in a separa
 | `ONEDIRECTBUY_ATC_KEYWORD` | Cart / purchase product seed (default `filter`) |
 | `ONEDIRECTBUY_TEST_COUPON` | Cart / promotions coupon apply |
 | `ONEDIRECTBUY_STRIPE_TEST_*` | Flow 6.2 place order |
+| `ODB_BACKEND_ROOT` | UX Modules (flows 30–48) path to AutopartMarketplaceBackend |
 
 Never commit `.env`. See [`CI_SECRETS.md`](CI_SECRETS.md) for GitHub Actions wiring.
+
+---
+
+## UX Modules (flows 30–48)
+
+Backend module validation from [AutopartMarketplaceBackend/tests](../../OneDirectBuy/AutopartMarketplaceBackend/tests). These are not storefront UI journeys. The dashboard **UX Modules** tab lists one flow per source test file; each sheet row is an original `test()` / `it()` case.
+
+| Item | Value |
+|------|--------|
+| Actor | System |
+| IDs | `ODB-UX-001` … `ODB-UX-076` |
+| Specs | [`tests/OneDirectBuy/ux-modules/`](../tests/OneDirectBuy/ux-modules/) |
+| Catalogs | matching `*.tsv` files in the same folder |
+| Runner | Playwright `soft()` wraps the original Jest or `node --test` script |
+| Backend path | `ODB_BACKEND_ROOT`, else sibling `../OneDirectBuy/AutopartMarketplaceBackend` |
+
+If the backend repo or its `node_modules` is missing, specs skip. Install backend deps with `pnpm install` in AutopartMarketplaceBackend before running.
+
+```bash
+npx cross-env CI_TESTS_CONFIG=flows.config.json node scripts/run-ci-tests.js flow:30
+npx cross-env CI_TESTS_CONFIG=flows.config.json node scripts/run-ci-tests.js flow:48
+```
+
+| ID | Module | Source file |
+|----|--------|-------------|
+| 30 | Variation Aggregates | `variationAggregates.test.js` |
+| 31 | Seller Rating | `sellerRatingService.test.js` |
+| 32 | Product Atlas Search | `productAtlasSearch.test.js` |
+| 33 | Multi-Seller Order | `multiSellerOrder.test.js` |
+| 34 | Listing Variation Resolver | `listingVariationResolver.test.js` |
+| 35 | Listing Pricing | `listingPricing.test.js` |
+| 36 | Fitment Keys | `fitmentKeys.test.js` |
+| 37 | Fitment Index | `fitmentIndex.test.js` |
+| 38 | Category Path Service | `categoryPathService.test.js` |
+| 39 | Catalog Validation | `catalogValidation.test.js` |
+| 40 | Seller Status | `sellers/sellerStatusService.test.js` |
+| 41 | Seller Onboarding Payload | `sellers/sellerOnboardingPayload.test.js` |
+| 42 | Audit Logs | `security/auditLogs.test.js` |
+| 43 | Verify reCAPTCHA | `recaptcha/verifyRecaptcha.test.js` |
+| 44 | Privacy Request | `privacy/privacyRequest.test.js` |
+| 45 | Scheduled Jobs | `jobs/scheduledJobs.test.js` |
+| 46 | Job Queue | `jobs/jobQueue.test.js` |
+| 47 | Transaction Integrity | `database/transactionIntegrity.test.js` |
+| 48 | API Keys | `api/apiKey.test.js` |
 
 ---
 

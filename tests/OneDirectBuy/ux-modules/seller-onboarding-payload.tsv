@@ -1,0 +1,4 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-051	Seller Onboarding Payload	System	buildPublicSellerApplicationBody maps wizard fields and pending lifecycle	buildPublicSellerApplicationBody maps wizard fields and pending lifecycle	P0	Yes	Working
+ODB-UX-052	Seller Onboarding Payload	System	buildPublicSellerApplicationBody preserves minimal storefront pipeline version	buildPublicSellerApplicationBody preserves minimal storefront pipeline version	P0	Yes	Working
+ODB-UX-053	Seller Onboarding Payload	System	buildSellerPayloadFromWizard keeps admin create defaults	buildSellerPayloadFromWizard keeps admin create defaults	P0	Yes	Working

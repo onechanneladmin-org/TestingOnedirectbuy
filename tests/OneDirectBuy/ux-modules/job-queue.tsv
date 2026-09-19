@@ -1,0 +1,4 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-067	Job Queue	System	Failed job retry — worker retries according to retry policy	Failed job retry — worker retries according to retry policy	P0	Yes	Working
+ODB-UX-068	Job Queue	System	Dead-letter queue handling — repeated failures move job to DLQ with error details	Dead-letter queue handling — repeated failures move job to DLQ with error details	P0	Yes	Working
+ODB-UX-069	Job Queue	System	Job idempotency — duplicate delivery does not create duplicate side effects	Job idempotency — duplicate delivery does not create duplicate side effects	P0	Yes	Working

@@ -1,0 +1,4 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-054	Audit Logs	System	Security event logged — invalid token triggers audit log without sensitive data leakage	Security event logged — invalid token triggers audit log without sensitive data leakage	P0	Yes	Working
+ODB-UX-055	Audit Logs	System	Security event logged — forbidden scope triggers audit log without sensitive data leakage	Security event logged — forbidden scope triggers audit log without sensitive data leakage	P0	Yes	Working
+ODB-UX-056	Audit Logs	System	Security event logged — invalid API key triggers audit log without sensitive data leakage	Security event logged — invalid API key triggers audit log without sensitive data leakage	P0	Yes	Working

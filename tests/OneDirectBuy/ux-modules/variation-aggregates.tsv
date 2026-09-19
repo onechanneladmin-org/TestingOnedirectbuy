@@ -1,0 +1,6 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-001	Variation Aggregates	System	summarizeListings picks cheapest listing	summarizeListings picks cheapest listing	P1	Yes	Working
+ODB-UX-002	Variation Aggregates	System	computeVariationAggregates per variant	computeVariationAggregates per variant	P1	Yes	Working
+ODB-UX-003	Variation Aggregates	System	listingsForEmbeddedVariant includes parent fallback	listingsForEmbeddedVariant includes parent fallback	P1	Yes	Working
+ODB-UX-004	Variation Aggregates	System	listingsForProductAggregate excludes parent row when variant listings exist	listingsForProductAggregate excludes parent row when variant listings exist	P1	Yes	Working
+ODB-UX-005	Variation Aggregates	System	paginateVariantsWithPin keeps deep-linked variant	paginateVariantsWithPin keeps deep-linked variant	P1	Yes	Working

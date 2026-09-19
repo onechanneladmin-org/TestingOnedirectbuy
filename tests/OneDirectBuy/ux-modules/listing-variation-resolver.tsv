@@ -1,0 +1,6 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-022	Listing Variation Resolver	System	isListingBuyable accepts legacy rows without status	isListingBuyable accepts legacy rows without status	P1	Yes	Working
+ODB-UX-023	Listing Variation Resolver	System	resolveListingProductId returns the catalog product id	resolveListingProductId returns the catalog product id	P1	Yes	Working
+ODB-UX-024	Listing Variation Resolver	System	resolveActiveListingForCart resolves by productId and variationId	resolveActiveListingForCart resolves by productId and variationId	P1	Yes	Working
+ODB-UX-025	Listing Variation Resolver	System	resolveActiveListingForCart falls back from inactive listingId when productId is provided	resolveActiveListingForCart falls back from inactive listingId when productId is provided	P1	Yes	Working
+ODB-UX-026	Listing Variation Resolver	System	parentListingFallbackForEmbeddedVariant matches parent listing rows	parentListingFallbackForEmbeddedVariant matches parent listing rows	P1	Yes	Working

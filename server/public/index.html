@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Flow Control Plane</title>
-    <link rel="stylesheet" href="/ui/styles.css?v=13" />
+    <link rel="stylesheet" href="/ui/styles.css?v=14" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
@@ -99,6 +99,17 @@
           <button type="button" class="chip active" data-filter="all">All</button>
           <button type="button" class="chip" data-filter="enabled">Enabled</button>
           <button type="button" class="chip" data-filter="disabled">Off</button>
+        </div>
+        <div class="rail-groups" role="tablist" aria-label="Flow groups">
+          <button type="button" class="chip active" data-group="sheet" role="tab" aria-selected="true">
+            Sheet modules
+          </button>
+          <button type="button" class="chip" data-group="ux-modules" role="tab" aria-selected="false">
+            UX Modules
+          </button>
+          <button type="button" class="chip" data-group="other" role="tab" aria-selected="false">
+            Other
+          </button>
         </div>
         <label class="rail-search">
           <span class="visually-hidden">Search flows</span>
@@ -233,6 +244,6 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="/ui/app.js?v=14" type="module"></script>
+    <script src="/ui/app.js?v=16" type="module"></script>
   </body>
 </html>

@@ -3,6 +3,7 @@ const state = {
   projects: [],
   projectId: localStorage.getItem("odb_project_id") || "",
   filter: "all",
+  groupTab: "sheet",
   search: "",
   selectedFlowId: null,
   selectedUseCaseId: null,
@@ -81,8 +82,19 @@ function filteredFlows() {
   });
 }
 
+function isUxModuleFlow(f) {
+  return String(f.group || "") === "ux-modules";
+}
+
 function isSheetFlow(f) {
+  if (isUxModuleFlow(f)) return false;
   return Boolean(f.catalog) || (f.steps || []).some((s) => s.module || s.useCase);
+}
+
+function flowGroup(f) {
+  if (isUxModuleFlow(f)) return "ux-modules";
+  if (isSheetFlow(f)) return "sheet";
+  return "other";
 }
 
 function flowIdSortKey(id) {
@@ -96,15 +108,17 @@ function sheetGroupOrder(f) {
   return flowIdSortKey(f.flowId);
 }
 
+function groupedTabFlows() {
+  const tab = state.groupTab || "sheet";
+  const flows = filteredFlows().filter((f) => flowGroup(f) === tab);
+  if (tab === "sheet") {
+    return flows.sort((a, b) => sheetGroupOrder(a) - sheetGroupOrder(b));
+  }
+  return flows.sort((a, b) => flowIdSortKey(a.flowId) - flowIdSortKey(b.flowId));
+}
+
 function listedFlowsInOrder() {
-  const flows = filteredFlows();
-  const sheet = flows
-    .filter(isSheetFlow)
-    .sort((a, b) => sheetGroupOrder(a) - sheetGroupOrder(b));
-  const other = flows
-    .filter((f) => !isSheetFlow(f))
-    .sort((a, b) => flowIdSortKey(a.flowId) - flowIdSortKey(b.flowId));
-  return [...sheet, ...other];
+  return groupedTabFlows();
 }
 
 function selectedFlowIdsInOrder() {
@@ -146,7 +160,7 @@ function childCount(s) {
 function catalogUseCases(flows) {
   const out = [];
   for (const f of flows) {
-    if (!isSheetFlow(f)) continue;
+    if (!isSheetFlow(f) && !isUxModuleFlow(f)) continue;
     for (const s of f.steps || []) {
       out.push({
         flowId: f.flowId,
@@ -166,7 +180,9 @@ function catalogUseCases(flows) {
 
 function filteredUseCases() {
   const q = state.search.trim().toLowerCase();
+  const allowed = new Set(groupedTabFlows().map((f) => String(f.flowId)));
   return catalogUseCases(state.flows).filter((uc) => {
+    if (!allowed.has(String(uc.flowId))) return false;
     if (state.filter === "enabled" && !uc.flowEnabled) return false;
     if (state.filter === "disabled" && uc.flowEnabled) return false;
     if (!q) return true;
@@ -246,9 +262,15 @@ function useCaseRailHtml() {
   return html;
 }
 
+function groupTabLabel(tab) {
+  if (tab === "ux-modules") return "UX Modules";
+  if (tab === "other") return "Other flows";
+  return "Sheet modules";
+}
+
 function renderFlowList() {
   const list = $("flowList");
-  const flows = filteredFlows();
+  const flows = groupedTabFlows();
   const ucCount = filteredUseCases().length;
   $("flowCount").textContent = `${flows.length} shown · ${state.flows.length} total · ${ucCount} use cases`;
   renderStats();
@@ -258,13 +280,6 @@ function renderFlowList() {
     return;
   }
 
-  const sheet = flows
-    .filter(isSheetFlow)
-    .sort((a, b) => sheetGroupOrder(a) - sheetGroupOrder(b));
-  const other = flows
-    .filter((f) => !isSheetFlow(f))
-    .sort((a, b) => flowIdSortKey(a.flowId) - flowIdSortKey(b.flowId));
-
   const section = (label, items) => {
     if (!items.length) return "";
     return `<li class="rail-group">${escapeHtml(label)}</li>${items
@@ -272,10 +287,8 @@ function renderFlowList() {
       .join("")}`;
   };
 
-  list.innerHTML = `${section("Sheet modules", sheet)}${useCaseRailHtml()}${section(
-    "Other flows",
-    other,
-  )}`;
+  const useCases = state.groupTab === "other" ? "" : useCaseRailHtml();
+  list.innerHTML = `${section(groupTabLabel(state.groupTab), flows)}${useCases}`;
 
   list.querySelectorAll(".flow-item").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -1265,11 +1278,26 @@ function bindUi() {
     loadReport().catch((e) => toast(e.message, true)),
   );
 
-  document.querySelectorAll(".chip").forEach((chip) => {
+  document.querySelectorAll(".rail-filters .chip").forEach((chip) => {
     chip.addEventListener("click", () => {
-      document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+      document.querySelectorAll(".rail-filters .chip").forEach((c) =>
+        c.classList.remove("active"),
+      );
       chip.classList.add("active");
       state.filter = chip.dataset.filter;
+      renderFlowList();
+    });
+  });
+
+  document.querySelectorAll(".rail-groups .chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll(".rail-groups .chip").forEach((c) => {
+        c.classList.remove("active");
+        c.setAttribute("aria-selected", "false");
+      });
+      chip.classList.add("active");
+      chip.setAttribute("aria-selected", "true");
+      state.groupTab = chip.dataset.group || "sheet";
       renderFlowList();
     });
   });

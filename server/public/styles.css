@@ -399,7 +399,14 @@ h3 {
 .rail-filters {
   display: flex;
   gap: 0.4rem;
-  margin: 0.9rem 0 0.65rem;
+  margin: 0.9rem 0 0.45rem;
+  flex-wrap: wrap;
+}
+
+.rail-groups {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0 0 0.65rem;
   flex-wrap: wrap;
 }
 

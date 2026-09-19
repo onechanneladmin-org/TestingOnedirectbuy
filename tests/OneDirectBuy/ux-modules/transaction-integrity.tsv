@@ -1,0 +1,3 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-070	Transaction Integrity	System	Checkout transaction rollback — mid-process failure leaves no partial records	Checkout transaction rollback — mid-process failure leaves no partial records	P0	Yes	Working
+ODB-UX-071	Transaction Integrity	System	Checkout transaction commit — successful checkout updates inventory and cart atomically	Checkout transaction commit — successful checkout updates inventory and cart atomically	P0	Yes	Working

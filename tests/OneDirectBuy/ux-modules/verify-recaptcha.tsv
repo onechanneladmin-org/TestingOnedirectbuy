@@ -1,0 +1,5 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-057	Verify reCAPTCHA	System	assertHoneypotClean rejects filled honeypot	assertHoneypotClean rejects filled honeypot	P0	Yes	Working
+ODB-UX-058	Verify reCAPTCHA	System	assertHumanTiming rejects too-fast submit	assertHumanTiming rejects too-fast submit	P0	Yes	Working
+ODB-UX-059	Verify reCAPTCHA	System	verifyRecaptchaToken skips when bypass enabled and no secret	verifyRecaptchaToken skips when bypass enabled and no secret	P0	Yes	Working
+ODB-UX-060	Verify reCAPTCHA	System	isRecaptchaEnforced when secret is set	isRecaptchaEnforced when secret is set	P0	Yes	Working

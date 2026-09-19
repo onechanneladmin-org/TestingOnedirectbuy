@@ -1,0 +1,6 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-046	Seller Status	System	resolveSellerStatus keeps pending applications blocked	resolveSellerStatus keeps pending applications blocked	P0	Yes	Working
+ODB-UX-047	Seller Status	System	resolveSellerStatus does not treat pending+active as operational	resolveSellerStatus does not treat pending+active as operational	P0	Yes	Working
+ODB-UX-048	Seller Status	System	active sellers can accept orders when permitted	active sellers can accept orders when permitted	P0	Yes	Working
+ODB-UX-049	Seller Status	System	resolveSellerStatus honors active=false even when status is active	resolveSellerStatus honors active=false even when status is active	P0	Yes	Working
+ODB-UX-050	Seller Status	System	legacy sellers without status use active flag	legacy sellers without status use active flag	P0	Yes	Working

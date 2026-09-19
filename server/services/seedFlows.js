@@ -145,12 +145,13 @@ function stepFingerprint(s) {
   });
 }
 
-function flowFingerprint(name, enabled, tests, catalog, steps) {
+function flowFingerprint(name, enabled, tests, catalog, steps, group) {
   return JSON.stringify({
     name: name || "",
     enabled: enabled !== false,
     tests: tests || [],
     catalog: catalog || "",
+    group: group || "",
     steps: (steps || []).map(stepFingerprint),
   });
 }
@@ -271,6 +272,7 @@ async function seedFlows(projectId) {
       const enabled = flow.enabled !== false;
       const tests = flow.tests || fromCatalog.tests || [];
       const catalogPath = flow.catalog || "";
+      const group = flow.group || "";
       const existing = await Flow.findOne({
         projectId: project.id,
         flowId: key,
@@ -284,7 +286,14 @@ async function seedFlows(projectId) {
         fallbackCreated,
       );
 
-      const nextKey = flowFingerprint(name, enabled, tests, catalogPath, steps);
+      const nextKey = flowFingerprint(
+        name,
+        enabled,
+        tests,
+        catalogPath,
+        steps,
+        group,
+      );
       const prevKey = existing
         ? flowFingerprint(
             existing.name,
@@ -292,6 +301,7 @@ async function seedFlows(projectId) {
             existing.tests,
             existing.catalog,
             existing.steps,
+            existing.group,
           )
         : "";
       const contentChanged = !existing || nextKey !== prevKey;
@@ -309,6 +319,7 @@ async function seedFlows(projectId) {
         enabled,
         tests,
         catalog: catalogPath,
+        group,
         steps,
       };
 

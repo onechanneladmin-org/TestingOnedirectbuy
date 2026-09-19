@@ -1,0 +1,5 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-027	Listing Pricing	System	normalizeB2bPricingInput sorts and dedupes tiers	normalizeB2bPricingInput sorts and dedupes tiers	P1	Yes	Working
+ODB-UX-028	Listing Pricing	System	resolveB2bUnitPrice picks highest qualifying tier	resolveB2bUnitPrice picks highest qualifying tier	P1	Yes	Working
+ODB-UX-029	Listing Pricing	System	getListingLineUnitPrice uses min(consumer, b2b)	getListingLineUnitPrice uses min(consumer, b2b)	P1	Yes	Working
+ODB-UX-030	Listing Pricing	System	sale price beats b2b when lower	sale price beats b2b when lower	P1	Yes	Working

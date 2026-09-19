@@ -47,6 +47,7 @@ const FlowSchema = new mongoose.Schema(
     enabled: { type: Boolean, default: true },
     tests: [{ type: String }],
     catalog: { type: String, default: "" },
+    group: { type: String, default: "" },
     steps: [FlowStepSchema],
   },
   { timestamps: true },

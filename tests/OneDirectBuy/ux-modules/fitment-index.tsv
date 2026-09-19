@@ -1,0 +1,5 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-035	Fitment Index	System	fitmentEntryMatchesVehicle honors empty trim wildcard	fitmentEntryMatchesVehicle honors empty trim wildcard	P1	Yes	Working
+ODB-UX-036	Fitment Index	System	computeProductVehicleFitFromIndex	computeProductVehicleFitFromIndex	P1	Yes	Working
+ODB-UX-037	Fitment Index	System	buildVehicleFitProductFilter all mode includes universal	buildVehicleFitProductFilter all mode includes universal	P1	Yes	Working
+ODB-UX-038	Fitment Index	System	buildVehicleFitProductFilter YMM-only uses fitmentKeys	buildVehicleFitProductFilter YMM-only uses fitmentKeys	P1	Yes	Working

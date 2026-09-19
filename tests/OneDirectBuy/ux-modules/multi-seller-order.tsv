@@ -1,0 +1,4 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-019	Multi-Seller Order	System	multi-seller: one seller shipped keeps parent processing	multi-seller: one seller shipped keeps parent processing	P0	Yes	Working
+ODB-UX-020	Multi-Seller Order	System	multi-seller: all sellers shipped marks parent shipped	multi-seller: all sellers shipped marks parent shipped	P0	Yes	Working
+ODB-UX-021	Multi-Seller Order	System	multi-seller: parent totals reconcile per seller lines	multi-seller: parent totals reconcile per seller lines	P0	Yes	Working

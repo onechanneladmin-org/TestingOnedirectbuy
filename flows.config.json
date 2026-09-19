@@ -244,6 +244,177 @@
       "enabled": true,
       "catalog": "tests/OneDirectBuy/onefulfillment-3pl.tsv",
       "tests": ["tests/OneDirectBuy/OneFulfillment3pl.spec.js"]
+    },
+    {
+      "id": 30,
+      "name": "Variation Aggregates",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/variation-aggregates.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/VariationAggregates.spec.js"]
+    },
+    {
+      "id": 31,
+      "name": "Seller Rating",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/seller-rating.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/SellerRating.spec.js"]
+    },
+    {
+      "id": 32,
+      "name": "Product Atlas Search",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/product-atlas-search.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/ProductAtlasSearch.spec.js"]
+    },
+    {
+      "id": 33,
+      "name": "Multi-Seller Order",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/multi-seller-order.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/MultiSellerOrder.spec.js"]
+    },
+    {
+      "id": 34,
+      "name": "Listing Variation Resolver",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/listing-variation-resolver.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/ListingVariationResolver.spec.js"]
+    },
+    {
+      "id": 35,
+      "name": "Listing Pricing",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/listing-pricing.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/ListingPricing.spec.js"]
+    },
+    {
+      "id": 36,
+      "name": "Fitment Keys",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/fitment-keys.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/FitmentKeys.spec.js"]
+    },
+    {
+      "id": 37,
+      "name": "Fitment Index",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/fitment-index.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/FitmentIndex.spec.js"]
+    },
+    {
+      "id": 38,
+      "name": "Category Path Service",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/category-path-service.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/CategoryPathService.spec.js"]
+    },
+    {
+      "id": 39,
+      "name": "Catalog Validation",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/catalog-validation.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/CatalogValidation.spec.js"]
+    },
+    {
+      "id": 40,
+      "name": "Seller Status",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/seller-status.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/SellerStatus.spec.js"]
+    },
+    {
+      "id": 41,
+      "name": "Seller Onboarding Payload",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/seller-onboarding-payload.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/SellerOnboardingPayload.spec.js"]
+    },
+    {
+      "id": 42,
+      "name": "Audit Logs",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/audit-logs.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/AuditLogs.spec.js"]
+    },
+    {
+      "id": 43,
+      "name": "Verify reCAPTCHA",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/verify-recaptcha.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/VerifyRecaptcha.spec.js"]
+    },
+    {
+      "id": 44,
+      "name": "Privacy Request",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/privacy-request.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/PrivacyRequest.spec.js"]
+    },
+    {
+      "id": 45,
+      "name": "Scheduled Jobs",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/scheduled-jobs.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/ScheduledJobs.spec.js"]
+    },
+    {
+      "id": 46,
+      "name": "Job Queue",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/job-queue.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/JobQueue.spec.js"]
+    },
+    {
+      "id": 47,
+      "name": "Transaction Integrity",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/transaction-integrity.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/TransactionIntegrity.spec.js"]
+    },
+    {
+      "id": 48,
+      "name": "API Keys",
+      "group": "ux-modules",
+      "enabled": true,
+      "catalog": "tests/OneDirectBuy/ux-modules/api-key.tsv",
+      "workers": 1,
+      "tests": ["tests/OneDirectBuy/ux-modules/ApiKey.spec.js"]
     }
   ]
 }
