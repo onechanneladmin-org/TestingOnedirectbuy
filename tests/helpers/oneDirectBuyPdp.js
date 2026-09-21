@@ -45,8 +45,13 @@ export function pdpQtyInput(page) {
 
 export function pdpWishlist(page) {
   return page
-    .locator(".ps-product__actions a, .ps-product a, button.wishlist-btn")
-    .filter({ has: page.locator("i.icon-heart, [class*='heart']") })
+    .getByRole("link", { name: /^Add to wishlist$/i })
+    .or(page.getByRole("button", { name: /^Add to wishlist$/i }))
+    .or(
+      page
+        .locator(".ps-product__actions a, .ps-product a, button.wishlist-btn")
+        .filter({ has: page.locator("i.icon-heart, [class*='heart']") }),
+    )
     .filter({ visible: true })
     .first();
 }

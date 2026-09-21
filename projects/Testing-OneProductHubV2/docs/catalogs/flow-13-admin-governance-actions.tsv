@@ -6,6 +6,18 @@ OPH-ADMIN-SUBSCRIPTION-EDITOR-1	Admin governance actions	Admin	Subscription edit
 OPH-ADMIN-CLIENT-ACCESS-1	Admin governance actions	Admin	Open admin Client Access hub	Was missing from old admin nav matrix	P0	Yes	Automated
 OPH-ADMIN-DATA-QUALITY-1	Admin governance actions	Admin	Open admin Data Quality dashboard	Was missing from old admin nav matrix	P0	Yes	Automated
 OPH-ADMIN-SETTINGS-SECTIONS-1	Admin governance actions	Admin	Walk admin settings including Audit and Request form	Walk admin settings including Audit and Request form	P0	Yes	Automated
-UC-151	Admin governance actions	Admin	Approve or deny a live brand registry request	Mutates production registry	P2	No	Missing
-UC-152	Admin governance actions	Admin	Approve or deny a live client signup	Mutates production clients	P2	No	Missing
-UC-153	Admin governance actions	Admin	Create RBAC permission/role/user	Mutates RBAC	P2	No	Missing
+OPH-ADMIN-APPROVE-BRAND-UI-1	Admin governance actions	Admin	Brand registry approval controls visible	UI-only	P0	Yes	Automated
+OPH-ADMIN-APPROVE-CLIENT-UI-1	Admin governance actions	Admin	Client pending approval controls visible	UI-only	P0	Yes	Automated
+OPH-ADMIN-RBAC-CREATE-UI-1	Admin governance actions	Admin	RBAC create and bulk create are visible	UI-only	P0	Yes	Automated
+OPH-ADMIN-REGISTRY-SEARCH-1	Admin governance actions	Admin	Search brand registry	Search brand registry	P0	Yes	Automated
+OPH-ADMIN-REGISTRY-TABS-1	Admin governance actions	Admin	Switch approved requests revoked tabs	Switch approved requests revoked tabs	P0	Yes	Automated
+OPH-ADMIN-REGISTRY-FILTERS-1	Admin governance actions	Admin	Open registry filters	Open registry filters	P0	Yes	Automated
+OPH-ADMIN-REGISTRY-ADD-CANCEL-1	Admin governance actions	Admin	Open add brand then cancel	Open add brand then cancel	P0	Yes	Automated
+OPH-ADMIN-REGISTRY-ASSIGN-CANCEL-1	Admin governance actions	Admin	Open assign user then cancel	Open assign user then cancel	P0	Yes	Automated
+OPH-ADMIN-CLIENTS-SEARCH-1	Admin governance actions	Admin	Search admin clients hub	Search admin clients hub	P0	Yes	Automated
+OPH-ADMIN-CLIENTS-TABS-1	Admin governance actions	Admin	Switch pending approved denied client tabs	Switch pending approved denied client tabs	P0	Yes	Automated
+OPH-ADMIN-CLIENTS-INVITE-1	Admin governance actions	Admin	Open invite client without sending	Open invite client without sending	P0	Yes	Automated
+OPH-ADMIN-RBAC-FILTER-1	Admin governance actions	Admin	Filter RBAC permissions	Filter RBAC permissions	P0	Yes	Automated
+OPH-ADMIN-RBAC-CREATE-CANCEL-1	Admin governance actions	Admin	Open create permission then cancel	Open create permission then cancel	P0	Yes	Automated
+OPH-ADMIN-SETTINGS-ALL-TABS-1	Admin governance actions	Admin	Walk remaining admin settings tabs	Walk remaining admin settings tabs	P0	Yes	Automated
+OPH-ADMIN-SUB-PREVIEW-1	Admin governance actions	Admin	Preview subscription without Save to API	Preview subscription without Save to API	P0	Yes	Automated

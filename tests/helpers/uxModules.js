@@ -1,6 +1,6 @@
 /**
  * Run AutopartMarketplaceBackend Jest / node:test cases from Playwright UX Module specs.
- * Backend root: ODB_BACKEND_ROOT, else sibling AutopartMarketplaceBackend.
+ * Backend root: ODB_BACKEND_ROOT, else this-repo local/AutopartMarketplaceBackend.
  */
 import { spawnSync } from "child_process";
 import fs from "fs";
@@ -9,25 +9,50 @@ import path from "path";
 const TESTING_ROOT = process.cwd();
 const CASE_TIMEOUT_MS = 180000;
 
+function isBackendRoot(dir) {
+  return Boolean(dir) && fs.existsSync(path.join(dir, "package.json"));
+}
+
 export function resolveBackendRoot() {
   const fromEnv = String(process.env.ODB_BACKEND_ROOT || "").trim();
-  if (fromEnv) {
-    const resolved = path.resolve(fromEnv);
-    if (fs.existsSync(path.join(resolved, "package.json"))) return resolved;
+  const candidates = [
+    fromEnv ? path.resolve(fromEnv) : "",
+    path.resolve(TESTING_ROOT, "local/AutopartMarketplaceBackend"),
+    path.resolve(TESTING_ROOT, "AutopartMarketplaceBackend"),
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    if (isBackendRoot(candidate)) return candidate;
   }
-  const sibling = path.resolve(
-    TESTING_ROOT,
-    "../OneDirectBuy/AutopartMarketplaceBackend",
-  );
-  if (fs.existsSync(path.join(sibling, "package.json"))) return sibling;
   return "";
+}
+
+function ensureBackendDeps(root) {
+  if (fs.existsSync(path.join(root, "node_modules"))) return true;
+  const pnpmLock = fs.existsSync(path.join(root, "pnpm-lock.yaml"));
+  const npmLock = fs.existsSync(path.join(root, "package-lock.json"));
+  const cmd = pnpmLock
+    ? ["pnpm", "install"]
+    : npmLock
+      ? ["npm", "ci"]
+      : ["npm", "install"];
+  const result = spawnSync(cmd[0], cmd.slice(1), {
+    cwd: root,
+    encoding: "utf8",
+    timeout: 10 * 60 * 1000,
+    stdio: "pipe",
+    shell: process.platform === "win32",
+  });
+  if (result.status !== 0) return false;
+  return fs.existsSync(path.join(root, "node_modules"));
 }
 
 export function backendReady() {
   const root = resolveBackendRoot();
   if (!root) return { ok: false, root: "", reason: "missing-root" };
   if (!fs.existsSync(path.join(root, "node_modules"))) {
-    return { ok: false, root, reason: "missing-deps" };
+    const installed = ensureBackendDeps(root);
+    if (!installed) return { ok: false, root, reason: "missing-deps" };
   }
   return { ok: true, root, reason: "" };
 }

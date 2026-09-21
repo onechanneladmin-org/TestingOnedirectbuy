@@ -92,6 +92,10 @@ function main() {
     env.HEADLESS = env.HEADLESS || "true";
   }
 
+  if (meta.uiAnalysis && process.env.UI_ANALYSIS !== "0") {
+    env.UI_ANALYSIS = "1";
+  }
+
   if (meta.grep) {
     env.PW_GREP = meta.grep;
   }

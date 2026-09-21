@@ -71,6 +71,15 @@
                 <input type="checkbox" id="headedMode" />
                 Headed browser
               </label>
+              <button
+                type="button"
+                class="btn ghost"
+                id="btnLastRun"
+                disabled
+                title="No previous run for this flow"
+              >
+                Last run
+              </button>
               <button type="button" class="btn primary" id="btnRun">
                 <span class="btn-pulse" aria-hidden="true"></span>
                 Run flow
@@ -136,6 +145,6 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="/ui/app.js" type="module"></script>
+    <script src="/ui/app.js?v=2" type="module"></script>
   </body>
 </html>

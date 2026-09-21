@@ -3,6 +3,7 @@ const state = {
   filter: "all",
   selectedFlowId: null,
   occurrenceId: null,
+  history: [],
   pollTimer: null,
   token: localStorage.getItem("oph_api_token") || "",
 };
@@ -112,6 +113,85 @@ function selectFlow(flowId) {
       </li>`,
     )
     .join("");
+
+  const activeOcc = (state.history || []).find(
+    (o) =>
+      String(o.flowId) === state.selectedFlowId &&
+      ["running", "queued"].includes(o.status),
+  );
+  syncLastRunButton();
+  if (activeOcc) {
+    api(`/api/occurrences/${encodeURIComponent(activeOcc.occurrenceId)}`)
+      .then((occ) => {
+        renderOccurrence(occ);
+        if (["running", "queued"].includes(occ.status)) {
+          startPolling(occ.occurrenceId);
+        }
+      })
+      .catch(() => setLiveIdle());
+  } else {
+    setLiveIdle();
+  }
+}
+
+function lastFinishedOccurrenceForFlow(flowId) {
+  if (!flowId) return null;
+  return (
+    (state.history || []).find(
+      (o) =>
+        String(o.flowId) === String(flowId) &&
+        ["passed", "failed", "cancelled"].includes(o.status),
+    ) || null
+  );
+}
+
+function lastRunButtonLabel(occ) {
+  if (!occ) return "Last run";
+  if (occ.status === "failed") return "Last run · failed";
+  if (occ.status === "passed") return "Last run · passed";
+  return `Last run · ${occ.status || "done"}`;
+}
+
+function syncLastRunButton() {
+  const btn = $("btnLastRun");
+  if (!btn) return;
+  const last = lastFinishedOccurrenceForFlow(state.selectedFlowId);
+  if (!last) {
+    btn.disabled = true;
+    btn.textContent = "Last run";
+    btn.title = "No previous run for this flow";
+    return;
+  }
+  btn.disabled = false;
+  btn.textContent = lastRunButtonLabel(last);
+  const when = formatTime(last.finishedAt || last.startedAt || last.createdAt);
+  const steps = `${last.stepsCompleted || 0}/${last.stepsTotal || 0} steps`;
+  btn.title = `${when} · ${last.status} · ${steps}`;
+}
+
+function highlightHistory(occurrenceId) {
+  document.querySelectorAll(".history-item").forEach((el) => {
+    el.classList.toggle("active", el.dataset.id === String(occurrenceId || ""));
+  });
+}
+
+async function openLastRun() {
+  const last = lastFinishedOccurrenceForFlow(state.selectedFlowId);
+  if (!last) {
+    toast("No last run for this flow", true);
+    return;
+  }
+  try {
+    const occ = await api(
+      `/api/occurrences/${encodeURIComponent(last.occurrenceId)}`,
+    );
+    state.occurrenceId = occ.occurrenceId;
+    stopPolling();
+    renderOccurrence(occ);
+    highlightHistory(occ.occurrenceId);
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
 function setLiveIdle() {
@@ -120,11 +200,16 @@ function setLiveIdle() {
   $("liveEmpty").classList.remove("hidden");
   $("liveBody").classList.add("hidden");
   $("btnLoadReport").disabled = true;
+  $("btnRun").disabled = false;
+  highlightHistory(null);
+  syncLastRunButton();
   $("reportBody").innerHTML =
     '<p class="muted">Report appears when the occurrence finishes.</p>';
 }
 
 function renderOccurrence(occ) {
+  highlightHistory(occ.occurrenceId);
+  syncLastRunButton();
   $("liveEmpty").classList.add("hidden");
   $("liveBody").classList.remove("hidden");
 
@@ -293,6 +378,8 @@ async function loadFlows() {
 async function loadHistory() {
   const data = await api("/api/occurrences?limit=20");
   const items = data.occurrences || [];
+  state.history = items;
+  syncLastRunButton();
   $("runHistory").innerHTML = items.length
     ? items
         .map(
@@ -381,6 +468,9 @@ function bindUi() {
   });
 
   $("btnRun").addEventListener("click", runSelectedFlow);
+  $("btnLastRun")?.addEventListener("click", () =>
+    openLastRun().catch((e) => toast(e.message, true)),
+  );
   $("btnLoadReport").addEventListener("click", () =>
     loadReport().catch((e) => toast(e.message, true)),
   );

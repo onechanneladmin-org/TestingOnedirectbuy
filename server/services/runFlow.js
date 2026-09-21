@@ -261,6 +261,7 @@ async function startFlowRun(flowId, opts = {}) {
     statusApiUrl: STATUS_API_URL,
     mongoUri: MONGODB_URI,
     headed: Boolean(opts.headed),
+    uiAnalysis: String(flow.group || "") === "ux-modules",
     // Control-plane runs must report real Playwright exit (not CI soft-pass)
     softPass: "0",
     exitFile: exitFile.replace(/\\/g, "/"),
@@ -331,6 +332,10 @@ async function startFlowRun(flowId, opts = {}) {
     const headedLines = opts.headed
       ? ["set PW_HEADED=1", "set HEADLESS=false", "set PW_HEADLESS=0"]
       : ["set PW_HEADLESS=1", "set HEADLESS=true"];
+    const uxAnalysisLines =
+      String(flow.group || "") === "ux-modules"
+        ? ['set "UI_ANALYSIS=1"']
+        : [];
     const workerLines = serialWorkers ? ['set "PW_WORKERS=1"'] : [];
     const bat = [
       "@echo off",
@@ -346,6 +351,7 @@ async function startFlowRun(flowId, opts = {}) {
       'set "ODB_PAUSE_ON_EXIT=0"',
       'set "PLAYWRIGHT_BROWSERS_PATH="',
       ...headedLines,
+      ...uxAnalysisLines,
       ...workerLines,
       "echo.",
       "echo ============================================",
@@ -419,6 +425,9 @@ async function startFlowRun(flowId, opts = {}) {
           ...(opts.headed
             ? { PW_HEADED: "1", HEADLESS: "false", PW_HEADLESS: "0" }
             : { PW_HEADLESS: "1", HEADLESS: "true" }),
+          ...(String(flow.group || "") === "ux-modules"
+            ? { UI_ANALYSIS: process.env.UI_ANALYSIS === "0" ? "0" : "1" }
+            : {}),
         };
         sanitizePlaywrightBrowsersPath(childEnv);
         return childEnv;

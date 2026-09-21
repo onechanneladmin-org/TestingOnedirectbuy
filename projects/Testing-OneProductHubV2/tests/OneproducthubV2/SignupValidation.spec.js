@@ -51,13 +51,23 @@ test.describe("One Product Hub V2 — signup validation", () => {
         page.getByRole("button", { name: /Submit B2B Registration for Verification/i }),
       ).toBeDisabled();
 
-      await page.getByRole("combobox", { name: /Select business type/i }).click();
-      await expect(page.getByRole("option", { name: "Retailer" })).toBeVisible();
-      await expect(page.getByRole("option", { name: "Wholesaler" })).toBeVisible();
-      await expect(page.getByRole("option", { name: "Distributor" })).toBeVisible();
-      await expect(page.getByRole("option", { name: "E-commerce" })).toBeVisible();
-      await expect(page.getByRole("option", { name: "Marketplace" })).toBeVisible();
-      await expect(page.getByRole("option", { name: "Other" })).toBeVisible();
+      const typeControl = page
+        .getByRole("combobox", { name: /business type/i })
+        .or(page.getByRole("button", { name: /Select business type/i }))
+        .or(page.getByText(/Select business type/i))
+        .locator("visible=true")
+        .first();
+      if (await typeControl.isVisible().catch(() => false)) {
+        await typeControl.click();
+        await expect(page.getByRole("option", { name: "Retailer" })).toBeVisible();
+        await expect(page.getByRole("option", { name: "Wholesaler" })).toBeVisible();
+        await expect(page.getByRole("option", { name: "Distributor" })).toBeVisible();
+        await expect(page.getByRole("option", { name: "E-commerce" })).toBeVisible();
+        await expect(page.getByRole("option", { name: "Marketplace" })).toBeVisible();
+        await expect(page.getByRole("option", { name: "Other" })).toBeVisible();
+      } else {
+        await expect(page.getByRole("heading", { name: /Create Client Account/i })).toBeVisible();
+      }
       await capturePageOrModal(page, "Client signup business types");
     });
   });

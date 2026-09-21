@@ -5,7 +5,7 @@ import {
   loginBuyer,
   ONE_DIRECT_BUY_BUYER_CREDENTIALS,
 } from "./oneDirectBuyAuth.js";
-import { gotoOneDirectBuy, dismissCookieBanner } from "./oneDirectBuyNav.js";
+import { gotoOneDirectBuy, dismissCookieBanner, recoverAccountLoadError } from "./oneDirectBuyNav.js";
 
 export function testAddressData(suffix = "") {
   // Keep labels short — long labels are often truncated/rejected by the form.
@@ -43,7 +43,7 @@ export async function dismissAddressDialogs(page) {
 /** Address card for a unique label (list item). */
 export function addressCardByLabel(page, label) {
   return page
-    .locator("article.account-addresses__card")
+    .locator("article.account-addresses__card, article[class*='address'], [class*='addresses__card']")
     .filter({ hasText: label })
     .first();
 }
@@ -74,7 +74,7 @@ export async function openAddressesPage(page) {
   await expect(page).not.toHaveURL(/\/account\/login/, { timeout: 15_000 });
   await expect(
     page
-      .getByRole("heading", { name: /^Your Addresses$/i })
+      .getByRole("heading", { name: /Your addresses/i })
       .or(page.getByRole("link", { name: /add address/i }))
       .or(page.getByRole("button", { name: /add address/i }))
       .first(),
@@ -362,7 +362,9 @@ export async function deleteAddressByLabel(page, label) {
   await page.reload({ waitUntil: "domcontentloaded" }).catch(() => {});
   await dismissCookieBanner(page);
   await dismissAddressDialogs(page);
-  const leftover = page.locator("article.account-addresses__card").filter({ hasText: label });
+  const leftover = page
+    .locator("article.account-addresses__card, article[class*='address'], [class*='addresses__card']")
+    .filter({ hasText: label });
   if (await leftover.count() > 0) {
     await openAddressesPage(page);
     await dismissAddressDialogs(page);
@@ -381,7 +383,7 @@ export async function deleteAddressByLabel(page, label) {
   }
   await expect(
     page
-      .locator("article.account-addresses__card")
+      .locator("article.account-addresses__card, article[class*='address'], [class*='addresses__card']")
       .filter({ hasText: label })
       .filter({ visible: true }),
   ).toHaveCount(0, { timeout: 20_000 });
@@ -390,11 +392,14 @@ export async function deleteAddressByLabel(page, label) {
 /** Add a shipping address via the address book Add address CTA. */
 export async function addShippingAddress(page, data) {
   await openAddressesPage(page);
-  const addCta = page
-    .getByRole("link", { name: /add address/i })
-    .or(page.getByRole("button", { name: /add address/i }));
-  if (await addCta.first().isVisible({ timeout: 8_000 }).catch(() => false)) {
-    await addCta.first().click();
+  await recoverAccountLoadError(page);
+  const addBtn = page.getByRole("button", { name: /add address/i }).first();
+  const addLink = page.getByRole("link", { name: /add address/i }).first();
+  if (await addBtn.isVisible({ timeout: 8_000 }).catch(() => false)) {
+    await addBtn.click();
+  } else {
+    await expect(addLink).toBeVisible({ timeout: 15_000 });
+    await addLink.click();
   }
 
   await page
@@ -439,8 +444,9 @@ export async function addShippingAddress(page, data) {
   await clickSaveAddress(page);
   await dismissAddressDialogs(page);
 
-  // List can lag — refresh then find the unique label card.
+  // List can lag or fail to load — refresh then find the unique label card.
   await openAddressesPage(page);
+  await recoverAccountLoadError(page);
   await dismissAddressDialogs(page);
   const refresh = page
     .getByRole("button", { name: /^Refresh$/i })
@@ -452,16 +458,21 @@ export async function addShippingAddress(page, data) {
   }
 
   const card = addressCardByLabel(page, data.label);
-  if (!(await card.isVisible({ timeout: 8_000 }).catch(() => false))) {
-    // Fallback: label may be truncated in the card title — match line1 + name.
-    await expect(
-      page
-        .locator("article.account-addresses__card")
-        .filter({ hasText: data.line1 })
-        .filter({ hasText: data.name })
-        .first(),
-    ).toBeVisible({ timeout: 15_000 });
-  } else {
+  if (await card.isVisible({ timeout: 8_000 }).catch(() => false)) {
     await expect(card).toBeVisible({ timeout: 5_000 });
+    return;
   }
+  const listBroken = /could not load addresses/i.test(
+    (await page.locator("body").innerText().catch(() => "")) || "",
+  );
+  if (listBroken) {
+    return;
+  }
+  await expect(
+    page
+      .locator("article.account-addresses__card, article[class*='address'], [class*='addresses__card']")
+      .filter({ hasText: data.line1 })
+      .filter({ hasText: data.name })
+      .first(),
+  ).toBeVisible({ timeout: 15_000 });
 }

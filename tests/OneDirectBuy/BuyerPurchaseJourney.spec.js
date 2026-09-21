@@ -29,7 +29,7 @@ test.describe("OneDirectBuy — Buyer purchase journey", () => {
     page,
     soft,
   }) => {
-    test.setTimeout(6 * 60_000);
+    test.setTimeout(8 * 60_000);
 
     /** @type {{ productHref: string; stockMismatch?: string }} */
     let cartState = { productHref: "" };

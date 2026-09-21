@@ -12,11 +12,35 @@ OPH-BRAND-ACCESS-TABS-1	Brand workspace actions	Brand	Switch pending approved re
 OPH-BRAND-IMPORT-ACTIONS-1	Brand workspace actions	Brand	Import center upload or template actions	Import center upload or template actions	P0	Yes	Automated
 OPH-BRAND-EXPORT-ACTIONS-1	Brand workspace actions	Brand	Export center format or generate actions	Export center format or generate actions	P0	Yes	Automated
 OPH-BRAND-CHANGELOG-SEARCH-1	Brand workspace actions	Brand	Search or filter product change log	Search or filter product change log	P0	Yes	Automated
-UC-141	Brand workspace actions	Brand	Edit existing product and save	Mutates catalog	P2	No	Missing
-UC-142	Brand workspace actions	Brand	Delete or archive a product	Destructive	P2	No	Missing
-UC-143	Brand workspace actions	Brand	Duplicate a product	Mutates catalog	P2	No	Missing
-UC-144	Brand workspace actions	Brand	Run AI generate on a product	Consumes AI credits	P2	No	Missing
-UC-145	Brand workspace actions	Brand	Connect a live distribution channel	Needs channel credentials	P2	No	Missing
-UC-146	Brand workspace actions	Brand	Upload a real import file and map columns	Needs fixture file	P2	No	Missing
-UC-147	Brand workspace actions	Brand	Complete Stripe checkout / upgrade	Paid path	P2	No	Missing
-UC-148	Brand workspace actions	Brand	Change password in settings security	Would lock test account	P2	No	Missing
+OPH-BRAND-EDIT-PRODUCT-UI-1	Brand workspace actions	Brand	Open existing product editor without save	UI-only	P0	Yes	Automated
+OPH-BRAND-ARCHIVE-UI-1	Brand workspace actions	Brand	Archive filter is available without archiving	UI-only	P0	Yes	Automated
+OPH-BRAND-DUPLICATE-UI-1	Brand workspace actions	Brand	Product row actions are visible	UI-only	P0	Yes	Automated
+OPH-BRAND-AI-GENERATE-UI-1	Brand workspace actions	Brand	Open AI generate without consuming credits	UI-only	P0	Yes	Automated
+OPH-BRAND-DIST-CONNECT-UI-1	Brand workspace actions	Brand	Distributions page shows channel controls	UI-only	P0	Yes	Automated
+OPH-BRAND-IMPORT-FILE-UI-1	Brand workspace actions	Brand	Import dropzone is visible without upload	UI-only	P0	Yes	Automated
+OPH-BRAND-STRIPE-UI-1	Brand workspace actions	Brand	Choose Plan is visible without Stripe checkout	UI-only	P0	Yes	Automated
+OPH-BRAND-PASSWORD-UI-1	Brand workspace actions	Brand	Security settings password controls without submit	UI-only	P0	Yes	Automated
+OPH-BRAND-CATALOG-STATUS-1	Brand workspace actions	Brand	Switch All Active Draft Archive chips	Live catalog chips	P0	Yes	Automated
+OPH-BRAND-CATALOG-SEARCH-1	Brand workspace actions	Brand	Search product catalog by SKU or title	Search product catalog by SKU or title	P0	Yes	Automated
+OPH-BRAND-CATALOG-LIST-VIEW-1	Brand workspace actions	Brand	Toggle list view	Toggle list view	P0	Yes	Automated
+OPH-BRAND-CATALOG-RESET-1	Brand workspace actions	Brand	Reset catalog filters	Reset catalog filters	P0	Yes	Automated
+OPH-BRAND-CATALOG-SELECT-ALL-1	Brand workspace actions	Brand	Select all catalog rows	Select all catalog rows	P0	Yes	Automated
+OPH-BRAND-CATALOG-PAGINATION-1	Brand workspace actions	Brand	Catalog previous and next	Catalog previous and next	P0	Yes	Automated
+OPH-BRAND-CATALOG-MANAGE-PLAN-1	Brand workspace actions	Brand	Manage plan from catalog	Manage plan from catalog	P0	Yes	Automated
+OPH-BRAND-ADD-FIELDS-1	Brand workspace actions	Brand	Fill tags features specs shipping without save	Fill tags features specs shipping without save	P0	Yes	Automated
+OPH-BRAND-ADD-GENERATOR-1	Brand workspace actions	Brand	Launch AI generator then dismiss	Launch AI generator then dismiss	P0	Yes	Automated
+OPH-BRAND-ADD-CANCEL-1	Brand workspace actions	Brand	Cancel add product without saving	Cancel add product without saving	P0	Yes	Automated
+OPH-BRAND-DQ-REFRESH-1	Brand workspace actions	Brand	Refresh data quality dashboard	Refresh data quality dashboard	P0	Yes	Automated
+OPH-BRAND-DQ-EXPORT-REPORT-1	Brand workspace actions	Brand	Export report control is visible	Export report control is visible	P0	Yes	Automated
+OPH-BRAND-DQ-ROADMAP-1	Brand workspace actions	Brand	View full improvement roadmap	View full improvement roadmap	P0	Yes	Automated
+OPH-BRAND-EXPORT-FORMATS-1	Brand workspace actions	Brand	Switch CSV Excel JSON export formats	Switch CSV Excel JSON export formats	P0	Yes	Automated
+OPH-BRAND-EXPORT-CUSTOMIZE-1	Brand workspace actions	Brand	Open customize export fields	Open customize export fields	P0	Yes	Automated
+OPH-BRAND-EXPORT-LOGS-1	Brand workspace actions	Brand	Open export logs tab	Open export logs tab	P0	Yes	Automated
+OPH-BRAND-EXPORT-EDIT-SETTINGS-1	Brand workspace actions	Brand	Edit in Settings from export	Edit in Settings from export	P0	Yes	Automated
+OPH-BRAND-IMPORT-SAMPLES-1	Brand workspace actions	Brand	Download sample CSV and JSON controls	Download sample CSV and JSON controls	P0	Yes	Automated
+OPH-BRAND-IMPORT-FORMAT-1	Brand workspace actions	Brand	Toggle CSV and JSON import formats	Toggle CSV and JSON import formats	P0	Yes	Automated
+OPH-BRAND-IMPORT-CANCEL-1	Brand workspace actions	Brand	Cancel import without starting	Cancel import without starting	P0	Yes	Automated
+OPH-BRAND-SETTINGS-REMAINING-1	Brand workspace actions	Brand	Walk remaining brand settings tabs	Brand registry through Request form	P0	Yes	Automated
+OPH-BRAND-ACCESS-SEARCH-1	Brand workspace actions	Brand	Search client access hub	Search client access hub	P0	Yes	Automated
+OPH-BRAND-SUB-SHOW-MORE-1	Brand workspace actions	Brand	Expand subscription feature lists	Expand subscription feature lists	P0	Yes	Automated
+OPH-BRAND-SUB-CLEAR-PLAN-1	Brand workspace actions	Brand	Clear local plan without checkout	Clear local plan without checkout	P0	Yes	Automated

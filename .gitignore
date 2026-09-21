@@ -12,3 +12,6 @@ node_modules/
 
 # Local secrets
 .env
+
+# Local UX-module backend install
+/local/AutopartMarketplaceBackend/node_modules/

@@ -106,7 +106,7 @@ export async function openSellerApplication(page) {
   await gotoOneDirectBuy(page, "/vendor/seller-application");
   await expect(
     page
-      .getByRole("heading", { name: /Apply to sell on OneDirect Buy/i })
+      .getByRole("heading", { name: /Apply to sell on OneDirect\s?Buy/i })
       .or(page.getByRole("heading", { name: /Seller Application|Become a (Seller|Vendor)/i }))
       .or(page.getByText(/Seller Application/i))
       .first(),

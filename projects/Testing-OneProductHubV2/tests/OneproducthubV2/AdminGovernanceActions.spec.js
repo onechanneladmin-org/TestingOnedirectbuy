@@ -32,7 +32,11 @@ test.describe("One Product Hub V2 — admin governance actions", () => {
         timeout: STEP_TIMEOUT,
       });
       for (const tab of ["Permissions", "Roles", "Users"]) {
-        await page.getByRole("button", { name: tab }).click();
+        await page
+          .getByRole("button", { name: tab })
+          .or(page.getByRole("tab", { name: tab }))
+          .first()
+          .click();
         await expect(page.getByRole("heading", { name: /RBAC/i })).toBeVisible();
       }
       await expect(
@@ -49,12 +53,22 @@ test.describe("One Product Hub V2 — admin governance actions", () => {
     await soft("OPH-ADMIN-SUBSCRIPTION-EDITOR-1", "Open admin subscription plan editor", async () => {
       await signInAsAdmin(page);
       await clickSidebarNav(page, "Subscription");
-      await expect(page.getByRole("heading", { name: /Subscription|Choose Your Plan/i })).toBeVisible({
+      await expect(page.getByRole("heading", { name: /Subscription|Choose Your Plan/i }).first()).toBeVisible({
         timeout: STEP_TIMEOUT,
       });
-      await expect(page.getByRole("button", { name: /^Preview$/i })).toBeVisible();
-      await expect(page.getByRole("button", { name: /Edit plans/i })).toBeVisible();
-      await expect(page.getByRole("button", { name: /Stripe settings/i })).toBeVisible();
+      await expect(
+        page
+          .getByRole("button", { name: /^Preview$/i })
+          .or(page.getByRole("tab", { name: /^Preview$/i }))
+          .or(page.getByText(/^Preview$/))
+          .first(),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /Edit plans/i }).or(page.getByRole("tab", { name: /Edit plans/i })).first(),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /Stripe settings/i }).or(page.getByRole("tab", { name: /Stripe settings/i })).first(),
+      ).toBeVisible();
       await expect(page.getByRole("button", { name: /Save to API|Reset draft/i }).first()).toBeVisible();
       await capturePageOrModal(page, "Admin subscription editor");
     });
@@ -89,7 +103,8 @@ test.describe("One Product Hub V2 — admin governance actions", () => {
         const btn = page.getByRole("button", { name: new RegExp(section, "i") });
         if ((await btn.count()) > 0) await btn.first().click();
       }
-      await expect(page.getByRole("button", { name: /Save profile/i })).toBeVisible();
+      await page.getByRole("button", { name: /^Profile$/i }).first().click();
+      await expect(page.getByRole("button", { name: /Save profile/i }).first()).toBeVisible();
       await capturePageOrModal(page, "Admin settings sections");
     });
   });

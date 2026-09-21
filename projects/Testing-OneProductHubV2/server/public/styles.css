@@ -431,6 +431,10 @@ body {
   background: transparent;
 }
 
+#btnLastRun {
+  white-space: nowrap;
+}
+
 .btn.sm {
   padding: 0.35rem 0.7rem;
   font-size: 0.8rem;

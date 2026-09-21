@@ -922,9 +922,9 @@ Backend module validation from [AutopartMarketplaceBackend/tests](../../OneDirec
 | Specs | [`tests/OneDirectBuy/ux-modules/`](../tests/OneDirectBuy/ux-modules/) |
 | Catalogs | matching `*.tsv` files in the same folder |
 | Runner | Playwright `soft()` wraps the original Jest or `node --test` script |
-| Backend path | `ODB_BACKEND_ROOT`, else sibling `../OneDirectBuy/AutopartMarketplaceBackend` |
+| Backend path | `ODB_BACKEND_ROOT`, else `local/AutopartMarketplaceBackend` in this repo |
 
-If the backend repo or its `node_modules` is missing, specs skip. Install backend deps with `pnpm install` in AutopartMarketplaceBackend before running.
+If `node_modules` is missing, the runner installs backend deps automatically. Generate/refresh the local backend with `node scripts/setup-local-ux-backend.js`.
 
 ```bash
 npx cross-env CI_TESTS_CONFIG=flows.config.json node scripts/run-ci-tests.js flow:30

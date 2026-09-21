@@ -45,6 +45,10 @@ export async function waitForAppShell(page) {
     .getByText(/Restoring session|Checking sign-in/i)
     .waitFor({ state: "hidden", timeout: STEP_TIMEOUT })
     .catch(() => {});
+  const dismiss = page.getByRole("button", { name: /Dismiss suggestions/i });
+  if (await dismiss.first().isVisible().catch(() => false)) {
+    await dismiss.first().click().catch(() => {});
+  }
 }
 
 /** Assert the current public landing page is visible. */
@@ -87,4 +91,33 @@ export async function expectHeading(page, name) {
   await expect(page.getByRole("heading", { name }).first()).toBeVisible({
     timeout: STEP_TIMEOUT,
   });
+}
+
+/**
+ * Click a settings sidebar/section button by exact-ish label.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} section
+ */
+export async function openSettingsSection(page, section) {
+  const btn = page.getByRole("button", {
+    name: new RegExp(`^${section.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
+  });
+  await expect(btn.first()).toBeVisible({ timeout: STEP_TIMEOUT });
+  await btn.first().click();
+  await capturePageOrModal(page, `Settings — ${section}`);
+}
+
+/**
+ * Close a modal/dialog without submitting.
+ * @param {import('@playwright/test').Page} page
+ */
+export async function dismissDialog(page) {
+  const cancel = page
+    .getByRole("button", { name: /^(Cancel|Close|Back|Dismiss|Not now)$/i })
+    .first();
+  if (await cancel.isVisible().catch(() => false)) {
+    await cancel.click();
+    return;
+  }
+  await page.keyboard.press("Escape").catch(() => {});
 }

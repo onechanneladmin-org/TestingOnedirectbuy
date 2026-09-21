@@ -68,6 +68,7 @@ export function isExpectedAbsentOnStorefront(err) {
     /no tax estimate/i.test(msg) ||
     /no shipping estimate/i.test(msg) ||
     /No Remove coupon/i.test(msg) ||
+    /Cart accepted quantity 9999 with no stock validation/i.test(msg) ||
     /no billing-same-as-shipping/i.test(msg) ||
     /no same-as-shipping control/i.test(msg) ||
     /No over-stock validation/i.test(msg) ||

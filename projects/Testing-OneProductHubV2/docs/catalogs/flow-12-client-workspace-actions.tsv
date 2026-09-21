@@ -7,5 +7,9 @@ OPH-CLIENT-NOTIFICATIONS-1	Client workspace actions	Client	Open activity and not
 OPH-CLIENT-MANAGE-PLAN-1	Client workspace actions	Client	Manage plan from client dashboard	Plans: Free Growth Scale	P0	Yes	Automated
 OPH-CLIENT-SETTINGS-SECTIONS-1	Client workspace actions	Client	Open profile security account and Save profile	Open profile security account and Save profile	P0	Yes	Automated
 OPH-CLIENT-TEAM-INVITE-1	Client workspace actions	Client	Fill team invite name and email without sending	Fill team invite name and email without sending	P0	Yes	Automated
-UC-149	Client workspace actions	Client	Submit a live access request that creates a pending row	Depends on available brands	P2	No	Missing
-UC-150	Client workspace actions	Client	Complete client plan checkout	Paid path	P2	No	Missing
+OPH-CLIENT-REQUEST-FORM-UI-1	Client workspace actions	Client	Open request access form without submitting	UI-only	P0	Yes	Automated
+OPH-CLIENT-CHECKOUT-UI-1	Client workspace actions	Client	Client plans visible without checkout	UI-only	P0	Yes	Automated
+OPH-CLIENT-EXPORT-DIRECTORY-1	Client workspace actions	Client	Export empty state goes to brand directory	Export empty state goes to brand directory	P0	Yes	Automated
+OPH-CLIENT-CHANGELOG-SIDEBAR-1	Client workspace actions	Client	Open product change log from sidebar	Open product change log from sidebar	P0	Yes	Automated
+OPH-CLIENT-TEAM-SEARCH-1	Client workspace actions	Client	Search team members	Search team members	P0	Yes	Automated
+OPH-CLIENT-TEAM-INVITE-OPEN-1	Client workspace actions	Client	Open invite member without sending	Open invite member without sending	P0	Yes	Automated

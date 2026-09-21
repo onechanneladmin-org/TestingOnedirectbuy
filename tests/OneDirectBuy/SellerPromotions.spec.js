@@ -38,8 +38,14 @@ test.describe("OneDirectBuy — Seller promotions (storefront)", () => {
       await page.getByRole("button", { name: /^Apply$/i }).click();
       await expect(
         page
-          .locator(".ant-notification-notice")
-          .filter({ hasText: /Invalid or expired coupon code/i }),
+          .locator(
+            ".ant-notification-notice, .ant-message-notice, .ant-message, [role='alert']",
+          )
+          .filter({
+            hasText: /invalid|expired|not found|coupon code|does not exist/i,
+          })
+          .or(page.getByText(/Invalid or expired coupon code|invalid coupon/i))
+          .first(),
       ).toBeVisible({ timeout: 15_000 });
     });
   });

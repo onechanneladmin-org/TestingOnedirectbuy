@@ -125,7 +125,8 @@
         "tests/OneproducthubV2/PublicStartFree.spec.js",
         "tests/OneproducthubV2/PublicBookDemo.spec.js",
         "tests/OneproducthubV2/PublicPricingFaq.spec.js",
-        "tests/OneproducthubV2/PublicMarketingPages.spec.js"
+        "tests/OneproducthubV2/PublicMarketingPages.spec.js",
+        "tests/OneproducthubV2/PublicHomeInteractions.spec.js"
       ],
       "catalog": "docs/catalogs/flow-09-public-marketing.tsv"
     },
@@ -137,7 +138,8 @@
         "tests/OneproducthubV2/SignupValidation.spec.js",
         "tests/OneproducthubV2/ForgotPasswordSubmit.spec.js",
         "tests/OneproducthubV2/LogoutBrandAdmin.spec.js",
-        "tests/OneproducthubV2/AuthEdgeCases.spec.js"
+        "tests/OneproducthubV2/AuthEdgeCases.spec.js",
+        "tests/OneproducthubV2/SignupFillWithoutSubmit.spec.js"
       ],
       "catalog": "docs/catalogs/flow-10-auth-hardening.tsv"
     },
@@ -151,7 +153,12 @@
         "tests/OneproducthubV2/BrandAddProductValidation.spec.js",
         "tests/OneproducthubV2/BrandStudioSearchFilter.spec.js",
         "tests/OneproducthubV2/BrandSettingsSubscription.spec.js",
-        "tests/OneproducthubV2/BrandDataOpsActions.spec.js"
+        "tests/OneproducthubV2/BrandDataOpsActions.spec.js",
+        "tests/OneproducthubV2/BrandCatalogFilters.spec.js",
+        "tests/OneproducthubV2/BrandAddProductFields.spec.js",
+        "tests/OneproducthubV2/BrandDataQualityActions.spec.js",
+        "tests/OneproducthubV2/BrandSettingsRemaining.spec.js",
+        "tests/OneproducthubV2/BrandUiOnlyMutations.spec.js"
       ],
       "catalog": "docs/catalogs/flow-11-brand-workspace-actions.tsv"
     },
@@ -162,7 +169,8 @@
       "tests": [
         "tests/OneproducthubV2/ClientBlogGuides.spec.js",
         "tests/OneproducthubV2/ClientCatalogAccessActions.spec.js",
-        "tests/OneproducthubV2/ClientAccountActions.spec.js"
+        "tests/OneproducthubV2/ClientAccountActions.spec.js",
+        "tests/OneproducthubV2/ClientDirectoryAndExport.spec.js"
       ],
       "catalog": "docs/catalogs/flow-12-client-workspace-actions.tsv"
     },
@@ -172,7 +180,9 @@
       "enabled": true,
       "tests": [
         "tests/OneproducthubV2/AdminBlogGuides.spec.js",
-        "tests/OneproducthubV2/AdminGovernanceActions.spec.js"
+        "tests/OneproducthubV2/AdminGovernanceActions.spec.js",
+        "tests/OneproducthubV2/AdminRegistryAndRbac.spec.js",
+        "tests/OneproducthubV2/AdminUiOnlyMutations.spec.js"
       ],
       "catalog": "docs/catalogs/flow-13-admin-governance-actions.tsv"
     },
@@ -181,7 +191,8 @@
       "name": "E2E access request",
       "enabled": true,
       "tests": [
-        "tests/OneproducthubV2/E2E_ClientRequestAccess.spec.js"
+        "tests/OneproducthubV2/E2E_ClientRequestAccess.spec.js",
+        "tests/OneproducthubV2/E2E_ApproveAccessUiOnly.spec.js"
       ],
       "catalog": "docs/catalogs/flow-14-e2e-access-request.tsv"
     }

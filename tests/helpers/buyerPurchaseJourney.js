@@ -5,7 +5,6 @@
 import { expect } from "@playwright/test";
 import {
   ensureLoggedInBuyer,
-  hasBuyerCredentials,
   fillInputField,
 } from "./oneDirectBuyAuth.js";
 import {
@@ -13,6 +12,7 @@ import {
   dismissCookieBanner,
   waitForCartReady,
   waitForShopProducts,
+  addFirstProductToCartFromShop,
   ONE_DIRECT_BUY_BASE_URL,
 } from "./oneDirectBuyNav.js";
 import {
@@ -244,6 +244,16 @@ export async function addProductAndOpenCart(page) {
     // Retry once — logged-in cart sync is occasionally delayed / dropped.
     added = await openSearchAndAdd();
     await dismissErrorModal(page);
+    await gotoOneDirectBuy(page, "/account/shopping-cart");
+    await waitForCartReady(page);
+    empty = await page
+      .getByText(/Your cart is empty/i)
+      .isVisible({ timeout: 3_000 })
+      .catch(() => false);
+  }
+
+  if (empty) {
+    await addFirstProductToCartFromShop(page).catch(() => {});
     await gotoOneDirectBuy(page, "/account/shopping-cart");
     await waitForCartReady(page);
     empty = await page
@@ -565,7 +575,9 @@ export async function attemptPlaceOrder(page) {
     .first();
 
   // If rates failed, try editing ZIP once more before giving up on Pay now.
-  const noQuotes = page.getByText(/No shipping quotes for this ZIP/i);
+  const noQuotes = page.getByText(
+    /No shipping quotes for this (city and )?ZIP/i,
+  );
   if (await noQuotes.isVisible({ timeout: 3_000 }).catch(() => false)) {
     const edit = page.getByRole("button", { name: /edit/i }).or(page.locator('[aria-label*="dit" i]')).first();
     if (await edit.isVisible({ timeout: 3_000 }).catch(() => false)) {
@@ -588,7 +600,9 @@ export async function attemptPlaceOrder(page) {
 
   if (!(await payBtn.isVisible({ timeout: 30_000 }).catch(() => false))) {
     const hint = await page
-      .getByText(/No shipping quotes|Select a shipping method above to enable payment/i)
+      .getByText(
+        /No shipping quotes for this city and ZIP|No shipping quotes|Select a shipping method above to enable payment/i,
+      )
       .first()
       .innerText()
       .catch(() => "");
@@ -670,25 +684,21 @@ export async function attemptPlaceOrder(page) {
  * @param {string} [orderHint]
  */
 export async function assertOrderInAccount(page, orderHint = "") {
-  // Checkout often runs as guest contact email even after an earlier login —
-  // re-authenticate before asserting Orders.
-  if (hasBuyerCredentials()) {
-    await loginForPurchase(page);
-  }
-
+  const { ensureLoggedInBuyer } = await import("./oneDirectBuyAuth.js");
+  await ensureLoggedInBuyer(page);
   await gotoOneDirectBuy(page, "/account/orders");
 
   if (/\/account\/login/i.test(page.url())) {
-    await loginForPurchase(page);
+    await ensureLoggedInBuyer(page);
     await gotoOneDirectBuy(page, "/account/orders");
   }
 
   await expect(page).not.toHaveURL(/\/account\/login$/, { timeout: 15_000 });
 
   const heading = page
-    .getByRole("heading", { name: /Orders|My Orders|Order History/i })
-    .or(page.getByText(/Recent orders|Your orders/i))
-    .or(page.locator(".ps-widget--account-dashboard").getByText(/^Orders$/i))
+    .getByRole("heading", { name: /Orders|My Orders|Order History|Your Orders/i })
+    .or(page.getByText(/Recent orders|Your orders|no orders? yet|You don't have any orders/i))
+    .or(page.locator("article, table, .ps-table, .account-orders").first())
     .first();
   await expect(heading).toBeVisible({ timeout: 30_000 });
 

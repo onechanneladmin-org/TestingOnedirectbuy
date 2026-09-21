@@ -3,6 +3,7 @@ import {
   gotoOneDirectBuy,
   dismissCookieBanner,
   dismissAssistantOverlay,
+  recoverAccountLoadError,
 } from "./oneDirectBuyNav.js";
 
 export const ONE_DIRECT_BUY_BUYER_CREDENTIALS = {
@@ -183,6 +184,7 @@ export async function gotoAuthenticatedPage(page, path, credentials) {
         .then(() => true)
         .catch(() => false);
       if (landed && !page.url().includes("/account/login")) {
+        await recoverAccountLoadError(page);
         return;
       }
     }

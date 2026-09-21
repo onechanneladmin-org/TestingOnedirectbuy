@@ -129,11 +129,15 @@ test.describe("OneDirectBuy — Product Detail (guest)", () => {
       const wish = pdpWishlist(page);
       await expect(wish).toBeVisible({ timeout: 10_000 });
       await wish.click({ force: true });
-      const modal = page.locator(".ant-modal, .ant-notification, [role='dialog']").filter({
-        hasText: /Sign in required|Log in to save items/i,
-      });
+      const modal = page
+        .locator(".ant-modal, .ant-notification, [role='dialog']")
+        .filter({
+          hasText: /Sign in required|Log in to save items|save items to your Wishlist/i,
+        });
       const signinHeading = page.getByRole("heading", { name: /^Welcome back$/i });
-      const signinBtn = page.getByRole("button", { name: /^Sign in$/i });
+      const signinBtn = page
+        .getByRole("button", { name: /^Log in$/i })
+        .or(page.getByRole("button", { name: /^Sign in$/i }));
       const onLogin = /\/account\/login/i.test(page.url());
       if (
         onLogin ||

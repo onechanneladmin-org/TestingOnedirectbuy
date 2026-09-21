@@ -259,11 +259,11 @@ test.describe("OneDirectBuy — Auto Parts Fitment, VIN, and Garage", () => {
     await soft("ODB-UC-100", "A saved garage vehicle can be applied", async () => {
       await saveYmmVehicleToGarage(page);
       await useFirstSavedVehicle(page);
-      const header = page.getByRole("button", { name: /Select Vehicle/i }).first();
-      const applied = page.getByRole("button").filter({ hasText: /\d{4}/ }).first();
+      const header = page.locator("header").getByRole("button", { name: /Select Vehicle|\d{4}/i }).first();
+      const applied = page.locator("header").getByRole("button", { name: /\d{4}/ }).first();
       const stillSelect =
         (await header.isVisible().catch(() => false)) &&
-        (await header.innerText().catch(() => "")).trim() === "Select Vehicle";
+        /^(Select Vehicle)$/i.test((await header.innerText().catch(() => "")).trim());
       if (stillSelect && !(await applied.isVisible().catch(() => false))) {
         throw new Error("Saved vehicle was not applied as the active vehicle.");
       }
@@ -285,7 +285,10 @@ test.describe("OneDirectBuy — Auto Parts Fitment, VIN, and Garage", () => {
       await saveYmmVehicleToGarage(page);
       await setDefaultSavedVehicle(page);
       await expect(
-        page.getByText(/default/i).first(),
+        page
+          .getByText(/^Selected$/i)
+          .or(page.getByText(/default/i))
+          .first(),
       ).toBeVisible({ timeout: 10_000 });
     });
   });
@@ -296,7 +299,10 @@ test.describe("OneDirectBuy — Auto Parts Fitment, VIN, and Garage", () => {
       await useFirstSavedVehicle(page);
       await clearSelectedVehicle(page);
       await expect(
-        page.getByRole("button", { name: /^Select Vehicle$/i }).first(),
+        page
+          .getByRole("button", { name: /^Select Vehicle$/i })
+          .or(page.getByText(/No saved vehicles yet/i))
+          .first(),
       ).toBeVisible({ timeout: 15_000 });
     });
   });

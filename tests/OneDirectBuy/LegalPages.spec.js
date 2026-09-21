@@ -54,7 +54,11 @@ test.describe("OneDirectBuy — Legal Pages", () => {
     }) => {
       await soft(legalPage.id, `Open ${legalPage.path} with matching heading`, async () => {
         await gotoOneDirectBuy(page, legalPage.path);
-        await expect(page).toHaveURL(new RegExp(legalPage.path.replace(/\//g, "\\/")));
+        const urlRe =
+          legalPage.path === "/info/terms-of-service"
+            ? /\/info\/terms(?:-of)?-service/
+            : new RegExp(legalPage.path.replace(/\//g, "\\/"));
+        await expect(page).toHaveURL(urlRe);
         await expect(
           page.getByRole("heading", { name: legalPage.title }).first(),
         ).toBeVisible({ timeout: 30_000 });
@@ -69,7 +73,7 @@ test.describe("OneDirectBuy — Legal Pages", () => {
     await soft("ODB-UC-382", "/info/policies hub cards", async () => {
       await gotoOneDirectBuy(page, "/info/policies");
       await expect(
-        page.getByRole("heading", { name: /^Policies & Legal$/i }),
+        page.getByRole("heading", { name: /^Policies & Legal$/i }).first(),
       ).toBeVisible({ timeout: 20_000 });
       await expect(
         page.getByRole("link", { name: /Privacy Policy/i }).first(),
@@ -86,11 +90,16 @@ test.describe("OneDirectBuy — Legal Pages", () => {
   test("ODB-UC-383: HTML sitemap page is available", async ({ page, soft }) => {
     await soft("ODB-UC-383", "/info/sitemap heading + XML link", async () => {
       await gotoOneDirectBuy(page, "/info/sitemap");
-      await expect(page.getByRole("heading", { name: /^Sitemap$/i })).toBeVisible({
+      await expect(
+        page.getByRole("heading", { name: /^(HTML )?Sitemap$/i }).first(),
+      ).toBeVisible({
         timeout: 20_000,
       });
       await expect(
-        page.getByRole("link", { name: /sitemap.*\.xml|\/sitemap\//i }).first(),
+        page
+          .locator('a[href*="sitemap"][href$=".xml"]')
+          .or(page.getByRole("link", { name: /sitemap.*\.xml|XML sitemap|\/sitemap\//i }))
+          .first(),
       ).toBeVisible();
     });
   });
@@ -102,7 +111,7 @@ test.describe("OneDirectBuy — Legal Pages", () => {
     await soft("ODB-UC-384", "Privacy policy page shows © year", async () => {
       await gotoOneDirectBuy(page, "/info/privacy-policy");
       await expect(
-        page.getByRole("heading", { name: /^Privacy Policy$/i }),
+        page.getByRole("heading", { name: /^Privacy Policy$/i }).first(),
       ).toBeVisible({ timeout: 20_000 });
       await expect(page.getByText(/©\s*2026|All Rights Reserved/i).first()).toBeVisible();
     });

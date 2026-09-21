@@ -18,12 +18,13 @@ test.describe("One Product Hub V2 — client account actions", () => {
         page.getByText(/notification|activity|no (new )?notification/i).first(),
       ).toBeVisible({ timeout: STEP_TIMEOUT });
       await capturePageOrModal(page, "Client notifications");
+      await page.keyboard.press("Escape");
     });
 
     await soft("OPH-CLIENT-MANAGE-PLAN-1", "Manage plan from client dashboard", async () => {
-      const manage = page.getByRole("button", { name: /Manage plan/i });
+      const manage = page.getByRole("button", { name: /Manage plan/i }).first();
       await expect(manage).toBeVisible({ timeout: STEP_TIMEOUT });
-      await manage.click();
+      await manage.click({ force: true });
       await expect(
         page.getByRole("heading", { name: /Subscription|Free Plan|Growth Plan/i }).first(),
       ).toBeVisible({ timeout: STEP_TIMEOUT });
@@ -44,6 +45,7 @@ test.describe("One Product Hub V2 — client account actions", () => {
         const btn = page.getByRole("button", { name: new RegExp(`^${section}$`, "i") });
         if ((await btn.count()) > 0) await btn.first().click();
       }
+      await page.getByRole("button", { name: /^Profile$/i }).first().click();
       await expect(page.getByRole("button", { name: /Save profile/i })).toBeVisible();
       await capturePageOrModal(page, "Client settings sections");
     });

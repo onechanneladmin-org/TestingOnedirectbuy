@@ -1,5 +1,5 @@
 import { test, expect } from "../helpers/softTest.js";
-import { gotoOneDirectBuy } from "../helpers/oneDirectBuyNav.js";
+import { gotoOneDirectBuy, recoverAccountLoadError } from "../helpers/oneDirectBuyNav.js";
 import {
   ensureLoggedInBuyer,
   logoutBuyer,
@@ -48,29 +48,53 @@ test.describe("OneDirectBuy — Authenticated Buyer Account", () => {
         "/account/user-information",
         ONE_DIRECT_BUY_BUYER_CREDENTIALS,
       );
-      await expect(
-        page.getByRole("heading", { name: /Account Information/i }).first(),
-      ).toBeVisible({ timeout: 20_000 });
+      await page.waitForTimeout(2_000);
 
       const saveBtn = page.getByRole("button", { name: /update profile/i });
 
-      async function waitForProfileForm() {
-        await expect(saveBtn.first()).toBeVisible({ timeout: 30_000 });
-        const lastNameField = page
-          .getByRole("textbox", { name: /Last name\s*\*/i })
-          .or(page.getByRole("textbox", { name: /Last name/i }))
-          .first();
-        await expect(lastNameField).toBeVisible({ timeout: 45_000 });
+      async function profileNameInput() {
+        const labels = [
+          page.getByRole("textbox", { name: /Last name/i }),
+          page.getByRole("textbox", { name: /First name/i }),
+          page.getByRole("textbox", { name: /^Full name/i }),
+          page.getByRole("textbox", { name: /^Name/i }),
+        ];
+        for (const loc of labels) {
+          if (await loc.first().isVisible({ timeout: 2_000 }).catch(() => false)) {
+            return loc.first();
+          }
+        }
+        return labels[0].first();
       }
 
-      await waitForProfileForm();
+      async function waitForProfileForm() {
+        for (let attempt = 0; attempt < 6; attempt++) {
+          if (attempt > 0) {
+            const infoLink = page
+              .locator(".ps-widget--account-dashboard a")
+              .filter({ hasText: /Account Information/i })
+              .first();
+            if (await infoLink.isVisible().catch(() => false)) {
+              await infoLink.click();
+              await page.waitForTimeout(1_000);
+            }
+          }
+          await recoverAccountLoadError(page);
+          if (await saveBtn.first().isVisible({ timeout: 4_000 }).catch(() => false)) {
+            const field = await profileNameInput();
+            if (await field.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              return field;
+            }
+          }
+          await page.reload({ waitUntil: "domcontentloaded" });
+          await page.waitForTimeout(2_000);
+        }
+        throw new Error(
+          "Account Information did not load after retries (We could not load your profile).",
+        );
+      }
 
-      // Make the test deterministic: edit the visible "Last name" field by label.
-      // (Placeholders vary between renders; label/role is stable.)
-      const lastNameInput = page
-        .getByRole("textbox", { name: /Last name\s*\*/i })
-        .or(page.getByRole("textbox", { name: /Last name/i }))
-        .first();
+      const lastNameInput = await waitForProfileForm();
       await expect(lastNameInput).toBeVisible({ timeout: 15_000 });
 
       const original = (await lastNameInput.inputValue()) || "Oneauto";

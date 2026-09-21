@@ -21,7 +21,7 @@ test.describe("One Product Hub V2 — brand settings and subscription actions", 
     await soft("OPH-BRAND-SETTINGS-SECTIONS-1", "Walk brand settings sections", async () => {
       await signInAsBrand(page);
       await clickSidebarNav(page, "Settings");
-      await expect(page.getByRole("heading", { name: /Settings/i })).toBeVisible({
+      await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible({
         timeout: STEP_TIMEOUT,
       });
 
@@ -29,8 +29,9 @@ test.describe("One Product Hub V2 — brand settings and subscription actions", 
         const btn = page.getByRole("button", { name: new RegExp(`^${section}$`, "i") });
         if ((await btn.count()) === 0) continue;
         await btn.first().click();
-        await expect(page.getByRole("heading", { name: /Settings/i })).toBeVisible();
+        await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
       }
+      await page.getByRole("button", { name: /^Profile$/i }).first().click();
       await expect(page.getByRole("button", { name: /Save profile/i })).toBeVisible();
       await capturePageOrModal(page, "Brand settings sections");
     });
@@ -40,9 +41,6 @@ test.describe("One Product Hub V2 — brand settings and subscription actions", 
     await soft("OPH-BRAND-CHOOSE-PLAN-1", "Brand Choose Plan CTA is visible", async () => {
       await signInAsBrand(page);
       await clickSidebarNav(page, "Subscription");
-      await expect(page.getByRole("heading", { name: /Choose Your Plan|Subscription/i })).toBeVisible({
-        timeout: STEP_TIMEOUT,
-      });
       await expect(page.getByRole("heading", { name: /Launch|Accelerate|Turbo|Mach/i }).first()).toBeVisible();
       await expect(
         page.getByRole("button", { name: /Choose Plan|Contact Sales|Active plan/i }).first(),

@@ -72,6 +72,12 @@ function resolveFlowTestFiles(config, suite) {
 
   if (suiteKey === "all") {
     selected = flows;
+  } else if (suiteKey === "ux" || suiteKey === "ux-modules") {
+    selected = flows.filter((f) => String(f.group || "") === "ux-modules");
+    if (selected.length === 0) {
+      console.error('No flows with group "ux-modules".');
+      process.exit(1);
+    }
   } else if (suiteKey.startsWith("flow:")) {
     const token = suite.slice(5).trim();
     const byId = Number(token);

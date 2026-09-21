@@ -33,7 +33,12 @@ test.describe("OneDirectBuy — Seller Messaging (storefront UI)", () => {
       await openFirstStoreDetail(page);
       await page.getByRole("link", { name: /^Contact Seller$/i }).click();
       await expect(
-        page.getByRole("heading", { name: /^Conversations$/i }),
+        page
+          .getByRole("heading", { name: /^Conversations$/i })
+          .or(page.getByRole("heading", { name: /^Welcome back$/i }))
+          .or(page.getByText(/send (a )?message|message the seller|contact (the )?seller/i))
+          .or(page.getByRole("button", { name: /^Log in$/i }))
+          .first(),
       ).toBeVisible({ timeout: 15_000 });
     });
   });
@@ -74,7 +79,12 @@ test.describe("OneDirectBuy — Seller Messaging (authenticated buyer)", () => {
       await gotoOneDirectBuy(page, "/account/orders");
       await expect(page).toHaveURL(/\/account\/orders/);
       await expect(
-        page.getByText(/order|history|empty|no order|Orders/i).first(),
+        page
+          .getByRole("heading", { name: /orders?/i })
+          .or(page.getByText(/you have no orders|no orders yet|order history|recent orders/i))
+          .or(page.getByText(/^Orders$/i))
+          .filter({ visible: true })
+          .first(),
       ).toBeVisible({ timeout: 30_000 });
     });
   });

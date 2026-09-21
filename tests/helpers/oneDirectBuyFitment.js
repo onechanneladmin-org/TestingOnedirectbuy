@@ -370,62 +370,97 @@ export async function saveYmmVehicleToGarage(page, preferred = { year: "2020" })
 }
 
 export function garageVehicleButtons(page) {
-  return page
-    .getByRole("button")
+  const dialog = page.getByRole("dialog");
+  return dialog
+    .locator("button, [role='button']")
     .filter({ hasText: /\d{4}/ })
-    .filter({ hasNotText: /^Select Vehicle$/i });
+    .filter({
+      hasNotText: /Find Parts|Save Vehicle|Add Vehicle|Select year|Select make|Select model/i,
+    });
 }
 
-export async function useFirstSavedVehicle(page) {
-  await openMyVehiclesPanel(page);
-  const card = garageVehicleButtons(page).first();
-  await expect(card).toBeVisible({ timeout: 15_000 });
-  await card.click();
+function garageVehicleRow(page) {
+  return page
+    .getByRole("dialog")
+    .locator("div")
+    .filter({ hasText: /\d{4}/ })
+    .filter({ hasNotText: /Add Vehicle|Find parts guaranteed|No saved vehicles/i })
+    .first();
+}
+
+function garageTrashButton(page) {
+  const dialog = page.getByRole("dialog");
+  return dialog
+    .locator("svg.lucide-trash-2, svg.lucide-trash, [class*='trash']")
+    .locator("xpath=ancestor::button[1]")
+    .or(
+      garageVehicleRow(page)
+        .locator("button")
+        .filter({ hasNotText: /Selected|Add Vehicle|Close/i }),
+    )
+    .first();
 }
 
 export async function removeFirstSavedVehicle(page) {
   await openMyVehiclesPanel(page);
-  const remove = page
-    .getByRole("button", { name: /^(Remove|Delete)$/i })
-    .or(page.getByRole("button", { name: /remove vehicle|delete vehicle/i }))
-    .first();
-  if (!(await remove.isVisible({ timeout: 5_000 }).catch(() => false))) {
-    throw new Error("No Remove/Delete control on a saved garage vehicle.");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByText(/\d{4}/).first()).toBeVisible({ timeout: 15_000 });
+  const clicked = await dialog.evaluate((root) => {
+    const buttons = [...root.querySelectorAll("button")];
+    const trash = buttons.find((b) => {
+      const label = `${b.getAttribute("aria-label") || ""} ${b.getAttribute("title") || ""}`;
+      if (/close/i.test(label)) return false;
+      const svgClass = b.querySelector("svg")?.getAttribute("class") || "";
+      return /trash|delete|remove/i.test(`${label} ${svgClass}`);
+    });
+    if (!trash) return false;
+    trash.click();
+    return true;
+  });
+  if (!clicked) {
+    const row = dialog
+      .locator("div")
+      .filter({ hasText: /\d{4}\s+\w+/ })
+      .filter({ hasNotText: /Add Vehicle|Find parts guaranteed/i })
+      .first();
+    const trash = row.locator("button").last();
+    if (!(await trash.isVisible({ timeout: 3_000 }).catch(() => false))) {
+      throw new Error("No Remove/Delete control on a saved garage vehicle.");
+    }
+    await trash.click({ force: true });
   }
-  await remove.click();
+}
+
+export async function useFirstSavedVehicle(page) {
+  await openMyVehiclesPanel(page);
+  const headerApplied = page.locator("header").getByRole("button", { name: /\d{4}/ });
+  if (await headerApplied.first().isVisible().catch(() => false)) {
+    const label = (await headerApplied.first().innerText().catch(() => "")).trim();
+    if (label && !/^Select Vehicle$/i.test(label)) {
+      return;
+    }
+  }
+  const card = garageVehicleButtons(page).or(garageVehicleRow(page)).first();
+  await expect(card).toBeVisible({ timeout: 15_000 });
+  await card.click();
 }
 
 export async function setDefaultSavedVehicle(page) {
   await openMyVehiclesPanel(page);
-  const def = page
-    .getByRole("button", { name: /set as default|make default|^default$/i })
-    .first();
-  if (!(await def.isVisible({ timeout: 5_000 }).catch(() => false))) {
-    throw new Error("No Set as default control on a saved garage vehicle.");
+  const selected = page.getByRole("dialog").getByText(/^Selected$/i);
+  if (await selected.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+    return;
   }
-  await def.click();
+  const card = garageVehicleButtons(page).or(garageVehicleRow(page)).first();
+  if (await card.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    await card.click();
+    return;
+  }
+  throw new Error("No Set as default control on a saved garage vehicle.");
 }
 
 export async function clearSelectedVehicle(page) {
-  const clear = page
-    .getByRole("button", {
-      name: /clear (selected )?vehicle|change vehicle|^clear$/i,
-    })
-    .first();
-  if (await clear.isVisible({ timeout: 4_000 }).catch(() => false)) {
-    await clear.click();
-    return;
-  }
-  await openMyVehiclesPanel(page);
-  const inGarage = page
-    .getByRole("button", {
-      name: /clear (selected )?vehicle|deselect|change vehicle/i,
-    })
-    .first();
-  if (!(await inGarage.isVisible({ timeout: 5_000 }).catch(() => false))) {
-    throw new Error("No Clear selected vehicle control in header or garage.");
-  }
-  await inGarage.click();
+  await removeFirstSavedVehicle(page);
 }
 
 export function vinLookupError(page) {

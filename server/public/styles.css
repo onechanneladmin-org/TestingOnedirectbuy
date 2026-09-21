@@ -292,9 +292,9 @@ body {
   margin: 0;
   color: var(--muted);
   font-size: 0.75rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.35;
+  white-space: normal;
+}
 }
 
 .stat-hint.pass {
@@ -719,6 +719,10 @@ h3 {
 
 .btn.ghost {
   background: transparent;
+}
+
+#btnLastRun {
+  white-space: nowrap;
 }
 
 .btn.danger {

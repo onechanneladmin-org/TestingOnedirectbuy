@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Flow Control Plane</title>
-    <link rel="stylesheet" href="/ui/styles.css?v=14" />
+    <link rel="stylesheet" href="/ui/styles.css?v=16" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
@@ -61,7 +61,7 @@
       <article class="stat-card">
         <p class="stat-label">Use cases</p>
         <p class="stat-value" id="statUseCases">0</p>
-        <p class="stat-hint">Sheet / catalog rows</p>
+        <p class="stat-hint" id="statUseCasesHint">Sheet / catalog rows</p>
       </article>
       <article class="stat-card">
         <p class="stat-label">Steps</p>
@@ -142,6 +142,15 @@
                 Headed browser
               </label>
               <span id="runBadge" class="status-pill idle">idle</span>
+              <button
+                type="button"
+                class="btn ghost"
+                id="btnLastRun"
+                disabled
+                title="No previous run for this flow"
+              >
+                Last run
+              </button>
               <button type="button" class="btn primary" id="btnRun">
                 <span class="btn-pulse" aria-hidden="true"></span>
                 <span id="btnRunLabel">Run flow</span>
@@ -244,6 +253,6 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="/ui/app.js?v=16" type="module"></script>
+    <script src="/ui/app.js?v=18" type="module"></script>
   </body>
 </html>

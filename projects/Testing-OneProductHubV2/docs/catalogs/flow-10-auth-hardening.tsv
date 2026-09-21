@@ -9,5 +9,5 @@ OPH-LOGIN-EMPTY-1	Auth hardening	Guest	Empty credentials stay on brand login	Emp
 OPH-SESSION-PERSIST-CLIENT-1	Auth hardening	Client	Client session survives full page reload	Client session survives full page reload	P0	Yes	Automated
 OPH-UNAUTH-GUARD-SETTINGS-1	Auth hardening	Guest	Guest #/settings shows public home	Guest #/settings shows public home	P0	Yes	Automated
 OPH-UNAUTH-GUARD-IMPORT-1	Auth hardening	Guest	Guest #/import shows public home	Guest #/import shows public home	P0	Yes	Automated
-UC-139	Auth hardening	Guest	Submit complete brand B2B registration	Creates a real account — keep manual	P2	No	Missing
-UC-140	Auth hardening	Guest	Submit complete client B2B registration	Creates a real account — keep manual	P2	No	Missing
+OPH-SIGNUP-BRAND-FILL-1	Auth hardening	Guest	Fill brand B2B registration without submit	UI-only does not create account	P0	Yes	Automated
+OPH-SIGNUP-CLIENT-FILL-1	Auth hardening	Guest	Fill client B2B registration without submit	UI-only does not create account	P0	Yes	Automated

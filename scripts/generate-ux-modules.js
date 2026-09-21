@@ -424,22 +424,28 @@ for (const mod of modules) {
 
   const tests = mod.cases
     .map(
-      ([id, title]) => `  test("${esc(id)}: ${esc(title)}", async ({ soft }) => {
+      ([id, title]) => `  test("${esc(id)}: ${esc(title)}", async ({ page, soft, captureStep }) => {
     await soft("${esc(id)}", "${esc(title)}", async () => {
-      await runUxModuleCase({
+      await runUxValidatedCase(page, captureStep, {
+        id: "${esc(id)}",
+        title: "${esc(title)}",
         file: "${esc(mod.file)}",
         testName: "${esc(title)}",
         runner: "${mod.runner}",
+        slug: "${esc(mod.slug)}",
       });
     });
   });`,
     )
     .join("\n\n");
 
-  const spec = `import { test } from "../../helpers/softTest.js";
-import { runUxModuleCase, backendSkipReason } from "../../helpers/uxModules.js";
+  const spec = `import { test } from "../../fixtures/uxModuleTest.js";
+import { backendSkipReason } from "../../helpers/uxModules.js";
+import { runUxValidatedCase } from "../../helpers/uxUi.js";
 
 test.describe("${esc(mod.describe)}", () => {
+  test.use({ viewport: { width: 1920, height: 1080 } });
+
   test.beforeEach(() => {
     const reason = backendSkipReason();
     test.skip(Boolean(reason), reason || "Backend unavailable");

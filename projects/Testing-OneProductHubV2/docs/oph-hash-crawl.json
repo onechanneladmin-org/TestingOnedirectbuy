@@ -11,7 +11,8 @@
           "ProductHub",
           "Workspace Overview",
           "Recent Products",
-          "Selected brand"
+          "Selected brand",
+          "Conversations"
         ],
         "buttons": [
           "Client Access Manage client requests",
@@ -33,9 +34,27 @@
           "Reliable Professional Hazard Lights HAZARD123 $10.00 In Stock",
           "MyNewProduct NEWSKU11 $10.00 In Stock",
           "View all products",
-          "TestBrand Approved anuragsinghg999@gmail.com 3 products"
+          "TestBrand Approved anuragsinghg999@gmail.com 3 products",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "products",
@@ -44,7 +63,8 @@
         "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
         "headings": [
           "ProductHub",
-          "Product Catalog"
+          "Product Catalog",
+          "Conversations"
         ],
         "buttons": [
           "Client Access Manage client requests",
@@ -84,7 +104,9 @@
           "Next"
         ],
         "fields": [
-          "Search SKUs, Titles, UPC..."
+          "Search SKUs, Titles, UPC...",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -101,7 +123,8 @@
           "Shipping Details",
           "Product Tags",
           "Product Features",
-          "Product Specifications"
+          "Product Specifications",
+          "Conversations"
         ],
         "buttons": [
           "Client Access Manage client requests",
@@ -123,7 +146,22 @@
           "Draft",
           "TestBrand",
           "Select a category",
-          "Add"
+          "Add",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo"
         ],
         "fields": [
           "Enter product name",
@@ -138,7 +176,9 @@
           "e.g., wireless, eco-friendly, premium",
           "e.g., Premium Construction, Energy Efficient",
           "e.g., Color, Size, Material",
-          "e.g., Blue, Large, Cotton"
+          "e.g., Blue, Large, Cotton",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -150,7 +190,8 @@
           "ProductHub",
           "Workspace Overview",
           "Recent Products",
-          "Selected brand"
+          "Selected brand",
+          "Conversations"
         ],
         "buttons": [
           "Client Access Manage client requests",
@@ -169,9 +210,30 @@
           "Add Product",
           "Upgrade now",
           "View all",
-          "View all products"
+          "High-Visibility Hazard Lights PRD11 $100.00 In Stock",
+          "Reliable Professional Hazard Lights HAZARD123 $10.00 In Stock",
+          "MyNewProduct NEWSKU11 $10.00 In Stock",
+          "View all products",
+          "TestBrand Approved anuragsinghg999@gmail.com 3 products",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "client-access",
@@ -180,7 +242,8 @@
         "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
         "headings": [
           "ProductHub",
-          "Client Access Hub"
+          "Client Access Hub",
+          "Conversations"
         ],
         "buttons": [
           "Client Access Manage client requests",
@@ -202,10 +265,27 @@
           "Revoked",
           "Client",
           "Company",
-          "Applied"
+          "Applied",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo"
         ],
         "fields": [
-          "Search by name, email, or company..."
+          "Search by name, email, or company...",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -218,7 +298,8 @@
           "Data Quality Dashboard",
           "Category Health",
           "Recent Data Issues",
-          "Improvement Roadmap"
+          "Improvement Roadmap",
+          "Conversations"
         ],
         "buttons": [
           "Client Access Manage client requests",
@@ -241,9 +322,26 @@
           "Expand product descriptions High Aim for at least 50 characters with use-case and specs. 1",
           "Assign distribution channels Medium Link products to channels so feeds and exports stay co",
           "Publish draft products Medium Activate completed drafts so clients can discover and order ",
-          "View Full Roadmap"
+          "View Full Roadmap",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "export",
@@ -254,7 +352,8 @@
           "ProductHub",
           "Product Export",
           "Export format",
-          "Export summary"
+          "Export summary",
+          "Conversations"
         ],
         "buttons": [
           "Client Access Manage client requests",
@@ -278,9 +377,25 @@
           "JSON Best for API / data pipelines",
           "7/25 Fields selected",
           "Export products now",
-          "Customize export fields (7/25 selected)"
+          "Customize export fields (7/25 selected)",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "import",
@@ -292,7 +407,8 @@
           "Product Import Center",
           "Upload file",
           "File format",
-          "Field mapping"
+          "Field mapping",
+          "Conversations"
         ],
         "buttons": [
           "Client Access Manage client requests",
@@ -316,10 +432,25 @@
           "Cancel",
           "Preview Import",
           "Start Import",
-          "Go to Subscription"
+          "Go to Subscription",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?"
         ],
         "fields": [
-          "e.g. attributes.Finish, features.0"
+          "e.g. attributes.Finish, features.0",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -331,7 +462,8 @@
           "ProductHub",
           "Workspace Overview",
           "Recent Products",
-          "Selected brand"
+          "Selected brand",
+          "Conversations"
         ],
         "buttons": [
           "Client Access Manage client requests",
@@ -350,9 +482,30 @@
           "Add Product",
           "Upgrade now",
           "View all",
-          "View all products"
+          "High-Visibility Hazard Lights PRD11 $100.00 In Stock",
+          "Reliable Professional Hazard Lights HAZARD123 $10.00 In Stock",
+          "MyNewProduct NEWSKU11 $10.00 In Stock",
+          "View all products",
+          "TestBrand Approved anuragsinghg999@gmail.com 3 products",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "blog",
@@ -362,7 +515,8 @@
         "headings": [
           "ProductHub",
           "OneProductHub Blog",
-          "No Articles Published Yet"
+          "No Articles Published Yet",
+          "Conversations"
         ],
         "buttons": [
           "Client Access Manage client requests",
@@ -384,10 +538,27 @@
           "All Articles (0)",
           "Explore OneProductHub",
           "Privacy Policy",
-          "Terms of Service"
+          "Terms of Service",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo"
         ],
         "fields": [
-          "Search articles..."
+          "Search articles...",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -399,7 +570,8 @@
           "ProductHub",
           "Workspace Overview",
           "Recent Products",
-          "Selected brand"
+          "Selected brand",
+          "Conversations"
         ],
         "buttons": [
           "Client Access Manage client requests",
@@ -418,9 +590,1006 @@
           "Add Product",
           "Upgrade now",
           "View all",
-          "View all products"
+          "High-Visibility Hazard Lights PRD11 $100.00 In Stock",
+          "Reliable Professional Hazard Lights HAZARD123 $10.00 In Stock",
+          "MyNewProduct NEWSKU11 $10.00 In Stock",
+          "View all products",
+          "TestBrand Approved anuragsinghg999@gmail.com 3 products",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "subscription",
+        "url": "https://oneproducthub.com/#/subscription",
+        "hash": "#/subscription",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Subscription",
+          "Choose Your Plan",
+          "Launch",
+          "Accelerate",
+          "Turbo",
+          "Mach",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Settings",
+          "Clear local plan",
+          "Show 2 more",
+          "Active plan",
+          "Show 6 more",
+          "Choose Plan",
+          "Show 12 more",
+          "Show 17 more",
+          "Contact Sales",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?"
+        ],
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings",
+        "url": "https://oneproducthub.com/#/settings",
+        "hash": "#/settings",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Profile & onboarding",
+          "Contact & company",
+          "Business address",
+          "Authorized signatory",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Save profile",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "+1 (555) 000-0000",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=profile",
+        "url": "https://oneproducthub.com/#/settings?section=profile",
+        "hash": "#/settings?section=profile",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Profile & onboarding",
+          "Contact & company",
+          "Business address",
+          "Authorized signatory",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Save profile",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "+1 (555) 000-0000",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=general",
+        "url": "https://oneproducthub.com/#/settings?section=general",
+        "hash": "#/settings?section=general",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "General settings",
+          "Regional & file defaults",
+          "Organization information",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "CSV",
+          "Eastern (US)",
+          "MM/DD/YYYY",
+          "Upload logo",
+          "Save changes",
+          "Open assistant",
+          "AI Assistant▾"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Acme Corp",
+          "https://company.com",
+          "+1 (555) 000-0000",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=notifications",
+        "url": "https://oneproducthub.com/#/settings?section=notifications",
+        "hash": "#/settings?section=notifications",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Notification preferences",
+          "Email notifications",
+          "Browser push",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Save notification preferences",
+          "Enable browser push",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=email",
+        "url": "https://oneproducthub.com/#/settings?section=email",
+        "hash": "#/settings?section=email",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Email configuration",
+          "SMTP settings",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Save email configuration",
+          "Test SMTP connection",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=security",
+        "url": "https://oneproducthub.com/#/settings?section=security",
+        "hash": "#/settings?section=security",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Security & access control",
+          "Password & MFA",
+          "Access restrictions",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Update password",
+          "Refresh status",
+          "Save changes",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "203.0.113.10\n198.51.100.0/24",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=branding",
+        "url": "https://oneproducthub.com/#/settings?section=branding",
+        "hash": "#/settings?section=branding",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Branding settings",
+          "Logo & company details",
+          "Brand colors",
+          "Email appearance",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Upload logo",
+          "Light",
+          "Save changes",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "© Your company · Support contact",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=brand-registry",
+        "url": "https://oneproducthub.com/#/settings?section=brand-registry",
+        "hash": "#/settings?section=brand-registry",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Request brand",
+          "Approved Brands",
+          "My Requests",
+          "Filters",
+          "TestBrand",
+          "Request New Brand",
+          "Open assistant"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search brands by name, key, email, or description...",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=categories",
+        "url": "https://oneproducthub.com/#/settings?section=categories",
+        "hash": "#/settings?section=categories",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Categories",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Add category",
+          "Edit Bedding",
+          "Delete Bedding",
+          "Edit Lights",
+          "Delete Lights",
+          "Edit Safety Lights",
+          "Delete Safety Lights"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search categories…",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=product-feeds",
+        "url": "https://oneproducthub.com/#/settings?section=product-feeds",
+        "hash": "#/settings?section=product-feeds",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Product feed settings",
+          "Feed configuration",
+          "Validation rules",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Daily",
+          "Default catalog",
+          "Save changes",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=feed-export",
+        "url": "https://oneproducthub.com/#/settings?section=feed-export",
+        "hash": "#/settings?section=feed-export",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Feed & export settings",
+          "Automatic feed generation",
+          "Default export fields",
+          "Export templates & preferences",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Daily",
+          "Standard catalog",
+          "Save changes",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=data-export",
+        "url": "https://oneproducthub.com/#/settings?section=data-export",
+        "hash": "#/settings?section=data-export",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Data & export controls",
+          "Export permissions & formats",
+          "Restricted data fields",
+          "Retention & templates",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Standard catalog",
+          "Save changes",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "cost, margin, supplier_id",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=api",
+        "url": "https://oneproducthub.com/#/settings?section=api",
+        "hash": "#/settings?section=api",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "API & integrations",
+          "API access configuration",
+          "Webhook settings",
+          "AI generation (OpenAI & Gemini)",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "API documentation",
+          "OpenAI",
+          "Save AI keys",
+          "Approve keys",
+          "Save changes",
+          "Open assistant",
+          "AI Assistant▾"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "https://…",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=account",
+        "url": "https://oneproducthub.com/#/settings?section=account",
+        "hash": "#/settings?section=account",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Account & subscription",
+          "Current plan",
+          "Billing information",
+          "Usage statistics",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Upgrade plan",
+          "Compare plans",
+          "Save changes",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=audit",
+        "url": "https://oneproducthub.com/#/settings?section=audit",
+        "hash": "#/settings?section=audit",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Audit & activity logs",
+          "Log retention",
+          "Login activity",
+          "Export activity",
+          "API key events",
+          "Download history",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Save changes",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=request-form",
+        "url": "https://oneproducthub.com/#/settings?section=request-form",
+        "hash": "#/settings?section=request-form",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Access request form",
+          "Form settings",
+          "Form fields",
+          "Additional information",
+          "Conversations"
+        ],
+        "buttons": [
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Hide preview",
+          "Save form",
+          "Short text",
+          "Long text",
+          "File upload",
+          "Move field up",
+          "Move field down"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Shown to clients above your custom fields",
+          "Brief instructions for clients",
+          "e.g. Company registration number",
+          "Hint text inside the field",
+          "Short guidance shown below the field",
+          ".pdf,.png,.jpg,.doc,.docx",
+          "Describe your company and how you plan to use our catalog…",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       }
     ]
   },
@@ -437,7 +1606,8 @@
           "Welcome back, Anurag Singh!",
           "Brands you can access",
           "Subscription & billing",
-          "Your account"
+          "Your account",
+          "Conversations"
         ],
         "buttons": [
           "Brand Directory Browse brands",
@@ -450,13 +1620,35 @@
           "Sign Out",
           "Open activity and notifications",
           "Open settings",
-          "Go to subscription",
+          "View plans",
           "Brands you can access Open the directory to request access or manage approved catalogues. ",
           "View brands",
           "Subscription & billing Current plan: Free Plan · 0/2 brands · 0/100 products Manage plan",
-          "Manage plan"
+          "Manage plan",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?",
+          "Voice input",
+          "Send"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "brands",
@@ -469,7 +1661,8 @@
           "Profile & onboarding",
           "Contact & company",
           "Business address",
-          "Authorized signatory"
+          "Authorized signatory",
+          "Conversations"
         ],
         "buttons": [
           "Brand Directory Browse brands",
@@ -487,11 +1680,32 @@
           "General",
           "Security",
           "Account",
-          "Save profile"
+          "Save profile",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?",
+          "Voice input",
+          "Send"
         ],
         "fields": [
           "settings-section-mobile",
-          "+1 (555) 000-0000"
+          "+1 (555) 000-0000",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -503,7 +1717,8 @@
           "ProductHub",
           "Workspace Overview",
           "Recent Products",
-          "Your Workspace"
+          "Your Workspace",
+          "Conversations"
         ],
         "buttons": [
           "Brand Directory Browse brands",
@@ -525,9 +1740,27 @@
           "Spark Plugs Set AP-01003 $45.99 In Stock",
           "Brake Rotors Pair AP-01004 $149.99 In Stock",
           "View all products",
-          "AutoPro Elite Approved 40 products"
+          "AutoPro Elite Approved 40 products",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "export",
@@ -536,7 +1769,8 @@
         "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
         "headings": [
           "ProductHub",
-          "Product Export"
+          "Product Export",
+          "Conversations"
         ],
         "buttons": [
           "Brand Directory Browse brands",
@@ -550,9 +1784,31 @@
           "Open activity and notifications",
           "Open settings",
           "Back to Dashboard",
-          "Go to Brand Directory"
+          "Go to Brand Directory",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?",
+          "Voice input",
+          "Send"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "changelog",
@@ -563,7 +1819,8 @@
           "ProductHub",
           "Workspace Overview",
           "Recent Products",
-          "Your Workspace"
+          "Your Workspace",
+          "Conversations"
         ],
         "buttons": [
           "Brand Directory Browse brands",
@@ -585,9 +1842,27 @@
           "Spark Plugs Set AP-01003 $45.99 In Stock",
           "Brake Rotors Pair AP-01004 $149.99 In Stock",
           "View all products",
-          "AutoPro Elite Approved 40 products"
+          "AutoPro Elite Approved 40 products",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "blog",
@@ -597,7 +1872,8 @@
         "headings": [
           "ProductHub",
           "OneProductHub Blog",
-          "No Articles Published Yet"
+          "No Articles Published Yet",
+          "Conversations"
         ],
         "buttons": [
           "Brand Directory Browse brands",
@@ -617,10 +1893,29 @@
           "All Articles (0)",
           "Explore OneProductHub",
           "Privacy Policy",
-          "Terms of Service"
+          "Terms of Service",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?"
         ],
         "fields": [
-          "Search articles..."
+          "Search articles...",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -631,7 +1926,8 @@
         "headings": [
           "ProductHub",
           "Saved draft requests",
-          "No drafts saved"
+          "No drafts saved",
+          "Conversations"
         ],
         "buttons": [
           "Brand Directory Browse brands",
@@ -645,9 +1941,31 @@
           "Open activity and notifications",
           "Open settings",
           "Back to Brand Directory",
-          "Browse brands"
+          "Browse brands",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?",
+          "Voice input",
+          "Send"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "client-team",
@@ -656,7 +1974,8 @@
         "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
         "headings": [
           "ProductHub",
-          "Team Members"
+          "Team Members",
+          "Conversations"
         ],
         "buttons": [
           "Brand Directory Browse brands",
@@ -671,10 +1990,313 @@
           "Open settings",
           "Back to Dashboard",
           "Invite member",
-          "Try again"
+          "Try again",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?",
+          "Voice input",
+          "Send"
         ],
         "fields": [
-          "Search by name or email…"
+          "Search by name or email…",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "subscription",
+        "url": "https://oneproducthub.com/#/subscription",
+        "hash": "#/subscription",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Client Subscription",
+          "Free Plan",
+          "Growth Plan",
+          "Scale Plan",
+          "Conversations"
+        ],
+        "buttons": [
+          "Brand Directory Browse brands",
+          "Product Catalog View Products",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "Open activity and notifications",
+          "Open settings",
+          "Back to Settings",
+          "Active plan",
+          "Choose Plan",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?",
+          "Voice input",
+          "Send"
+        ],
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings",
+        "url": "https://oneproducthub.com/#/settings",
+        "hash": "#/settings",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Profile & onboarding",
+          "Contact & company",
+          "Business address",
+          "Authorized signatory",
+          "Conversations"
+        ],
+        "buttons": [
+          "Brand Directory Browse brands",
+          "Product Catalog View Products",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "Open activity and notifications",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Security",
+          "Account",
+          "Save profile",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?",
+          "Voice input",
+          "Send"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "+1 (555) 000-0000",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=profile",
+        "url": "https://oneproducthub.com/#/settings?section=profile",
+        "hash": "#/settings?section=profile",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Profile & onboarding",
+          "Contact & company",
+          "Business address",
+          "Authorized signatory",
+          "Conversations"
+        ],
+        "buttons": [
+          "Brand Directory Browse brands",
+          "Product Catalog View Products",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "Open activity and notifications",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Security",
+          "Account",
+          "Save profile",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?",
+          "Voice input",
+          "Send"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "+1 (555) 000-0000",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=security",
+        "url": "https://oneproducthub.com/#/settings?section=security",
+        "hash": "#/settings?section=security",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Security & access control",
+          "Password & MFA",
+          "Access restrictions",
+          "Conversations"
+        ],
+        "buttons": [
+          "Brand Directory Browse brands",
+          "Product Catalog View Products",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "Open activity and notifications",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Security",
+          "Account",
+          "Update password",
+          "Refresh status",
+          "Save changes",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "203.0.113.10\n198.51.100.0/24",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=account",
+        "url": "https://oneproducthub.com/#/settings?section=account",
+        "hash": "#/settings?section=account",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Account & subscription",
+          "Current plan",
+          "Billing information",
+          "Usage statistics",
+          "Conversations"
+        ],
+        "buttons": [
+          "Brand Directory Browse brands",
+          "Product Catalog View Products",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "Open activity and notifications",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Security",
+          "Account",
+          "Upgrade plan",
+          "Compare plans",
+          "Save changes",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       }
     ]
@@ -691,7 +2313,8 @@
           "ProductHub",
           "Admin Dashboard",
           "Pending Client Approvals",
-          "Pending Brand Requests"
+          "Pending Brand Requests",
+          "Conversations"
         ],
         "buttons": [
           "Workspace Brand overview",
@@ -710,9 +2333,30 @@
           "Subscription",
           "Sign Out",
           "Open settings",
-          "View All"
+          "View All",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo",
+          "How do I contact sales?",
+          "Does OneProductHub use AI for product content?",
+          "Voice input"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "clients",
@@ -721,7 +2365,8 @@
         "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
         "headings": [
           "ProductHub",
-          "Client Access Hub"
+          "Client Access Hub",
+          "Conversations"
         ],
         "buttons": [
           "Workspace Brand overview",
@@ -752,10 +2397,18 @@
           "Company",
           "Applied",
           "S",
-          "srihari"
+          "srihari",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations"
         ],
         "fields": [
-          "Search by name, email, or company..."
+          "Search by name, email, or company...",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -765,7 +2418,8 @@
         "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
         "headings": [
           "ProductHub",
-          "Brand Registry"
+          "Brand Registry",
+          "Conversations"
         ],
         "buttons": [
           "Workspace Brand overview",
@@ -793,10 +2447,21 @@
           "Approval Requests",
           "Revoked Access",
           "Filters",
-          "TestBrand"
+          "TestBrand",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat"
         ],
         "fields": [
-          "Search brands by name, key, email, or description..."
+          "Search brands by name, key, email, or description...",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -806,7 +2471,8 @@
         "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
         "headings": [
           "ProductHub",
-          "Settings"
+          "Settings",
+          "Conversations"
         ],
         "buttons": [
           "Workspace Brand overview",
@@ -847,7 +2513,9 @@
         ],
         "fields": [
           "settings-section-mobile",
-          "Search brands by name, key, email, or description..."
+          "Search brands by name, key, email, or description...",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -857,7 +2525,8 @@
         "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
         "headings": [
           "ProductHub",
-          "Page not found"
+          "Page not found",
+          "Conversations"
         ],
         "buttons": [
           "Workspace Brand overview",
@@ -879,9 +2548,27 @@
           "1",
           "Open settings",
           "Back to Dashboard",
-          "Back to Platform"
+          "Back to Platform",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo"
         ],
-        "fields": []
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
       },
       {
         "requested": "products",
@@ -890,7 +2577,8 @@
         "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
         "headings": [
           "ProductHub",
-          "Product Catalog"
+          "Product Catalog",
+          "Conversations"
         ],
         "buttons": [
           "Workspace Brand overview",
@@ -930,7 +2618,9 @@
           "TP-001"
         ],
         "fields": [
-          "Search SKUs, Titles, UPC..."
+          "Search SKUs, Titles, UPC...",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -940,7 +2630,8 @@
         "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
         "headings": [
           "ProductHub",
-          "RBAC Administration"
+          "RBAC Administration",
+          "Conversations"
         ],
         "buttons": [
           "Workspace Brand overview",
@@ -968,10 +2659,21 @@
           "Users",
           "Create permission",
           "Bulk create",
-          "Apply filter"
+          "Apply filter",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat"
         ],
         "fields": [
-          "Search permissions..."
+          "Search permissions...",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       },
       {
@@ -982,7 +2684,8 @@
         "headings": [
           "ProductHub",
           "OneProductHub Blog",
-          "No Articles Published Yet"
+          "No Articles Published Yet",
+          "Conversations"
         ],
         "buttons": [
           "Workspace Brand overview",
@@ -1010,10 +2713,697 @@
           "All Articles (0)",
           "Explore OneProductHub",
           "Privacy Policy",
-          "Terms of Service"
+          "Terms of Service",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat"
         ],
         "fields": [
-          "Search articles..."
+          "Search articles...",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "client-access",
+        "url": "https://oneproducthub.com/#/client-access",
+        "hash": "#/client-access",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Client Access Hub",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Export",
+          "Pending 1",
+          "Approved 2",
+          "Revoked",
+          "Client",
+          "Company",
+          "Applied",
+          "S",
+          "srihari",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation"
+        ],
+        "fields": [
+          "Search by name, email, or company...",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "data-quality",
+        "url": "https://oneproducthub.com/#/data-quality",
+        "hash": "#/data-quality",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Data Quality",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Back to dashboard",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation",
+          "Speak with Assistant",
+          "Live chat",
+          "Connect with admin",
+          "Dismiss suggestions",
+          "What is OneProductHub?",
+          "How does PIM work?",
+          "Can I distribute product data to retailers?",
+          "Request a demo"
+        ],
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "import",
+        "url": "https://oneproducthub.com/#/import",
+        "hash": "#/import",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Product Import Center",
+          "Upload file",
+          "File format",
+          "Field mapping",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Drag & drop your file here or click to browse CSV or JSON · Max 5,000 rows per import · Ma",
+          "Download sample CSV",
+          "Download sample JSON",
+          "RECOMMENDED CSV Map using CSV headers",
+          "JSON Map using object keys",
+          "Cancel",
+          "Preview Import",
+          "Start Import",
+          "Go to Subscription",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation"
+        ],
+        "fields": [
+          "e.g. attributes.Finish, features.0",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "export",
+        "url": "https://oneproducthub.com/#/export",
+        "hash": "#/export",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Product Export",
+          "Export format",
+          "Export summary",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Export",
+          "Logs",
+          "Edit in Settings",
+          "RECOMMENDED CSV Best for spreadsheet use",
+          "Excel Best for Microsoft Excel",
+          "JSON Best for API / data pipelines",
+          "7/25 Fields selected",
+          "Export products now",
+          "Customize export fields (7/25 selected)",
+          "Open assistant",
+          "AI Assistant▾",
+          "+",
+          "Clear",
+          "Close",
+          "Close conversations",
+          "✎ New conversation"
+        ],
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "subscription",
+        "url": "https://oneproducthub.com/#/subscription",
+        "hash": "#/subscription",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Subscription",
+          "Choose Your Plan",
+          "Launch",
+          "Accelerate",
+          "Turbo",
+          "Mach",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Settings",
+          "Reset draft",
+          "Save to API",
+          "Preview",
+          "Edit plans",
+          "Stripe settings",
+          "Clear local plan",
+          "Show 2 more",
+          "Trial expired",
+          "Show 6 more",
+          "Choose Plan",
+          "Show 12 more",
+          "Show 17 more",
+          "Contact Sales",
+          "Open assistant",
+          "AI Assistant▾",
+          "+"
+        ],
+        "fields": [
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings",
+        "url": "https://oneproducthub.com/#/settings",
+        "hash": "#/settings",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Profile & onboarding",
+          "Contact & company",
+          "Business address",
+          "Authorized signatory",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Save profile"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "+1 (555) 000-0000",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=audit",
+        "url": "https://oneproducthub.com/#/settings?section=audit",
+        "hash": "#/settings?section=audit",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Audit & activity logs",
+          "Log retention",
+          "Login activity",
+          "Export activity",
+          "API key events",
+          "Download history",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Save changes"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=request-form",
+        "url": "https://oneproducthub.com/#/settings?section=request-form",
+        "hash": "#/settings?section=request-form",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Access request form",
+          "Form settings",
+          "Form fields",
+          "Additional information",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Hide preview"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Shown to clients above your custom fields",
+          "Brief instructions for clients",
+          "e.g. Company registration number",
+          "Hint text inside the field",
+          "Short guidance shown below the field",
+          ".pdf,.png,.jpg,.doc,.docx",
+          "Describe your company and how you plan to use our catalog…",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=api",
+        "url": "https://oneproducthub.com/#/settings?section=api",
+        "hash": "#/settings?section=api",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "API & integrations",
+          "API access configuration",
+          "Webhook settings",
+          "AI generation (OpenAI & Gemini)",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "API documentation"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "https://…",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=brand-registry",
+        "url": "https://oneproducthub.com/#/settings?section=brand-registry",
+        "hash": "#/settings?section=brand-registry",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Assign user"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search brands by name, key, email, or description...",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=categories",
+        "url": "https://oneproducthub.com/#/settings?section=categories",
+        "hash": "#/settings?section=categories",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Categories",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Add category"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search categories…",
+          "Search conversations…",
+          "Ask Assistant a question"
+        ]
+      },
+      {
+        "requested": "settings?section=product-feeds",
+        "url": "https://oneproducthub.com/#/settings?section=product-feeds",
+        "hash": "#/settings?section=product-feeds",
+        "title": "AI Product Data Enrichment and Sharing Platform | OneProductHub",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Product feed settings",
+          "Feed configuration",
+          "Validation rules",
+          "Conversations"
+        ],
+        "buttons": [
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Daily"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "Search conversations…",
+          "Ask Assistant a question"
         ]
       }
     ]

@@ -97,6 +97,14 @@ function flowGroup(f) {
   return "other";
 }
 
+function isMergedLegacyFlow(f) {
+  return /merged into/i.test(String(f.name || ""));
+}
+
+function activeFlows(flows = state.flows) {
+  return (flows || []).filter((f) => !isMergedLegacyFlow(f));
+}
+
 function flowIdSortKey(id) {
   const n = Number.parseFloat(id);
   return Number.isFinite(n) ? n : 0;
@@ -272,7 +280,7 @@ function renderFlowList() {
   const list = $("flowList");
   const flows = groupedTabFlows();
   const ucCount = filteredUseCases().length;
-  $("flowCount").textContent = `${flows.length} shown · ${state.flows.length} total · ${ucCount} use cases`;
+  $("flowCount").textContent = `${flows.length} shown · ${activeFlows().length} flows · ${ucCount} use cases`;
   renderStats();
 
   if (!flows.length && !ucCount) {
@@ -566,12 +574,11 @@ function selectFlow(flowId, useCaseId = null) {
       String(o.flowId) === state.selectedFlowId &&
       ["running", "queued"].includes(o.status),
   );
-  const latestOccForFlow =
-    activeOcc ||
-    (state.history || []).find((o) => String(o.flowId) === state.selectedFlowId);
 
-  if (latestOccForFlow) {
-    api(`/api/occurrences/${encodeURIComponent(latestOccForFlow.occurrenceId)}`)
+  syncLastRunButton();
+
+  if (activeOcc) {
+    api(`/api/occurrences/${encodeURIComponent(activeOcc.occurrenceId)}`)
       .then((occ) => {
         renderOccurrence(occ);
         if (["running", "queued"].includes(occ.status)) {
@@ -583,6 +590,70 @@ function selectFlow(flowId, useCaseId = null) {
       });
   } else {
     setLiveIdle();
+  }
+}
+
+function lastFinishedOccurrenceForFlow(flowId) {
+  if (!flowId) return null;
+  return (
+    (state.history || []).find(
+      (o) =>
+        String(o.flowId) === String(flowId) &&
+        ["passed", "failed", "cancelled"].includes(o.status),
+    ) || null
+  );
+}
+
+function lastRunButtonLabel(occ) {
+  if (!occ) return "Last run";
+  const passed = Number(occ.passed || 0);
+  const failed = Number(occ.failed || 0);
+  if (failed) return `Last run · ${failed} failed`;
+  if (passed) return `Last run · ${passed} passed`;
+  return `Last run · ${occ.status || "done"}`;
+}
+
+function syncLastRunButton() {
+  const btn = $("btnLastRun");
+  if (!btn) return;
+  const last = lastFinishedOccurrenceForFlow(state.selectedFlowId);
+  if (!last) {
+    btn.disabled = true;
+    btn.textContent = "Last run";
+    btn.title = "No previous run for this flow";
+    return;
+  }
+  btn.disabled = false;
+  btn.textContent = lastRunButtonLabel(last);
+  const when = formatTime(last.finishedAt || last.startedAt || last.createdAt);
+  const passed = Number(last.passed || 0);
+  const failed = Number(last.failed || 0);
+  const skipped = Number(last.skipped || 0);
+  btn.title = `${when} · ${passed} passed · ${failed} failed · ${skipped} skipped`;
+}
+
+function highlightHistory(occurrenceId) {
+  document.querySelectorAll(".history-item").forEach((el) => {
+    el.classList.toggle("active", el.dataset.id === String(occurrenceId || ""));
+  });
+}
+
+async function openLastRun() {
+  const last = lastFinishedOccurrenceForFlow(state.selectedFlowId);
+  if (!last) {
+    toast("No last run for this flow", true);
+    return;
+  }
+  try {
+    const occ = await api(
+      `/api/occurrences/${encodeURIComponent(last.occurrenceId)}`,
+    );
+    state.occurrenceId = occ.occurrenceId;
+    stopPolling();
+    renderOccurrence(occ);
+    highlightHistory(occ.occurrenceId);
+  } catch (err) {
+    toast(err.message, true);
   }
 }
 
@@ -599,6 +670,8 @@ function setLiveIdle() {
     '<p class="muted">Report appears when the occurrence finishes.</p>';
   state.lastOccurrence = null;
   state.occurrenceId = null;
+  highlightHistory(null);
+  syncLastRunButton();
   const flow = state.flows.find((f) => String(f.flowId) === state.selectedFlowId);
   if (!flow) return;
   if (hasSheetCatalog(flow) && !state.selectedUseCaseId) {
@@ -611,6 +684,8 @@ function setLiveIdle() {
 
 function renderOccurrence(occ) {
   state.lastOccurrence = occ;
+  highlightHistory(occ.occurrenceId);
+  syncLastRunButton();
   $("liveEmpty").classList.add("hidden");
   $("liveBody").classList.remove("hidden");
   $("runProgress").classList.remove("hidden");
@@ -971,23 +1046,41 @@ function watchQueue(total) {
 }
 
 function projectStats() {
-  const flows = state.flows || [];
+  const all = state.flows || [];
+  const flows = activeFlows(all);
+  const sheet = flows.filter(isSheetFlow);
+  const ux = flows.filter(isUxModuleFlow);
+  const other = flows.filter((f) => flowGroup(f) === "other");
   let steps = 0;
   const specs = new Set();
   let enabled = 0;
   for (const f of flows) {
     if (f.enabled) enabled += 1;
-    for (const t of f.tests || []) specs.add(t);
+    for (const t of f.tests || []) specs.add(String(t).replace(/\\/g, "/"));
     for (const s of f.steps || []) {
       const n = childCount(s);
       steps += n > 0 ? n : 1;
     }
   }
   const history = state.history || [];
+  const sheetUseCases = sheet.reduce(
+    (n, f) => n + (Array.isArray(f.steps) ? f.steps.length : 0),
+    0,
+  );
+  const uxCases = ux.reduce(
+    (n, f) => n + (Array.isArray(f.steps) ? f.steps.length : 0),
+    0,
+  );
   return {
     flows: flows.length,
+    sheet: sheet.length,
+    ux: ux.length,
+    other: other.length,
+    mergedOff: Math.max(0, all.length - flows.length),
     enabled,
-    useCases: catalogUseCases(flows).length,
+    disabled: flows.length - enabled,
+    useCases: sheetUseCases,
+    uxCases,
     steps,
     specs: specs.size,
     runs: history.length,
@@ -1008,8 +1101,24 @@ function renderStats() {
   if (!$("statStrip")) return;
   const s = projectStats();
   setText("statFlows", String(s.flows));
-  setText("statFlowsHint", `${s.enabled} enabled · ${s.flows - s.enabled} off`);
+  const flowParts = [];
+  if (s.sheet) flowParts.push(`${s.sheet} sheet`);
+  if (s.ux) flowParts.push(`${s.ux} UX`);
+  if (s.other) flowParts.push(`${s.other} other`);
+  if (s.mergedOff) flowParts.push(`${s.mergedOff} merged off`);
+  setText(
+    "statFlowsHint",
+    flowParts.length > 1
+      ? flowParts.join(" · ")
+      : `${s.enabled} enabled · ${s.disabled} off`,
+  );
   setText("statUseCases", String(s.useCases));
+  setText(
+    "statUseCasesHint",
+    s.uxCases
+      ? `Sheet rows · ${s.uxCases} UX cases`
+      : "Sheet / catalog rows",
+  );
   setText("statSteps", String(s.steps));
   setText("statSpecs", String(s.specs));
   setText("statRuns", String(s.runs));
@@ -1046,6 +1155,7 @@ async function loadHistory() {
   const items = data.occurrences || [];
   state.history = items;
   renderStats();
+  syncLastRunButton();
   $("runHistory").innerHTML = items.length
     ? items
         .map(
@@ -1263,6 +1373,9 @@ function bindUi() {
   });
 
   $("btnRun").addEventListener("click", runSelectedFlow);
+  $("btnLastRun")?.addEventListener("click", () =>
+    openLastRun().catch((e) => toast(e.message, true)),
+  );
   $("btnRunSelected")?.addEventListener("click", () =>
     runFlowQueue(selectedFlowIdsInOrder()),
   );
@@ -1298,6 +1411,10 @@ function bindUi() {
       chip.classList.add("active");
       chip.setAttribute("aria-selected", "true");
       state.groupTab = chip.dataset.group || "sheet";
+      const headed = $("headedMode");
+      if (headed && state.groupTab === "ux-modules") {
+        headed.checked = true;
+      }
       renderFlowList();
     });
   });
