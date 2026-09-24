@@ -17,6 +17,7 @@ const PATHS = {
   authDir: path.join(ROOT_DIR, "playwright", ".auth"),
   uiCapture: path.join(ROOT_DIR, "test-results", "ui-capture"),
   uiAnalysis: path.join(ROOT_DIR, "test-results", "ui-analysis"),
+  uiAudit: path.join(ROOT_DIR, "test-results", "ui-audit"),
   screenshots: path.join(ROOT_DIR, "test-results", "screenshots"),
   videos: path.join(ROOT_DIR, "test-results", "videos"),
   traces: path.join(ROOT_DIR, "test-results", "traces"),

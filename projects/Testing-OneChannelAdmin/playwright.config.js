@@ -115,6 +115,7 @@ export default defineConfig({
     ["json", { outputFile: jsonReportPath }],
     ["junit", { outputFile: junitReportPath }],
     ["./reporters/devIssuesReporter.js"],
+    ["./reporters/flowStepReporter.js"],
     // OpenAI UI analysis — opt-in via UI_ANALYSIS=1
     ...(process.env.UI_ANALYSIS === "1" || process.env.UI_ANALYSIS === "true"
       ? [["./reporters/uiAnalysisReporter.js"]]
@@ -159,6 +160,15 @@ export default defineConfig({
         ...(ci || process.env.PW_USE_CHROME === "0"
           ? {}
           : { channel: "chrome" }),
+      },
+    },
+    {
+      name: "ui-audit",
+      testDir: "./tests/ui-audit",
+      timeout: 60_000,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 720 },
       },
     },
   ],

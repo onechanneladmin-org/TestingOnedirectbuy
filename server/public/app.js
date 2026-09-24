@@ -268,7 +268,23 @@ function groupTabLabel(tab) {
   return "Sheet modules";
 }
 
+function selectGroupWithFlows() {
+  const order = ["sheet", "ux-modules", "other"];
+  const current = state.groupTab || "sheet";
+  const has = (tab) => filteredFlows().some((flow) => flowGroup(flow) === tab);
+  if (has(current)) return;
+  const next = order.find(has);
+  if (!next) return;
+  state.groupTab = next;
+  document.querySelectorAll(".rail-groups .chip").forEach((chip) => {
+    const on = chip.dataset.group === next;
+    chip.classList.toggle("active", on);
+    chip.setAttribute("aria-selected", on ? "true" : "false");
+  });
+}
+
 function renderFlowList() {
+  selectGroupWithFlows();
   const list = $("flowList");
   const flows = groupedTabFlows();
   const ucCount = filteredUseCases().length;

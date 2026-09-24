@@ -25,6 +25,11 @@ function resolvePlaywrightCli(projectRoot) {
 }
 
 function main() {
+  try {
+    require("dotenv").config({ path: path.join(HUB_ROOT, ".env") });
+  } catch {
+    // optional
+  }
   const metaPath = path.resolve(process.argv[2] || META_PATH);
   if (!fs.existsSync(metaPath)) {
     console.error(`Missing run meta: ${metaPath}`);
@@ -69,6 +74,12 @@ function main() {
   if (!fs.existsSync(projectRoot)) {
     console.error(`Project folder not found: ${projectRoot}`);
     process.exit(1);
+  }
+
+  try {
+    require("dotenv").config({ path: path.join(projectRoot, ".env") });
+  } catch {
+    // optional
   }
 
   const env = {
@@ -120,6 +131,14 @@ function main() {
     });
   } else {
     const tests = Array.isArray(meta.tests) ? meta.tests.filter(Boolean) : [];
+    const loginSpec = "tests/Onechanneladmin/login.spec.js";
+    if (
+      projectId === "onechanneladmin" &&
+      String(flowId) !== "1" &&
+      !tests.includes(loginSpec)
+    ) {
+      tests.unshift(loginSpec);
+    }
     if (!tests.length) {
       console.error("No test files in meta.tests and no run-ci-tests.js");
       process.exit(1);

@@ -30,7 +30,8 @@
         "tests/Onechanneladmin/catalogbundles.spec.js",
         "tests/Onechanneladmin/CatalogVariationflow.spec.js",
         "tests/Onechanneladmin/CatalogFitmentFlow.spec.js",
-        "tests/Onechanneladmin/CompleteProductFlow.spec.js"
+        "tests/Onechanneladmin/CompleteProductFlow.spec.js",
+        "tests/Onechanneladmin/catalog-ui-audit.spec.js"
       ]
     },
     {
