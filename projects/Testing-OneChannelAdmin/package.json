@@ -12,6 +12,7 @@
     "test:regression": "playwright test",
     "test:ui-audit:unit": "node --test lib/ui-audit/ui-audit.test.js",
     "test:ui-audit": "npm run test:ui-audit:unit && playwright test --project=ui-audit",
+    "test:catalog-audit": "playwright test tests/Onechanneladmin/catalog-ui-audit.spec.js --project=onechanneladmin",
     "report": "playwright show-report",
     "show-report": "playwright show-report",
     "upload-report": "tsx scripts/upload-report.ts",
