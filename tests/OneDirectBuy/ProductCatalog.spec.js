@@ -1,8 +1,6 @@
 import { test } from "../helpers/softTest.js";
-import {
-  sellerPortalNotOnStorefrontError,
-  sellerProductCatalogVisible,
-} from "../helpers/oneDirectBuySeller.js";
+import { assertMarketplaceGap } from "../helpers/marketplaceGapRules.js";
+import { sellerProductCatalogVisible } from "../helpers/oneDirectBuySeller.js";
 
 const DESKTOP = { width: 1920, height: 1080 };
 
@@ -11,17 +9,8 @@ async function requireCatalog(page, feature) {
   void feature;
 }
 
-function laterVersion(feature) {
-  return `${feature} is not implemented on the storefront (sheet: Later versions to include).`;
-}
 
-function newFunctionality(feature) {
-  return `${feature} is not on the storefront (sheet: New Functionality).`;
-}
 
-function testPending(feature) {
-  return `${feature} is not visible on the storefront (sheet: Test pending).`;
-}
 
 test.describe("OneDirectBuy — Product approval and catalog", () => {
   test.beforeEach(async ({ page }) => {
@@ -37,7 +26,7 @@ test.describe("OneDirectBuy — Product approval and catalog", () => {
   test("ODB-UC-216: add offer to existing product", async ({ page, soft }) => {
     await soft("ODB-UC-216", "Add offer to existing product (Test pending)", async () => {
       if (await sellerProductCatalogVisible(page)) return;
-      throw new Error(testPending("Add offer to existing product"));
+      assertMarketplaceGap("ODB-UC-216");
     });
   });
 
@@ -45,14 +34,14 @@ test.describe("OneDirectBuy — Product approval and catalog", () => {
     soft,
   }) => {
     await soft("ODB-UC-217", "Duplicate product detection (Later versions to include)", async () => {
-      throw new Error(laterVersion("Duplicate product detection"));
+      assertMarketplaceGap("ODB-UC-217");
     });
   });
 
   test("ODB-UC-218: required product field validation", async ({ page, soft }) => {
     await soft("ODB-UC-218", "Required product field validation (Test pending)", async () => {
       if (await sellerProductCatalogVisible(page)) return;
-      throw new Error(testPending("Required product field validation"));
+      assertMarketplaceGap("ODB-UC-218");
     });
   });
 
@@ -154,7 +143,7 @@ test.describe("OneDirectBuy — Product approval and catalog", () => {
 
   test("ODB-UC-235: flag banned product content", async ({ soft }) => {
     await soft("ODB-UC-235", "Flag banned product content (New Functionality)", async () => {
-      throw new Error(newFunctionality("Flag banned product content"));
+      assertMarketplaceGap("ODB-UC-235");
     });
   });
 
@@ -166,7 +155,7 @@ test.describe("OneDirectBuy — Product approval and catalog", () => {
 
   test("ODB-UC-237: reject misleading product claims", async ({ soft }) => {
     await soft("ODB-UC-237", "Reject misleading claims (New Functionality)", async () => {
-      throw new Error(newFunctionality("Reject misleading product claims"));
+      assertMarketplaceGap("ODB-UC-237");
     });
   });
 });

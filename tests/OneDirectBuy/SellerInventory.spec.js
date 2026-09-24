@@ -1,9 +1,7 @@
 import { test } from "../helpers/softTest.js";
+import { assertMarketplaceGap } from "../helpers/marketplaceGapRules.js";
 import { openKnownProductDetail } from "../helpers/oneDirectBuyNav.js";
-import {
-  sellerInventoryVisible,
-  sellerPortalNotOnStorefrontError,
-} from "../helpers/oneDirectBuySeller.js";
+import { sellerInventoryVisible } from "../helpers/oneDirectBuySeller.js";
 
 const DESKTOP = { width: 1920, height: 1080 };
 
@@ -12,13 +10,7 @@ async function requireInventory(page, feature) {
   void feature;
 }
 
-function newFunctionality(feature) {
-  return `${feature} is not on the storefront (sheet: New Functionality).`;
-}
 
-function pending(feature) {
-  return `${feature} is not visible on the storefront (sheet: Pending).`;
-}
 
 test.describe("OneDirectBuy — Seller inventory management", () => {
   test.beforeEach(async ({ page }) => {
@@ -55,13 +47,13 @@ test.describe("OneDirectBuy — Seller inventory management", () => {
   }) => {
     await soft("ODB-UC-255", "Inventory restored after cancellation (Pending)", async () => {
       if (await sellerInventoryVisible(page)) return;
-      throw new Error(pending("Inventory restored after cancellation"));
+      assertMarketplaceGap("ODB-UC-255");
     });
   });
 
   test("ODB-UC-256: low stock alert", async ({ soft }) => {
     await soft("ODB-UC-256", "Low stock alert (New Functionality)", async () => {
-      throw new Error(newFunctionality("Low stock alert"));
+      assertMarketplaceGap("ODB-UC-256");
     });
   });
 
@@ -77,19 +69,19 @@ test.describe("OneDirectBuy — Seller inventory management", () => {
 
   test("ODB-UC-258: multi-warehouse inventory", async ({ soft }) => {
     await soft("ODB-UC-258", "Multi-warehouse inventory (New Functionality)", async () => {
-      throw new Error(newFunctionality("Multi-warehouse inventory"));
+      assertMarketplaceGap("ODB-UC-258");
     });
   });
 
   test("ODB-UC-259: update handling lead time", async ({ soft }) => {
     await soft("ODB-UC-259", "Update handling lead time (New Functionality)", async () => {
-      throw new Error(newFunctionality("Update handling lead time"));
+      assertMarketplaceGap("ODB-UC-259");
     });
   });
 
   test("ODB-UC-260: oversell prevention", async ({ soft }) => {
     await soft("ODB-UC-260", "Oversell prevention (New Functionality)", async () => {
-      throw new Error(newFunctionality("Oversell prevention"));
+      assertMarketplaceGap("ODB-UC-260");
     });
   });
 });

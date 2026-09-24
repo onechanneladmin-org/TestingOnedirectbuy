@@ -13,5 +13,5 @@ ODB-UC-123	Cart	Buyer	Shipping estimate	Cart shows a shipping estimate.	P1	Yes	W
 ODB-UC-124	Cart	Buyer	Apply coupon	Buyer applies a valid coupon to the cart.	P0	Yes	Working
 ODB-UC-125	Cart	Buyer	Invalid coupon	An invalid coupon is rejected.	P0	Yes	Working
 ODB-UC-126	Cart	Buyer	Remove coupon	Buyer can remove an applied coupon.	P1	Yes	Working
-ODB-UC-127	Cart	Buyer	Multi-seller cart grouping	Cart groups items by seller.	P0	Yes	Not Required
+ODB-UC-127	Cart	Buyer	Multi-seller cart grouping	Cart groups items by seller.	P0	Yes	Working
 ODB-UC-128	Cart	Buyer	Cart recovery	A saved cart can be recovered after login.	P1	Yes	Working

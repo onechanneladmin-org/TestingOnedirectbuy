@@ -1,8 +1,6 @@
 import { test } from "../helpers/softTest.js";
-import {
-  brandApprovalWorkspaceVisible,
-  sellerPortalNotOnStorefrontError,
-} from "../helpers/oneDirectBuySeller.js";
+import { assertMarketplaceGap } from "../helpers/marketplaceGapRules.js";
+import { brandApprovalWorkspaceVisible } from "../helpers/oneDirectBuySeller.js";
 
 const DESKTOP = { width: 1920, height: 1080 };
 
@@ -11,9 +9,6 @@ async function requireBrandWorkspace(page, feature) {
   void feature;
 }
 
-function laterVersion(feature) {
-  return `${feature} is not implemented on the storefront (sheet: Later versions to include).`;
-}
 
 test.describe("OneDirectBuy — Brand approval (seller/admin)", () => {
   test.beforeEach(async ({ page }) => {
@@ -36,13 +31,13 @@ test.describe("OneDirectBuy — Brand approval (seller/admin)", () => {
     soft,
   }) => {
     await soft("ODB-UC-205", "Upload brand authorization (Later versions to include)", async () => {
-      throw new Error(laterVersion("Upload brand authorization"));
+      assertMarketplaceGap("ODB-UC-205");
     });
   });
 
   test("ODB-UC-206: missing brand proof is later-version", async ({ soft }) => {
     await soft("ODB-UC-206", "Missing brand proof validation (Later versions to include)", async () => {
-      throw new Error(laterVersion("Missing brand proof validation"));
+      assertMarketplaceGap("ODB-UC-206");
     });
   });
 
@@ -54,7 +49,7 @@ test.describe("OneDirectBuy — Brand approval (seller/admin)", () => {
 
   test("ODB-UC-208: reject brand request is later-version", async ({ soft }) => {
     await soft("ODB-UC-208", "Reject brand request (Later versions to include)", async () => {
-      throw new Error(laterVersion("Reject brand request"));
+      assertMarketplaceGap("ODB-UC-208");
     });
   });
 
@@ -74,13 +69,13 @@ test.describe("OneDirectBuy — Brand approval (seller/admin)", () => {
     soft,
   }) => {
     await soft("ODB-UC-211", "View brand request status (Later versions to include)", async () => {
-      throw new Error(laterVersion("View brand request status"));
+      assertMarketplaceGap("ODB-UC-211");
     });
   });
 
   test("ODB-UC-212: apply for more brands is later-version", async ({ soft }) => {
     await soft("ODB-UC-212", "Apply for more brands (Later versions to include)", async () => {
-      throw new Error(laterVersion("Apply for more brands"));
+      assertMarketplaceGap("ODB-UC-212");
     });
   });
 
@@ -91,14 +86,14 @@ test.describe("OneDirectBuy — Brand approval (seller/admin)", () => {
       "ODB-UC-213",
       "Block unapproved brand listing (Later versions to include)",
       async () => {
-        throw new Error(laterVersion("Block unapproved brand listing"));
+        assertMarketplaceGap("ODB-UC-213");
       },
     );
   });
 
   test("ODB-UC-214: request brand info is later-version", async ({ soft }) => {
     await soft("ODB-UC-214", "Admin request brand info (Later versions to include)", async () => {
-      throw new Error(laterVersion("Request brand info"));
+      assertMarketplaceGap("ODB-UC-214");
     });
   });
 });
