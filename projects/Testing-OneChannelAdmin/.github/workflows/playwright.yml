@@ -78,6 +78,9 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
 
+      - name: UI audit unit tests
+        run: npm run test:ui-audit:unit
+
       - name: Run smoke tests
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.suite == 'smoke'
         run: npm run test:smoke

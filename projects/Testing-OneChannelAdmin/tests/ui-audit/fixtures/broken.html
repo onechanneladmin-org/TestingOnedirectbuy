@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body { margin: 0; background: #fff; color: #111; font: 16px Arial, sans-serif; }
+      main { padding: 12px; }
+      button { font: 16px Arial, sans-serif; color: #111; background: #f4f4f4; }
+      #email::placeholder { color: #c8c8c8; }
+      #search {
+        border: 0;
+        outline: none;
+        box-shadow: none;
+        background: #fff;
+        color: #111;
+        height: 36px;
+        min-width: 160px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Broken surface</h1>
+      <h4>Skipped rank</h4>
+      <div data-audit-id="wide" style="width: 2000px; height: 20px; background: #eee">wide block</div>
+      <div data-audit-id="clip" style="width: 80px; height: 24px; overflow: hidden; white-space: nowrap">
+        This text is clipped and not ellipsized
+      </div>
+      <p style="color: #595959; background: #767676; padding: 4px">Hard to read this sentence</p>
+      <p style="color: transparent">Cannot see this sentence</p>
+      <p style="font-size: 8px; color: #111">Too small to read comfortably</p>
+      <input id="email" name="email" placeholder="Email" />
+      <label for="search">Search</label>
+      <input id="search" name="search" />
+      <div style="position: relative; height: 70px">
+        <button type="button" data-audit-id="one" style="position: absolute; left: 8px; top: 8px; width: 140px; height: 40px">One</button>
+        <button type="button" data-audit-id="two" style="position: absolute; left: 40px; top: 16px; width: 140px; height: 40px">Two</button>
+      </div>
+      <div style="position: relative; height: 48px">
+        <button type="button" data-audit-id="under" style="position: absolute; left: 8px; top: 4px; width: 140px; height: 40px">Hidden click</button>
+        <div data-audit-id="cover" style="position: absolute; left: 8px; top: 4px; width: 140px; height: 40px; background: #c00; z-index: 2">cover</div>
+      </div>
+      <div role="toolbar" data-audit-id="align">
+        <button type="button" style="height: 40px; min-width: 64px">Align A</button>
+        <button type="button" style="height: 40px; min-width: 64px; margin-top: 14px">Align B</button>
+      </div>
+      <div role="toolbar" data-audit-id="heights">
+        <button type="button" style="height: 44px; min-width: 64px">Tall</button>
+        <button type="button" style="height: 28px; min-width: 64px">Short</button>
+      </div>
+      <div data-audit-id="chips" style="width: 100px">
+        <span data-audit-chip role="option" style="display: inline-block; width: 180px; height: 28px">Long chip label</span>
+      </div>
+      <div role="tab" data-audit-id="tab" style="display: inline-block; height: 32px; padding: 4px 8px">Details</div>
+      <button type="button" data-audit-id="tiny" style="width: 10px; height: 10px; padding: 0">x</button>
+      <button type="button" data-audit-id="noname" style="width: 40px; height: 40px"></button>
+      <button type="button" aria-label="Filter" data-audit-id="icon" style="width: 40px; height: 40px"></button>
+      <button type="button" data-audit-id="generic" style="height: 40px; min-width: 80px">Submit</button>
+      <button type="button" data-audit-id="boom" style="height: 40px; min-width: 80px" onclick="console.error('audit boom')">Log</button>
+      <a href="#">Dashboard</a>
+      <a data-audit-id="orders-link" href="#/settings">Orders</a>
+      <img data-audit-id="noalt" width="20" height="20" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" />
+      <img data-audit-id="nosize" alt="product" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" />
+      <div id="dup">First duplicate</div>
+      <span id="dup" style="display: block">Second duplicate</span>
+      <div data-audit-id="table-wrap">
+        <table data-audit-id="orders">
+          <thead><tr><th>Order</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div role="dialog" data-audit-id="dialog" style="padding: 8px">Unnamed overlay body</div>
+    </main>
+  </body>
+</html>

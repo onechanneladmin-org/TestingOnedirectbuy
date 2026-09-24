@@ -161,5 +161,14 @@ export default defineConfig({
           : { channel: "chrome" }),
       },
     },
+    {
+      name: "ui-audit",
+      testDir: "./tests/ui-audit",
+      timeout: 60_000,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 720 },
+      },
+    },
   ],
 });
