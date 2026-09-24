@@ -314,6 +314,7 @@ function collectInPage(limits) {
       controlKind: controlKind(el, role),
       inputType: (el.getAttribute("type") || "").toLowerCase() || null,
       labelled: labelled(el),
+      selected: el.getAttribute("aria-selected") === "true",
       borderless,
       sameBackgroundAsParent: !!(
         parentBackground &&
@@ -336,7 +337,7 @@ function collectInPage(limits) {
 
   document
     .querySelectorAll(
-      "a,button,input,select,textarea,img,table,h1,h2,h3,h4,h5,h6,label,p,li,td,th,dialog,[role],[data-audit-id],[data-audit-chip],[data-audit-list],[data-audit-ignore],[data-audit-allow-scroll]",
+      "a,button,input,select,textarea,img,table,article,section,h1,h2,h3,h4,h5,h6,label,p,li,td,th,dialog,[role],[data-audit-id],[data-audit-chip],[data-audit-list],[data-audit-ignore],[data-audit-allow-scroll]",
     )
     .forEach(add);
 
@@ -392,6 +393,20 @@ function collectInPage(limits) {
       ) {
         internalScroll = true;
       }
+    }
+  }
+
+  let verticalScrollerCount = 0;
+  for (const el of document.querySelectorAll("main, [role=main], section, article, div, aside")) {
+    if (verticalScrollerCount > 6) break;
+    if (el === document.body || el === document.documentElement) continue;
+    const style = getComputedStyle(el);
+    if (
+      (style.overflowY === "auto" || style.overflowY === "scroll") &&
+      el.scrollHeight > el.clientHeight + tol &&
+      el.clientHeight > 80
+    ) {
+      verticalScrollerCount += 1;
     }
   }
 
@@ -485,6 +500,22 @@ function collectInPage(limits) {
       });
     });
 
+  const icons = [];
+  document.querySelectorAll("svg, [role=img]").forEach((el) => {
+    if (icons.length >= 40) return;
+    const style = getComputedStyle(el);
+    const rect = el.getBoundingClientRect();
+    if (!visible(el, style, rect) || rect.width < 8 || rect.height < 8 || rect.width > 64) return;
+    const parent = el.parentElement;
+    icons.push({
+      selector: selectorFor(el),
+      name: (el.getAttribute("aria-label") || "").trim(),
+      foreground: parseColor(style.color),
+      background: parent ? opaqueBackground(parent) : opaqueBackground(document.body),
+      bbox: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+    });
+  });
+
   const headings = [];
   document.querySelectorAll("h1,h2,h3,h4,h5,h6,[role=heading]").forEach((el) => {
     const style = getComputedStyle(el);
@@ -520,11 +551,13 @@ function collectInPage(limits) {
       horizontalOverflow,
       verticalUnreachable: locked && taller && !internalScroll,
       nestedVerticalScroll,
+      verticalScrollerCount,
     },
     elements,
     tables,
     overlays,
     headings,
+    icons,
     main: mainInfo,
     duplicateIds,
     themeSignals: {

@@ -100,6 +100,7 @@ function ctx(extra = {}) {
 }
 
 const rules = [
+  ...require("./rules/audit-doc"),
   ...require("./rules/a11y"),
   ...require("./rules/color"),
   ...require("./rules/controls"),
@@ -408,4 +409,164 @@ test("detectors flag generalized audit patterns", () => {
     ctx(),
   );
   assert.match(review[0].message, /REVIEW_REQUIRED/);
+
+  const gradient = rule("color.gradient-button").detect(
+    snap({
+      elements: [
+        el({
+          controlKind: "button",
+          styles: { ...el().styles, backgroundImage: "linear-gradient(rgb(0,0,0), rgb(255,255,255))" },
+        }),
+      ],
+    }),
+    ctx(),
+  );
+  assert.equal(gradient.length, 1);
+
+  const fills = rule("color.inconsistent-field-fill").detect(
+    snap({
+      elements: [
+        el({
+          selector: "input:nth-of-type(1)",
+          controlKind: "input",
+          parentSelector: "form",
+          sameBackgroundAsParent: false,
+          background: { r: 20, g: 40, b: 80, a: 1 },
+        }),
+        el({
+          selector: "input:nth-of-type(2)",
+          controlKind: "input",
+          parentSelector: "form",
+          sameBackgroundAsParent: true,
+          background: { r: 255, g: 255, b: 255, a: 1 },
+        }),
+      ],
+    }),
+    ctx(),
+  );
+  assert.equal(fills.length, 1);
+
+  const icon = rule("theme.icon-on-wrong-theme").detect(
+    snap({
+      icons: [
+        {
+          selector: "svg",
+          name: "calendar",
+          foreground: { r: 10, g: 10, b: 10, a: 1 },
+          background: { r: 20, g: 24, b: 32, a: 1 },
+          bbox: { x: 0, y: 0, width: 16, height: 16 },
+        },
+      ],
+    }),
+    ctx({ theme: "dark" }),
+  );
+  assert.equal(icon.length, 1);
+
+  const missingPlaceholder = rule("controls.missing-placeholder").detect(
+    snap({
+      elements: [
+        el({ controlKind: "input", inputType: "text", placeholder: "", labelled: false, text: "" }),
+      ],
+    }),
+    ctx(),
+  );
+  assert.equal(missingPlaceholder.length, 1);
+
+  const stuck = rule("overlays.off-center-modal").detect(
+    snap({
+      overlays: [
+        {
+          selector: '[role="dialog"]',
+          role: "dialog",
+          bbox: { x: 400, y: 0, width: 480, height: 320 },
+          offscreen: false,
+          hasClose: true,
+        },
+      ],
+    }),
+    ctx(),
+  );
+  assert.match(stuck[0].message, /top/);
+
+  const dual = rule("scroll.dual-scrollbar").detect(
+    snap({
+      document: { ...snap().document, scrollHeight: 2000, innerHeight: 720, verticalScrollerCount: 1 },
+    }),
+    ctx(),
+  );
+  assert.equal(dual.length, 1);
+
+  const sticky = rule("layout.sticky-covers-content").detect(
+    snap({
+      elements: [
+        el({
+          selector: "header",
+          text: "Nav",
+          styles: { ...el().styles, position: "sticky" },
+          bbox: { x: 0, y: 0, width: 400, height: 48 },
+        }),
+        el({
+          selector: "h1",
+          text: "Orders",
+          bbox: { x: 16, y: 20, width: 200, height: 32 },
+        }),
+      ],
+    }),
+    ctx(),
+  );
+  assert.equal(sticky.length, 1);
+
+  const uneven = rule("layout.uneven-cards").detect(
+    snap({
+      elements: [
+        el({ tag: "article", bbox: { x: 0, y: 0, width: 200, height: 80 } }),
+        el({
+          selector: "article:nth-of-type(2)",
+          tag: "article",
+          bbox: { x: 220, y: 0, width: 200, height: 140 },
+        }),
+      ],
+    }),
+    ctx(),
+  );
+  assert.equal(uneven.length, 1);
+
+  const mixedTabs = rule("tabs.inconsistent-style").detect(
+    snap({
+      elements: [
+        el({
+          controlKind: "tab",
+          background: { r: 20, g: 80, b: 180, a: 1 },
+          styles: { ...el().styles, borderBottomWidth: "0px" },
+        }),
+        el({
+          selector: '[role="tab"]:nth-of-type(2)',
+          controlKind: "tab",
+          background: { r: 255, g: 255, b: 255, a: 1 },
+          styles: { ...el().styles, borderBottomWidth: "3px" },
+        }),
+      ],
+    }),
+    ctx(),
+  );
+  assert.equal(mixedTabs.length, 1);
+
+  const blank = rule("empty.blank-region").detect(
+    snap({ tables: [{ selector: "table", rowCount: 0, hasEmptyMarker: false, text: "" }] }),
+    ctx(),
+  );
+  assert.equal(blank.length, 1);
+
+  const drift = rule("theme.cross-mode-drift").detect(
+    snap({
+      elements: [el({ selector: "h1", styles: { ...el().styles, fontSize: "16px" } })],
+    }),
+    ctx({
+      theme: "light",
+      peerSnapshot: snap({
+        elements: [el({ selector: "h1", styles: { ...el().styles, fontSize: "22px" } })],
+      }),
+    }),
+  );
+  assert.match(drift[0].message, /Font size/);
 });
