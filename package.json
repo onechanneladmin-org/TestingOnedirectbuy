@@ -27,6 +27,9 @@
     "server:seed": "node server/index.js --seed",
     "extract-flow-steps": "node scripts/extract-flow-steps.js",
     "smoke:api": "node scripts/smoke-flow-api.js",
+    "production-qa:generate": "node scripts/generate-production-qa.mjs",
+    "production-qa:test": "playwright test tests/OneDirectBuy/ProductionQaCoverage.spec.js tests/OneDirectBuy/ProductionQaLive.spec.js",
+    "production-qa:report": "node scripts/update-production-qa-results.mjs",
     "posttest": "node -e \"console.log('Reports: reports/<run>/ — toggle flows in flows.config.json (npm test) or files in ci-tests.config.json (npm run test:ci)')\""
   },
   "keywords": [
