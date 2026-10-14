@@ -1177,8 +1177,87 @@ h3 {
   color: var(--muted);
 }
 
+.covered-pages {
+  height: min(42vh, 420px);
+  min-height: 180px;
+}
+
+.covered-pages-body {
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.page-sheet {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.page-sheet th,
+.page-sheet td {
+  text-align: left;
+  padding: 0.4rem 0.55rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: top;
+}
+
+.page-sheet th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-2);
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .report-panel {
   min-height: 180px;
+}
+
+.report-panel-head {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.report-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.report-panel.report-panel--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  margin: 0;
+  border-radius: 0;
+  min-height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-1, var(--bg));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+body.report-fullscreen-open {
+  overflow: hidden;
+}
+
+.report-panel--fullscreen .report-body {
+  max-height: none;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 1.5rem;
+}
+
+.report-panel--fullscreen .issue-shot {
+  max-height: min(52vh, 520px);
+  max-width: min(92vw, 720px);
+  object-fit: contain;
 }
 
 .report-body {
@@ -1211,6 +1290,24 @@ h3 {
   color: var(--muted);
   font-size: 0.8rem;
   white-space: pre-wrap;
+}
+
+.issue-shot-link {
+  display: block;
+  margin-top: 0.55rem;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  max-width: 420px;
+}
+
+.issue-shot {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  object-position: top left;
+  background: #0f172a;
 }
 
 .history-item .name {

@@ -1,13 +1,13 @@
 {
-  "$comment": "One Channel Admin flows for the hub control plane. Specs live in Testing-OneChannelAdmin.",
-  "workers": 1,
-  "retries": 0,
+  "projectId": "onechanneladmin",
   "flows": [
     {
       "id": 1,
       "name": "Login",
       "enabled": true,
-      "tests": ["tests/Onechanneladmin/login.spec.js"]
+      "tests": [
+        "tests/Onechanneladmin/login.spec.js"
+      ]
     },
     {
       "id": 2,
@@ -56,31 +56,1074 @@
       "id": 6,
       "name": "Fulfillment Returns",
       "enabled": true,
-      "tests": ["tests/Onechanneladmin/Fulfillmentflowreturn.spec.js"]
+      "tests": [
+        "tests/Onechanneladmin/Fulfillmentflowreturn.spec.js"
+      ]
     },
     {
       "id": 7,
       "name": "Orders",
       "enabled": true,
-      "tests": ["tests/Onechanneladmin/CompleteOrderFlow.spec.js"]
+      "tests": [
+        "tests/Onechanneladmin/CompleteOrderFlow.spec.js"
+      ]
     },
     {
       "id": 8,
       "name": "Rentals",
       "enabled": true,
-      "tests": ["tests/Onechanneladmin/RentalsOrderFlow.spec.js"]
+      "tests": [
+        "tests/Onechanneladmin/RentalsOrderFlow.spec.js"
+      ]
     },
     {
       "id": 9,
       "name": "Email Marketing",
       "enabled": true,
-      "tests": ["tests/Onechanneladmin/emaimarketingflow.spec.js"]
+      "tests": [
+        "tests/Onechanneladmin/emaimarketingflow.spec.js"
+      ]
     },
     {
       "id": 10,
       "name": "Advanced Datatable",
       "enabled": true,
-      "tests": ["tests/Onechanneladmin/advanced/demoDatatable.spec.js"]
+      "tests": [
+        "tests/Onechanneladmin/advanced/demoDatatable.spec.js"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Catalog Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/CatalogDashboardCards.spec.js"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Accounting Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/AccountingDashboardCards.spec.js"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Home Dashboard UI UX Audit",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/HomeDashboardUxAudit.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 14,
+      "name": "UX Audit \u2014 Catalog Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/catalog-dashboard.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 15,
+      "name": "UX Audit \u2014 Catalog Products",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/catalog-products.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 16,
+      "name": "UX Audit \u2014 Catalog Inventory",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/catalog-inventory.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 17,
+      "name": "UX Audit \u2014 Catalog Fitment",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/catalog-fitment.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 18,
+      "name": "UX Audit \u2014 Catalog Addons",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/catalog-addons.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 19,
+      "name": "UX Audit \u2014 Catalog Bundles",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/catalog-bundles.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 20,
+      "name": "UX Audit \u2014 Catalog Pricing",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/catalog-pricing.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 21,
+      "name": "UX Audit \u2014 Catalog Images",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/catalog-images.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 22,
+      "name": "UX Audit \u2014 Catalog Import / Export",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/catalog-import-export.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 23,
+      "name": "UX Audit \u2014 CRM Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-dashboard.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 24,
+      "name": "UX Audit \u2014 CRM B2B Accounts",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-b2b-accounts.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 25,
+      "name": "UX Audit \u2014 CRM Suppliers B2B",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-suppliers-b2b.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 26,
+      "name": "UX Audit \u2014 CRM D2C",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-d2c.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 27,
+      "name": "UX Audit \u2014 CRM Leads",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-leads.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 28,
+      "name": "UX Audit \u2014 CRM Sales Persons",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-sales-persons.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 29,
+      "name": "UX Audit \u2014 CRM Tasks",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-tasks.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 30,
+      "name": "UX Audit \u2014 CRM Services Offered",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-services-offered.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 31,
+      "name": "UX Audit \u2014 CRM Work Orders",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-work-orders.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 32,
+      "name": "UX Audit \u2014 CRM Sales Performance",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-sales-performance.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 33,
+      "name": "UX Audit \u2014 CRM 1CA CRMhub",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-1ca-crmhub.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 34,
+      "name": "UX Audit \u2014 CRM Messages",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-messages.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 35,
+      "name": "UX Audit \u2014 CRM Websites",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/crm-websites.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 36,
+      "name": "UX Audit \u2014 Admin User Permissions",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/admin-user-permissions.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 37,
+      "name": "UX Audit \u2014 Admin Users Attendance",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/admin-users-attendance.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 38,
+      "name": "UX Audit \u2014 Admin Marketplace Plans",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/admin-marketplace-plans.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 39,
+      "name": "UX Audit \u2014 Admin Testing Reports",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/admin-testing-reports.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 40,
+      "name": "UX Audit \u2014 Admin Menu Editor",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/admin-menu-editor.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 41,
+      "name": "UX Audit \u2014 Admin Addons & Invoices",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/admin-addons-invoices.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 42,
+      "name": "UX Audit \u2014 Admin Manage Billing & AddOns",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/admin-manage-billing-addons.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 43,
+      "name": "UX Audit \u2014 Admin Help Desk",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/admin-help-desk.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 44,
+      "name": "UX Audit \u2014 Admin Channel Integration",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/admin-channel-integration.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 45,
+      "name": "UX Audit \u2014 Accounting Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-dashboard.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 46,
+      "name": "UX Audit \u2014 Accounting Transactions",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-transactions.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 47,
+      "name": "UX Audit \u2014 Accounting General Ledger",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-general-ledger.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 48,
+      "name": "UX Audit \u2014 Accounting Invoices",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-invoices.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 49,
+      "name": "UX Audit \u2014 Accounting Expenses",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-expenses.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 50,
+      "name": "UX Audit \u2014 Accounting AP/AR Workflows",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-ap-ar-workflows.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 51,
+      "name": "UX Audit \u2014 Accounting Reports",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-reports.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 52,
+      "name": "UX Audit \u2014 Accounting Customers",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-customers.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 53,
+      "name": "UX Audit \u2014 Accounting Vendors",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-vendors.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 54,
+      "name": "UX Audit \u2014 Accounting Chart of Accounts",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-chart-of-accounts.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 55,
+      "name": "UX Audit \u2014 Accounting Journal Entries",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-journal-entries.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 56,
+      "name": "UX Audit \u2014 Accounting Customer Payments",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-customer-payments.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 57,
+      "name": "UX Audit \u2014 Accounting Vendor Payments",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-vendor-payments.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 58,
+      "name": "UX Audit \u2014 Accounting Credit Memos",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-credit-memos.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 59,
+      "name": "UX Audit \u2014 Accounting Account Statements",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-account-statements.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 60,
+      "name": "UX Audit \u2014 Accounting Reconciliation",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-reconciliation.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 61,
+      "name": "UX Audit \u2014 Accounting Multi Entity",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-multi-entity.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 62,
+      "name": "UX Audit \u2014 Accounting Tax Engine",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-tax-engine.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 63,
+      "name": "UX Audit \u2014 Accounting Period Close",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-period-close.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 64,
+      "name": "UX Audit \u2014 Accounting Settings",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/accounting-settings.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 65,
+      "name": "UX Audit \u2014 Channel OneDirectBuy",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-onedirectbuy.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 66,
+      "name": "UX Audit \u2014 Channel Google Merchant",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-google-merchant.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 67,
+      "name": "UX Audit \u2014 Channel eBay",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-ebay.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 68,
+      "name": "UX Audit \u2014 Channel Amazon",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-amazon.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 69,
+      "name": "UX Audit \u2014 Channel Walmart",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-walmart.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 70,
+      "name": "UX Audit \u2014 Channel Etsy",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-etsy.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 71,
+      "name": "UX Audit \u2014 Channel Shopify",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-shopify.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 72,
+      "name": "UX Audit \u2014 Channel Walmart CA",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-walmart-ca.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 73,
+      "name": "UX Audit \u2014 Channel B2B",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-b2b.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 74,
+      "name": "UX Audit \u2014 Channel 1XA",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-1xa.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 75,
+      "name": "UX Audit \u2014 Channel Facebook",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-facebook.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 76,
+      "name": "UX Audit \u2014 Channel Square",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/channel-square.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 77,
+      "name": "UX Audit \u2014 Fulfillment Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-dashboard.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 78,
+      "name": "UX Audit \u2014 Fulfillment Rental Orders",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-rental-orders.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 79,
+      "name": "UX Audit \u2014 Fulfillment Shipments",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-shipments.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 80,
+      "name": "UX Audit \u2014 Fulfillment Returns",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-returns.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 81,
+      "name": "UX Audit \u2014 Fulfillment Refunds",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-refunds.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 82,
+      "name": "UX Audit \u2014 Fulfillment Intake Form Queries",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-intake-form-queries.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 83,
+      "name": "UX Audit \u2014 Fulfillment Deliveries/Pickups",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-deliveries-pickups.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 84,
+      "name": "UX Audit \u2014 Fulfillment Driver Hub",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-driver-hub.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 85,
+      "name": "UX Audit \u2014 Fulfillment Cancellations",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-cancellations.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 86,
+      "name": "UX Audit \u2014 Fulfillment Claims",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-claims.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 87,
+      "name": "UX Audit \u2014 Fulfillment Invoices",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-invoices.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 88,
+      "name": "UX Audit \u2014 Fulfillment Archived Orders",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-archived-orders.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 89,
+      "name": "UX Audit \u2014 Fulfillment Shipping Carriers",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-shipping-carriers.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 90,
+      "name": "UX Audit \u2014 Fulfillment Delivery Time Windows",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-delivery-time-windows.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 91,
+      "name": "UX Audit \u2014 Fulfillment Shipping Lookuplist",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-shipping-lookuplist.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 92,
+      "name": "UX Audit \u2014 Fulfillment Tax Rates",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-tax-rates.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 93,
+      "name": "UX Audit \u2014 Fulfillment Labels Printing",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-labels-printing.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 94,
+      "name": "UX Audit \u2014 Fulfillment Default Shipping Address",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-default-shipping-address.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 95,
+      "name": "UX Audit \u2014 Fulfillment Order Templates",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/fulfillment-order-templates.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 96,
+      "name": "UX Audit \u2014 WMS Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-dashboard.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 97,
+      "name": "UX Audit \u2014 WMS Inventory",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-inventory.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 98,
+      "name": "UX Audit \u2014 WMS Cycle Count",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-cycle-count.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 99,
+      "name": "UX Audit \u2014 WMS Orders",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-orders.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 100,
+      "name": "UX Audit \u2014 WMS Pick and Pack",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-pick-and-pack.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 101,
+      "name": "UX Audit \u2014 WMS PO Outbound",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-po-outbound.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 102,
+      "name": "UX Audit \u2014 WMS Put Away",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-put-away.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 103,
+      "name": "UX Audit \u2014 WMS Blind Receive",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-blind-receive.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 104,
+      "name": "UX Audit \u2014 WMS Transfers",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-transfers.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 105,
+      "name": "UX Audit \u2014 WMS Returns",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-returns.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 106,
+      "name": "UX Audit \u2014 WMS Manage Locations",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-manage-locations.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 107,
+      "name": "UX Audit \u2014 WMS 3PL Clients",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-3pl-clients.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 108,
+      "name": "UX Audit \u2014 WMS Manage 3pl Billing/Addons",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-manage-3pl-billing-addons.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 109,
+      "name": "UX Audit \u2014 WMS Order Replenishment",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-order-replenishment.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 110,
+      "name": "UX Audit \u2014 WMS Non-Inventory Items",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/wms-non-inventory-items.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 111,
+      "name": "UX Audit \u2014 Marketing Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/marketing-dashboard.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 112,
+      "name": "UX Audit \u2014 Marketing Email Marketing",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/marketing-email-marketing.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 113,
+      "name": "UX Audit \u2014 Marketing Discounts",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/marketing-discounts.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 114,
+      "name": "UX Audit \u2014 Marketing Geo Fencing",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/marketing-geo-fencing.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 115,
+      "name": "UX Audit \u2014 Marketing Common Socials",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/marketing-common-socials.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 116,
+      "name": "UX Audit \u2014 Analytics & Reports Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/analytics-reports-dashboard.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 117,
+      "name": "UX Audit \u2014 B2B Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/b2b-dashboard.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 118,
+      "name": "UX Audit \u2014 3PL Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/3pl-dashboard.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 119,
+      "name": "UX Audit \u2014 Map Price Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/map-price-dashboard.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 120,
+      "name": "UX Audit \u2014 Map Price Settings",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/map-price-settings.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 121,
+      "name": "UX Audit \u2014 Operations Hub Dashboard",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/operations-hub-dashboard.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 122,
+      "name": "UX Audit \u2014 Operations Hub Raw Materials",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/operations-hub-raw-materials.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 123,
+      "name": "UX Audit \u2014 Operations Hub Production",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/operations-hub-production.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 124,
+      "name": "UX Audit \u2014 Operations Hub Settings",
+      "enabled": true,
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/operations-hub-settings.spec.js"
+      ],
+      "group": "ui-ux"
+    },
+    {
+      "id": 125,
+      "name": "UX Audit \u2014 All Covered Pages",
+      "enabled": true,
+      "group": "ui-ux",
+      "tests": [
+        "tests/Onechanneladmin/ux-flows/ux-audit-batch.spec.js"
+      ]
     }
   ]
 }

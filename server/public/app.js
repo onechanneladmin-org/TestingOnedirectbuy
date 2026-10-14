@@ -92,7 +92,7 @@ function isSheetFlow(f) {
 }
 
 function flowGroup(f) {
-  if (isUxModuleFlow(f)) return "ux-modules";
+  if (isUxModuleFlow(f) || String(f.group || "") === "ui-ux") return "ux-modules";
   if (isSheetFlow(f)) return "sheet";
   return "other";
 }
@@ -276,6 +276,95 @@ function groupTabLabel(tab) {
   return "Sheet modules";
 }
 
+const UX_HUBS = [
+  "Operations Hub",
+  "Analytics & Reports",
+  "Map Price",
+  "Fulfillment",
+  "Marketing",
+  "Catalog",
+  "Channel",
+  "Accounting",
+  "Admin",
+  "WMS",
+  "CRM",
+  "B2B",
+  "3PL",
+];
+
+function coveredAuditFlows() {
+  return activeFlows().filter((flow) => {
+    const name = String(flow.name || "");
+    return (
+      String(flow.group || "") === "ui-ux" ||
+      name.startsWith("UX Audit — ") ||
+      /Home Dashboard UI UX/i.test(name)
+    );
+  });
+}
+
+function coveredPageRow(flow) {
+  const name = String(flow.name || "");
+  let hub = "Home";
+  let page = "Dashboard";
+  if (name.startsWith("UX Audit — ")) {
+    const rest = name.slice("UX Audit — ".length);
+    hub = UX_HUBS.find((item) => rest.startsWith(item)) || "Other";
+    page = rest.slice(hub === "Other" ? 0 : hub.length).trim();
+  }
+  const stay = (flow.steps || [])
+    .map((step) => String(step.title || ""))
+    .find((title) => /stayed on\s+\//.test(title));
+  const path = stay ? stay.replace(/.*stayed on\s+/, "").trim() : "";
+  return { hub, page, path };
+}
+
+function coveredPageLines() {
+  return coveredAuditFlows()
+    .map(coveredPageRow)
+    .sort((a, b) => a.hub.localeCompare(b.hub) || a.page.localeCompare(b.page))
+    .map((row) => `${row.hub}\t${row.page}\t${row.path}`);
+}
+
+function renderCoveredPages() {
+  const panel = $("coveredPages");
+  if (!panel) return;
+  const show = state.groupTab === "ux-modules";
+  panel.classList.toggle("hidden", !show);
+  if (!show) return;
+  const rows = coveredPageLines();
+  $("coveredPagesCount").textContent = String(rows.length);
+  $("coveredPagesBody").innerHTML = `
+    <table class="page-sheet">
+      <thead><tr><th>Hub</th><th>Page</th><th>Path</th></tr></thead>
+      <tbody>
+        ${rows
+          .map((line) => {
+            const [hub, page, path] = line.split("\t");
+            return `<tr><td>${escapeHtml(hub)}</td><td>${escapeHtml(page)}</td><td class="mono">${escapeHtml(path)}</td></tr>`;
+          })
+          .join("")}
+      </tbody>
+    </table>`;
+}
+
+async function copyCoveredPages() {
+  const lines = coveredPageLines();
+  const text = ["Hub\tPage\tPath", ...lines].join("\n");
+  try {
+    await navigator.clipboard.writeText(text);
+    toast(`Copied ${lines.length} pages`);
+  } catch {
+    const area = document.createElement("textarea");
+    area.value = text;
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand("copy");
+    area.remove();
+    toast(`Copied ${lines.length} pages`);
+  }
+}
+
 function renderFlowList() {
   const list = $("flowList");
   const flows = groupedTabFlows();
@@ -315,6 +404,7 @@ function renderFlowList() {
   });
   syncSelectAllBox();
   updateQueueRunButtons();
+  renderCoveredPages();
 }
 
 function hasSheetCatalog(flow) {
@@ -664,6 +754,8 @@ function setLiveIdle() {
   $("liveBody").classList.add("hidden");
   $("runProgress").classList.add("hidden");
   $("btnLoadReport").disabled = true;
+  $("btnReportDocx") && ($("btnReportDocx").disabled = true);
+  setReportFullscreen(false);
   $("btnStop")?.classList.add("hidden");
   $("btnRun").disabled = false;
   $("reportBody").innerHTML =
@@ -705,6 +797,7 @@ function renderOccurrence(occ) {
 
   const terminal = ["passed", "failed", "cancelled"].includes(status);
   $("btnLoadReport").disabled = !terminal;
+  syncReportActions(occ);
   $("btnRun").disabled = status === "running" || status === "queued";
   const btnStop = $("btnStop");
   if (btnStop) {
@@ -759,17 +852,8 @@ function renderOccurrence(occ) {
     $("reportBody").innerHTML =
       `<p><strong>${liveIssues.length}</strong> live issue(s) in DB</p>` +
       liveIssues
-        .slice(0, 30)
-        .map((issue) => {
-          const sev = (issue.severity || "major").toLowerCase();
-          return `
-            <div class="issue ${escapeAttr(sev)}">
-              <p class="ih">${escapeHtml(issue.marker || "")} ${escapeHtml(
-                issue.id || issue.step || "",
-              )} — ${escapeHtml(issue.title || "")}</p>
-              <p class="im">${escapeHtml(issue.evidence || issue.message || "")}</p>
-            </div>`;
-        })
+        .slice(0, 40)
+        .map((issue) => renderIssueCard(issue, occ.occurrenceId))
         .join("");
   }
 
@@ -798,17 +882,8 @@ async function loadReport(occurrenceId) {
       html += `<p class="muted" style="margin-top:0.75rem">No soft issues recorded for this run.</p>`;
     } else {
       html += list
-        .slice(0, 40)
-        .map((issue) => {
-          const sev = (issue.severity || "major").toLowerCase();
-          return `
-            <div class="issue ${escapeAttr(sev)}">
-              <p class="ih">${escapeHtml(issue.marker || "")} ${escapeHtml(
-                issue.id || issue.step || "",
-              )} — ${escapeHtml(issue.title || "")}</p>
-              <p class="im">${escapeHtml(issue.evidence || issue.message || "")}</p>
-            </div>`;
-        })
+        .slice(0, 200)
+        .map((issue) => renderIssueCard(issue, id))
         .join("");
     }
 
@@ -819,6 +894,7 @@ async function loadReport(occurrenceId) {
     }
 
     $("reportBody").innerHTML = html;
+    syncReportActions(state.lastOccurrence);
   } catch (err) {
     $("reportBody").innerHTML = `<p class="muted">${escapeHtml(
       err.message || "Report not ready",
@@ -1253,6 +1329,111 @@ function escapeAttr(s) {
   return escapeHtml(s).replace(/'/g, "&#39;");
 }
 
+function formatIssueBody(issue) {
+  const evidence = String(issue.evidence || issue.message || "").trim();
+  if (evidence) return evidence;
+  return [
+    issue.pagePath ? `Page: ${issue.pagePath}` : "",
+    issue.expected ? `Expected: ${issue.expected}` : "",
+    issue.actual ? `Actual: ${issue.actual}` : "",
+    issue.selector ? `Selector: ${issue.selector}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function issueScreenshotUrl(occurrenceId, issue) {
+  const file = String(issue.screenshotFile || issue.screenshot || "").trim();
+  if (!occurrenceId || !file) return "";
+  const baseName = file.split(/[/\\]/).pop();
+  const base = `/api/occurrences/${encodeURIComponent(occurrenceId)}/screenshot`;
+  const tokenQ = state.token
+    ? `${baseName.endsWith(".png") ? "?" : "&"}token=${encodeURIComponent(state.token)}`
+    : "";
+  if (baseName.endsWith(".png")) {
+    return `${base}/${encodeURIComponent(baseName)}${tokenQ}`;
+  }
+  return `${base}?file=${encodeURIComponent(baseName || file)}${
+    state.token ? `&token=${encodeURIComponent(state.token)}` : ""
+  }`;
+}
+
+function syncReportActions(occ) {
+  const btnDocx = $("btnReportDocx");
+  if (!btnDocx) return;
+  const id = occ?.occurrenceId || state.occurrenceId;
+  const status = occ?.status;
+  const terminal = status && ["passed", "failed", "cancelled"].includes(status);
+  const hasIssues = (occ?.liveIssues?.length || 0) > 0;
+  btnDocx.disabled = !id || (!terminal && !hasIssues);
+}
+
+function setReportFullscreen(on) {
+  const panel = $("reportPanel");
+  const btnIn = $("btnReportFullscreen");
+  const btnOut = $("btnReportExitFullscreen");
+  if (!panel) return;
+  panel.classList.toggle("report-panel--fullscreen", on);
+  document.body.classList.toggle("report-fullscreen-open", on);
+  btnIn?.classList.toggle("hidden", on);
+  btnOut?.classList.toggle("hidden", !on);
+}
+
+async function downloadReportDocx() {
+  const id = state.occurrenceId;
+  if (!id) {
+    toast("No occurrence to export", true);
+    return;
+  }
+  const url = new URL(
+    `/api/occurrences/${encodeURIComponent(id)}/report/docx`,
+    window.location.origin,
+  );
+  if (state.token) url.searchParams.set("token", state.token);
+  try {
+    const res = await fetch(`${url.pathname}${url.search}`, {
+      headers: headers(false),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Download failed (${res.status})`);
+    }
+    const blob = await res.blob();
+    const disp = res.headers.get("Content-Disposition") || "";
+    const match = /filename="([^"]+)"/i.exec(disp);
+    const name = match ? match[1] : `ux-report-${id.slice(0, 8)}.docx`;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    toast("Report downloaded");
+  } catch (err) {
+    toast(err.message, true);
+  }
+}
+
+function renderIssueCard(issue, occurrenceId) {
+  const sev = (issue.severity || "major").toLowerCase();
+  const body = formatIssueBody(issue);
+  const shotUrl = issueScreenshotUrl(occurrenceId, issue);
+  const shot = shotUrl
+    ? `<a class="issue-shot-link" href="${escapeAttr(shotUrl)}" target="_blank" rel="noopener">
+        <img class="issue-shot" src="${escapeAttr(shotUrl)}" alt="Issue screenshot" loading="lazy" />
+      </a>`
+    : "";
+  return `
+    <div class="issue ${escapeAttr(sev)}">
+      <p class="ih">${escapeHtml(issue.marker || "")} ${escapeHtml(
+        issue.id || issue.step || "",
+      )} — ${escapeHtml(issue.title || "")}</p>
+      <p class="im">${escapeHtml(body)}</p>
+      ${shot}
+    </div>`;
+}
+
 function currentProject() {
   return (
     state.projects.find((p) => p.id === state.projectId) ||
@@ -1390,6 +1571,18 @@ function bindUi() {
   $("btnLoadReport").addEventListener("click", () =>
     loadReport().catch((e) => toast(e.message, true)),
   );
+  $("btnReportFullscreen")?.addEventListener("click", () => setReportFullscreen(true));
+  $("btnReportExitFullscreen")?.addEventListener("click", () =>
+    setReportFullscreen(false),
+  );
+  $("btnReportDocx")?.addEventListener("click", () =>
+    downloadReportDocx().catch((e) => toast(e.message, true)),
+  );
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape" && $("reportPanel")?.classList.contains("report-panel--fullscreen")) {
+      setReportFullscreen(false);
+    }
+  });
 
   document.querySelectorAll(".rail-filters .chip").forEach((chip) => {
     chip.addEventListener("click", () => {
@@ -1418,6 +1611,9 @@ function bindUi() {
       renderFlowList();
     });
   });
+
+  const copyPages = $("btnCopyPages");
+  if (copyPages) copyPages.addEventListener("click", () => copyCoveredPages());
 
   $("flowSearch").addEventListener("input", () => {
     state.search = $("flowSearch").value;

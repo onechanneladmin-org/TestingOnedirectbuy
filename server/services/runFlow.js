@@ -11,6 +11,10 @@ const RunningOccurrence = require("../models/RunningOccurrence");
 const Report = require("../models/Report");
 const { ROOT, STATUS_API_URL, MONGODB_URI } = require("../config");
 const {
+  writeOccurrenceArchive,
+  pruneOccurrenceRetention,
+} = require("../lib/occurrenceArchive");
+const {
   writeMeta,
   clearMeta,
   META_PATH,
@@ -93,23 +97,82 @@ async function pumpFlowQueue() {
  * @param {{ headed?: boolean; projectId?: string; visibleTerminal?: boolean }} [opts]
  */
 async function enqueueFlowRuns(flowIds, opts = {}) {
-  const ids = (flowIds || []).map((id) => String(id).trim()).filter(Boolean);
+  let ids = (flowIds || []).map((id) => String(id).trim()).filter(Boolean);
   if (!ids.length) {
     const err = new Error("No flowIds to queue");
     err.status = 400;
     throw err;
   }
+
+  const projectId = String(opts.projectId || defaultProjectId()).trim();
+  let uxPages = null;
+  let coalescedFrom = null;
+  if (ids.length > 1) {
+    const flows = await Flow.find({ projectId, flowId: { $in: ids } }).lean();
+    const byId = new Map(flows.map((flow) => [String(flow.flowId), flow]));
+    const selected = ids.map((id) => byId.get(id)).filter(Boolean);
+    const allUx =
+      selected.length === ids.length &&
+      selected.every(
+        (flow) =>
+          String(flow.group || "") === "ui-ux" ||
+          String(flow.name || "").startsWith("UX Audit") ||
+          /UI UX Audit/i.test(String(flow.name || "")),
+      );
+    if (allUx) {
+      const batch = await Flow.findOne({
+        projectId,
+        name: "UX Audit — All Covered Pages",
+      }).lean();
+      if (batch) {
+        uxPages = selected
+          .filter((flow) => String(flow.flowId) !== String(batch.flowId))
+          .map((flow) => {
+            const stay = (flow.steps || [])
+              .map((step) => String(step.title || ""))
+              .find((title) => /stayed on\s+\//.test(title));
+            const pagePath = stay
+              ? stay.replace(/.*stayed on\s+/, "").trim()
+              : /Home Dashboard/i.test(flow.name || "")
+                ? "/home/dashboard"
+                : "";
+            const rest = String(flow.name || "")
+              .replace(/^UX Audit —\s*/, "")
+              .replace(/\s+UI UX Audit$/i, "");
+            return {
+              hub: rest.split(" ")[0] || "Page",
+              name: rest,
+              path: pagePath || "/",
+              stepPrefix: ((flow.steps || [])[0]?.stepId || "UX").replace(
+                /-\d+$/,
+                "",
+              ),
+            };
+          })
+          .filter((page) => page.path && page.path !== "/");
+        if (uxPages.length) {
+          coalescedFrom = ids.slice();
+          ids = [String(batch.flowId)];
+        }
+      }
+    }
+  }
+
   for (const flowId of ids) {
     flowRunQueue.push({
       flowId,
       headed: Boolean(opts.headed),
       projectId: opts.projectId,
       visibleTerminal: opts.visibleTerminal,
+      uxPages,
     });
   }
   const first = await pumpFlowQueue();
   return {
     queued: ids.length,
+    coalesced: Boolean(coalescedFrom),
+    coalescedFrom,
+    pages: uxPages ? uxPages.length : 0,
     ...flowQueueSnapshot(),
     firstOccurrence: first
       ? {
@@ -233,7 +296,7 @@ async function startFlowRun(flowId, opts = {}) {
       runner: hasCiRunner ? "ci-tests" : "playwright",
     },
   });
-
+  writeOccurrenceArchive(occurrence);
   if (!flowQueueRunningId) {
     flowQueueRunningId = occurrenceId;
   }
@@ -261,7 +324,10 @@ async function startFlowRun(flowId, opts = {}) {
     statusApiUrl: STATUS_API_URL,
     mongoUri: MONGODB_URI,
     headed: Boolean(opts.headed),
-    uiAnalysis: String(flow.group || "") === "ux-modules",
+    uiAnalysis:
+      String(flow.group || "") === "ux-modules" ||
+      String(flow.group || "") === "ui-ux",
+    uxPages: Array.isArray(opts.uxPages) ? opts.uxPages : null,
     // Control-plane runs must report real Playwright exit (not CI soft-pass)
     softPass: "0",
     exitFile: exitFile.replace(/\\/g, "/"),
@@ -333,7 +399,8 @@ async function startFlowRun(flowId, opts = {}) {
       ? ["set PW_HEADED=1", "set HEADLESS=false", "set PW_HEADLESS=0"]
       : ["set PW_HEADLESS=1", "set HEADLESS=true"];
     const uxAnalysisLines =
-      String(flow.group || "") === "ux-modules"
+      String(flow.group || "") === "ux-modules" ||
+      String(flow.group || "") === "ui-ux"
         ? ['set "UI_ANALYSIS=1"']
         : [];
     const workerLines = serialWorkers ? ['set "PW_WORKERS=1"'] : [];
@@ -425,8 +492,12 @@ async function startFlowRun(flowId, opts = {}) {
           ...(opts.headed
             ? { PW_HEADED: "1", HEADLESS: "false", PW_HEADLESS: "0" }
             : { PW_HEADLESS: "1", HEADLESS: "true" }),
-          ...(String(flow.group || "") === "ux-modules"
+          ...(String(flow.group || "") === "ux-modules" ||
+          String(flow.group || "") === "ui-ux"
             ? { UI_ANALYSIS: process.env.UI_ANALYSIS === "0" ? "0" : "1" }
+            : {}),
+          ...(Array.isArray(opts.uxPages) && opts.uxPages.length
+            ? { UX_AUDIT_PAGES: JSON.stringify(opts.uxPages) }
             : {}),
         };
         sanitizePlaywrightBrowsersPath(childEnv);
@@ -699,6 +770,7 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   );
   occurrence.currentStepId = null;
   await occurrence.save();
+  writeOccurrenceArchive(occurrence);
 
   clearMeta(occurrenceId);
 
@@ -750,6 +822,21 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   console.log(
     `[runFlow] finalized ${occurrenceId} status=${occurrence.status} steps=${occurrence.stepsCompleted}/${occurrence.stepsTotal} passed=${passedSteps} failed=${failedSteps} issues=${occurrence.liveIssueCount || issueCount} exit=${realExit}`,
   );
+
+  try {
+    const pruned = await pruneOccurrenceRetention(RunningOccurrence, Report);
+    if (pruned.deleted) {
+      console.log(
+        `[runFlow] pruned ${pruned.deleted} old run(s); keeping last ${pruned.keep} per project (+ running)`,
+      );
+    }
+  } catch (err) {
+    console.warn(
+      "[runFlow] occurrence retention prune failed:",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+
   releaseQueueSlot(occurrenceId);
 }
 
@@ -1059,6 +1146,7 @@ async function stopOccurrence(occurrenceId, reason = "Stopped by user") {
   console.log(
     `[runFlow] stopped occurrence ${occurrenceId} flow=${occurrence.flowId} status=cancelled`,
   );
+  writeOccurrenceArchive(updatedOccurrence || occurrence);
   releaseQueueSlot(occurrenceId);
   return (updatedOccurrence || occurrence).toObject();
 }

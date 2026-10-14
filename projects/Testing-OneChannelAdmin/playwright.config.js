@@ -140,8 +140,8 @@ export default defineConfig({
     /* Screenshot on failure for Playwright HTML report + debugging */
     screenshot: "only-on-failure",
 
-    /* Video on failure */
-    video: "retain-on-failure",
+    /* Video on failure. PW_VIDEO=0 skips recording when ffmpeg is not installed. */
+    video: process.env.PW_VIDEO === "0" ? "off" : "retain-on-failure",
 
     /* Trace on failure */
     trace: "retain-on-failure",
@@ -152,10 +152,42 @@ export default defineConfig({
   /* One Channel Admin only. CI uses Playwright Chromium; local keeps Google Chrome when available. */
   projects: [
     {
-      name: "onechanneladmin",
-      testDir: "./tests/Onechanneladmin",
+      name: "setup",
+      testDir: "./tests",
+      testMatch: /auth\.setup\.js/,
       use: {
         ...devices["Desktop Chrome"],
+        ...(ci || process.env.PW_USE_CHROME === "0"
+          ? {}
+          : { channel: "chrome" }),
+      },
+    },
+    {
+      name: "onechanneladmin",
+      testDir: "./tests/Onechanneladmin",
+      testIgnore: [/ux-flows\//, /HomeDashboardUxAudit\.spec\.js/],
+      use: {
+        ...devices["Desktop Chrome"],
+        ...(ci || process.env.PW_USE_CHROME === "0"
+          ? {}
+          : { channel: "chrome" }),
+      },
+    },
+    {
+      name: "ux-audit",
+      testDir: "./tests/Onechanneladmin",
+      testMatch: [/ux-flows\/.*\.spec\.js/, /HomeDashboardUxAudit\.spec\.js/],
+      // Batch scans 100+ pages; default 5m timeout closes the browser mid-run.
+      timeout: Number(process.env.UX_BATCH_TIMEOUT_MS) || 3 * 60 * 60 * 1000,
+      // Optional warm session: run setup project first when UX_USE_STORAGE_STATE=1.
+      ...(process.env.UX_USE_STORAGE_STATE === "1"
+        ? { dependencies: ["setup"] }
+        : {}),
+      use: {
+        ...devices["Desktop Chrome"],
+        ...(process.env.UX_USE_STORAGE_STATE === "1"
+          ? { storageState: "playwright/.auth/admin.json" }
+          : {}),
         ...(ci || process.env.PW_USE_CHROME === "0"
           ? {}
           : { channel: "chrome" }),

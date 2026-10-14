@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const RunningOccurrence = require("../models/RunningOccurrence");
 const Report = require("../models/Report");
 const {
@@ -8,6 +9,8 @@ const {
   stopAllOccurrences,
 } = require("../services/runFlow");
 const { countByStatus } = require("../../lib/applyLiveStep");
+const { resolveScreenshotFile } = require("../lib/issueScreenshots");
+const { buildReportDocx } = require("../lib/reportDocx");
 
 const router = express.Router();
 
@@ -55,6 +58,31 @@ router.get("/", async (req, res, next) => {
     next(err);
   }
 });
+
+/** GET /api/occurrences/:occurrenceId/screenshot/:file — issue screenshot PNG */
+router.get(
+  ["/:occurrenceId/screenshot/:file", "/:occurrenceId/screenshot"],
+  async (req, res, next) => {
+    try {
+      const occurrenceId = req.params.occurrenceId;
+      const occurrence = await RunningOccurrence.findOne({ occurrenceId }).lean();
+      if (!occurrence) {
+        return res
+          .status(404)
+          .json({ error: `Occurrence not found: ${occurrenceId}` });
+      }
+      const key = req.params.file || req.query.step || req.query.file || "";
+      const filePath = resolveScreenshotFile(occurrenceId, key);
+      if (!filePath) {
+        return res.status(404).json({ error: "Screenshot not found" });
+      }
+      res.setHeader("Cache-Control", "no-store");
+      return res.sendFile(path.resolve(filePath));
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
 /** GET /api/occurrences/:occurrenceId — live status */
 router.get("/:occurrenceId", async (req, res, next) => {
@@ -123,6 +151,33 @@ router.post("/:occurrenceId/steps", async (req, res, next) => {
     if (err.status) {
       return res.status(err.status).json({ error: err.message });
     }
+    next(err);
+  }
+});
+
+/** GET /api/occurrences/:occurrenceId/report/docx — UX report download */
+router.get("/:occurrenceId/report/docx", async (req, res, next) => {
+  try {
+    const occurrenceId = req.params.occurrenceId;
+    const occurrence = await RunningOccurrence.findOne({ occurrenceId }).lean();
+    if (!occurrence) {
+      return res
+        .status(404)
+        .json({ error: `Occurrence not found: ${occurrenceId}` });
+    }
+    const report = await Report.findOne({ occurrenceId }).lean();
+    const buffer = await buildReportDocx({ occurrence, report });
+    const safeName = `${(occurrence.flowName || "ux-report")
+      .replace(/[^a-z0-9._-]+/gi, "-")
+      .slice(0, 60)}-${occurrenceId.slice(0, 8)}.docx`;
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);
+    res.setHeader("Cache-Control", "no-store");
+    return res.send(buffer);
+  } catch (err) {
     next(err);
   }
 });

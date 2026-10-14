@@ -96,6 +96,10 @@ function main() {
     env.UI_ANALYSIS = "1";
   }
 
+  if (Array.isArray(meta.uxPages) && meta.uxPages.length) {
+    env.UX_AUDIT_PAGES = JSON.stringify(meta.uxPages);
+  }
+
   if (meta.grep) {
     env.PW_GREP = meta.grep;
   }

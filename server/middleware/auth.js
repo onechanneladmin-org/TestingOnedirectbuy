@@ -7,7 +7,11 @@ function optionalAuth(req, res, next) {
 
   const header = req.headers.authorization || "";
   const bearer = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
-  const token = bearer || req.headers["x-api-token"] || "";
+  const token =
+    bearer ||
+    req.headers["x-api-token"] ||
+    (typeof req.query?.token === "string" ? req.query.token : "") ||
+    "";
 
   if (token !== API_TOKEN) {
     return res.status(401).json({ error: "Unauthorized" });

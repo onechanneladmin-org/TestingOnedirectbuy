@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Flow Control Plane</title>
-    <link rel="stylesheet" href="/ui/styles.css?v=16" />
+    <link rel="stylesheet" href="/ui/styles.css?v=22" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
@@ -124,6 +124,13 @@
       </aside>
 
       <section class="stage">
+        <div id="coveredPages" class="panel covered-pages hidden">
+          <div class="panel-head">
+            <h3>Pages covered <span id="coveredPagesCount" class="badge">0</span></h3>
+            <button type="button" class="btn ghost sm" id="btnCopyPages">Copy list</button>
+          </div>
+          <div id="coveredPagesBody" class="covered-pages-body"></div>
+        </div>
         <div id="emptyState" class="empty">
           <h1>Pick a flow</h1>
           <p>Select a journey on the left to inspect steps, trigger a run, and watch live progress.</p>
@@ -229,12 +236,39 @@
             </div>
           </div>
 
-          <div class="panel report-panel">
-            <div class="panel-head">
+          <div class="panel report-panel" id="reportPanel">
+            <div class="panel-head report-panel-head">
               <h3>Report &amp; issues</h3>
-              <button type="button" class="btn ghost sm" id="btnLoadReport" disabled>
-                Load report
-              </button>
+              <div class="report-panel-actions">
+                <button
+                  type="button"
+                  class="btn ghost sm hidden"
+                  id="btnReportExitFullscreen"
+                  title="Exit full screen"
+                >
+                  Exit full screen
+                </button>
+                <button
+                  type="button"
+                  class="btn ghost sm"
+                  id="btnReportFullscreen"
+                  title="Full screen report"
+                >
+                  Full screen
+                </button>
+                <button
+                  type="button"
+                  class="btn ghost sm"
+                  id="btnReportDocx"
+                  disabled
+                  title="Download report as Word document"
+                >
+                  Download DOCX
+                </button>
+                <button type="button" class="btn ghost sm" id="btnLoadReport" disabled>
+                  Load report
+                </button>
+              </div>
             </div>
             <div id="reportBody" class="report-body">
               <p class="muted">Report appears when the occurrence finishes.</p>
@@ -253,6 +287,6 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="/ui/app.js?v=18" type="module"></script>
+    <script src="/ui/app.js?v=25" type="module"></script>
   </body>
 </html>
