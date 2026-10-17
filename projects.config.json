@@ -20,6 +20,12 @@
       "name": "Testing-OneProductHubV2",
       "root": "projects/Testing-OneProductHubV2",
       "flowsConfig": "flows.config.json"
+    },
+    {
+      "id": "zukaongo",
+      "name": "Testing-Zukaongo",
+      "root": "projects/Testing-Zukaongo",
+      "flowsConfig": "flows.config.json"
     }
   ]
 }
