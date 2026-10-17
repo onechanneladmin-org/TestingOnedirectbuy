@@ -855,6 +855,7 @@ function renderOccurrence(occ) {
         .slice(0, 40)
         .map((issue) => renderIssueCard(issue, occ.occurrenceId))
         .join("");
+    hydrateIssueShots($("reportBody"));
   }
 
   if (terminal) {
@@ -894,6 +895,7 @@ async function loadReport(occurrenceId) {
     }
 
     $("reportBody").innerHTML = html;
+    hydrateIssueShots($("reportBody"));
     syncReportActions(state.lastOccurrence);
   } catch (err) {
     $("reportBody").innerHTML = `<p class="muted">${escapeHtml(
@@ -1347,15 +1349,32 @@ function issueScreenshotUrl(occurrenceId, issue) {
   if (!occurrenceId || !file) return "";
   const baseName = file.split(/[/\\]/).pop();
   const base = `/api/occurrences/${encodeURIComponent(occurrenceId)}/screenshot`;
-  const tokenQ = state.token
-    ? `${baseName.endsWith(".png") ? "?" : "&"}token=${encodeURIComponent(state.token)}`
-    : "";
   if (baseName.endsWith(".png")) {
-    return `${base}/${encodeURIComponent(baseName)}${tokenQ}`;
+    return `${base}/${encodeURIComponent(baseName)}`;
   }
-  return `${base}?file=${encodeURIComponent(baseName || file)}${
-    state.token ? `&token=${encodeURIComponent(state.token)}` : ""
-  }`;
+  return `${base}?file=${encodeURIComponent(baseName || file)}`;
+}
+
+/**
+ * Screenshots need the bearer token, which <img src> cannot send, so fetch
+ * each one with headers() and swap in a blob URL.
+ */
+function hydrateIssueShots(root) {
+  if (!root) return;
+  root.querySelectorAll("img.issue-shot[data-shot-src]").forEach(async (img) => {
+    const src = img.getAttribute("data-shot-src");
+    img.removeAttribute("data-shot-src");
+    try {
+      const res = await fetch(src, { headers: headers(false) });
+      if (!res.ok) throw new Error(String(res.status));
+      const blobUrl = URL.createObjectURL(await res.blob());
+      img.src = blobUrl;
+      const link = img.closest("a.issue-shot-link");
+      if (link) link.href = blobUrl;
+    } catch {
+      img.alt = "Screenshot unavailable";
+    }
+  });
 }
 
 function syncReportActions(occ) {
@@ -1389,7 +1408,6 @@ async function downloadReportDocx() {
     `/api/occurrences/${encodeURIComponent(id)}/report/docx`,
     window.location.origin,
   );
-  if (state.token) url.searchParams.set("token", state.token);
   try {
     const res = await fetch(`${url.pathname}${url.search}`, {
       headers: headers(false),
@@ -1420,8 +1438,8 @@ function renderIssueCard(issue, occurrenceId) {
   const body = formatIssueBody(issue);
   const shotUrl = issueScreenshotUrl(occurrenceId, issue);
   const shot = shotUrl
-    ? `<a class="issue-shot-link" href="${escapeAttr(shotUrl)}" target="_blank" rel="noopener">
-        <img class="issue-shot" src="${escapeAttr(shotUrl)}" alt="Issue screenshot" loading="lazy" />
+    ? `<a class="issue-shot-link" href="#" target="_blank" rel="noopener">
+        <img class="issue-shot" data-shot-src="${escapeAttr(shotUrl)}" alt="Issue screenshot" />
       </a>`
     : "";
   return `

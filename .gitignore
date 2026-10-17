@@ -19,3 +19,7 @@ node_modules/
 
 # Local UX-module backend install
 /local/AutopartMarketplaceBackend/node_modules/
+
+# Scratch output
+tmp-ocr/
+fix.txt

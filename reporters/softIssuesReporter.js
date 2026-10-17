@@ -227,12 +227,9 @@ class SoftIssuesReporter {
         String(a.id || "").localeCompare(String(b.id || "")),
     );
 
+    // Opt-in only (same rule as scripts/run-ci-tests.js).
     const softPass =
-      process.env.CI_SOFT_PASS === "1" ||
-      process.env.CI_SOFT_PASS === "true" ||
-      (Boolean(process.env.CI) &&
-        process.env.CI_SOFT_PASS !== "0" &&
-        process.env.CI_SOFT_PASS !== "false");
+      process.env.CI_SOFT_PASS === "1" || process.env.CI_SOFT_PASS === "true";
 
     const meta = {
       generatedAt: new Date().toISOString(),

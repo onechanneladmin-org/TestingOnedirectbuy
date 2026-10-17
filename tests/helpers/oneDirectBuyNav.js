@@ -1,7 +1,11 @@
 import { expect } from "@playwright/test";
+import targetEnv from "../../lib/targetEnv.cjs";
 
-export const ONE_DIRECT_BUY_BASE_URL =
-  process.env.ONEDIRECTBUY_BASE_URL || "https://onedirectbuy.com";
+/** Defaults to https://dev.onedirectbuy.com; production needs ALLOW_PROD=1 (see lib/targetEnv.cjs). */
+export const ONE_DIRECT_BUY_BASE_URL = targetEnv.resolveBaseUrl();
+
+/** True when BASE_URL is a dev/staging/local host — gate anything that writes data on it. */
+export const IS_NON_PROD_TARGET = targetEnv.isNonProdTarget();
 
 const DEFAULT_TIMEOUT = 15_000;
 

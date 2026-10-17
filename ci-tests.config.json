@@ -1,5 +1,14 @@
 {
   "$comment": "Control which Playwright specs run in GitHub Actions (Chromium only). Set enabled: false to skip. Authenticated buyer account/address specs skip themselves when ONEDIRECTBUY_BUYER_* secrets are missing.",
+  "$targetComment": "Runs target BASE_URL (default https://dev.onedirectbuy.com). Production is refused unless ALLOW_PROD=1, and then only the productionReadOnly specs run (lib/targetEnv.cjs). Specs that create data (e.g. buyer registration) also skip themselves unless BASE_URL is a dev/staging/local host.",
+  "productionReadOnly": [
+    "tests/OneDirectBuy/Homepage.spec.js",
+    "tests/OneDirectBuy/Navigation.spec.js",
+    "tests/OneDirectBuy/Search.spec.js",
+    "tests/OneDirectBuy/LegalPages.spec.js",
+    "tests/OneDirectBuy/ErrorHandlingSeo.spec.js",
+    "tests/OneDirectBuy/ResponsiveAccessibility.spec.js"
+  ],
   "workers": 4,
   "retries": 1,
   "suites": {
@@ -61,7 +70,8 @@
     {
       "file": "tests/OneDirectBuy/BuyerAccount.spec.js",
       "enabled": true,
-      "description": "Public auth — register form, terms, guest orders gate"
+      "description": "Public auth — register form, terms, guest orders gate. ODB-UC-001/002 register new buyer accounts and run only when BASE_URL is non-prod",
+      "nonProdOnlyTests": ["ODB-UC-001", "ODB-UC-002"]
     },
     {
       "file": "tests/OneDirectBuy/BuyerAccountAuthenticated.spec.js",
