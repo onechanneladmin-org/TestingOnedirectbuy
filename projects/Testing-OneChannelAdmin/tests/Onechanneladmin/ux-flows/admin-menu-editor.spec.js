@@ -1,6 +1,6 @@
 const { test } = require("@playwright/test");
 const { flowStep: soft, reportFlowIssue } = require("../../helpers/flowStep");
-const { openSignIn, signIn, openAdminPage, runFullUxAudit } = require("./uxAuditSteps");
+const { openSignIn, signIn, openAdminPage, runFullUxAudit, runUserActionSteps } = require("./uxAuditSteps");
 
 const entry = {
   "hub": "Admin",
@@ -24,6 +24,10 @@ test("Admin: Menu Editor UI UX audit", async ({ page }) => {
 
   await soft("ADMIN-MENU-EDITOR-04", "Confirm Menu Editor stayed on /settings/pageflipcanvaseditor", async () => {
     await openAdminPage(page, entry);
+  });
+
+  await soft(entry.stepPrefix + "-05A", "List user actions, run each one, and return to this page", async () => {
+    await runUserActionSteps(page, entry, soft);
   });
 
   await soft("ADMIN-MENU-EDITOR-05", "Run all UI audit rules on Admin Menu Editor", async () => {

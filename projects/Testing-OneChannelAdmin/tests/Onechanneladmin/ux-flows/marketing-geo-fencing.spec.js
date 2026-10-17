@@ -1,6 +1,6 @@
 const { test } = require("@playwright/test");
 const { flowStep: soft, reportFlowIssue } = require("../../helpers/flowStep");
-const { openSignIn, signIn, openAdminPage, runFullUxAudit } = require("./uxAuditSteps");
+const { openSignIn, signIn, openAdminPage, runFullUxAudit, runUserActionSteps } = require("./uxAuditSteps");
 
 const entry = {
   "hub": "Marketing",
@@ -24,6 +24,10 @@ test("Marketing: Geo Fencing UI UX audit", async ({ page }) => {
 
   await soft("MARKETING-GEO-FENC-04", "Confirm Geo Fencing stayed on /marketing/geo-fencing", async () => {
     await openAdminPage(page, entry);
+  });
+
+  await soft(entry.stepPrefix + "-05A", "List user actions, run each one, and return to this page", async () => {
+    await runUserActionSteps(page, entry, soft);
   });
 
   await soft("MARKETING-GEO-FENC-05", "Run all UI audit rules on Marketing Geo Fencing", async () => {

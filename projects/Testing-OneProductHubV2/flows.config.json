@@ -192,7 +192,8 @@
       "enabled": true,
       "tests": [
         "tests/OneproducthubV2/E2E_ClientRequestAccess.spec.js",
-        "tests/OneproducthubV2/E2E_ApproveAccessUiOnly.spec.js"
+        "tests/OneproducthubV2/E2E_ApproveAccessUiOnly.spec.js",
+        "tests/OneproducthubV2/E2E_BrandAdminSharedAccess.spec.js"
       ],
       "catalog": "docs/catalogs/flow-14-e2e-access-request.tsv"
     }

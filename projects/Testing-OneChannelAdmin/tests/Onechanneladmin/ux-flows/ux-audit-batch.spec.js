@@ -11,6 +11,7 @@ const {
   signIn,
   openAdminPage,
   runFullUxAudit,
+  runUserActionSteps,
   writeBatchSummary,
 } = require("./uxAuditSteps");
 
@@ -48,6 +49,16 @@ function loadPages() {
   return uniq;
 }
 
+function overlayFields(source) {
+  const stats = (source && source.overlayStats) || {};
+  return {
+    modals: stats.modals || 0,
+    popups: stats.popups || 0,
+    sidebars: stats.sidebars || 0,
+    opened: stats.opened || [],
+  };
+}
+
 function isBrowserClosedError(err) {
   return /Target page, context or browser has been closed|browser has been closed/i.test(
     String(err?.message || err || ""),
@@ -78,6 +89,7 @@ test("UX Audit batch — login once and scan pages", async ({ page, context }) =
   let activePage = page;
 
   context.on("page", async (extra) => {
+    if (activePage && activePage.__uxAllowExtraPages) return;
     if (extra !== activePage && !extra.isClosed()) {
       await extra.close().catch(() => {});
     }
@@ -179,9 +191,11 @@ test("UX Audit batch — login once and scan pages", async ({ page, context }) =
       }
     }
 
+    let audited = null;
     try {
       await soft(auditId, `Audit ${entry.hub} — ${entry.name}`, async () => {
-        await runFullUxAudit(activePage, entry, reportFlowIssue, captureIssueScreenshot);
+        await runUserActionSteps(activePage, entry, soft);
+        audited = await runFullUxAudit(activePage, entry, reportFlowIssue, captureIssueScreenshot);
       });
       rows.push({
         hub: entry.hub,
@@ -189,6 +203,7 @@ test("UX Audit batch — login once and scan pages", async ({ page, context }) =
         path: entry.path,
         status: "audited",
         findings: 0,
+        ...overlayFields(audited),
       });
     } catch (err) {
       if (isBrowserClosedError(err)) {
@@ -196,7 +211,8 @@ test("UX Audit batch — login once and scan pages", async ({ page, context }) =
           activePage = await recoverPage(context, null);
           await soft(auditId, `Retry audit ${entry.hub} — ${entry.name}`, async () => {
             await openAdminPage(activePage, entry);
-            await runFullUxAudit(activePage, entry, reportFlowIssue, captureIssueScreenshot);
+            await runUserActionSteps(activePage, entry, soft);
+            audited = await runFullUxAudit(activePage, entry, reportFlowIssue, captureIssueScreenshot);
           });
           rows.push({
             hub: entry.hub,
@@ -204,6 +220,7 @@ test("UX Audit batch — login once and scan pages", async ({ page, context }) =
             path: entry.path,
             status: "audited",
             findings: 0,
+            ...overlayFields(audited),
           });
           continue;
         } catch (retryErr) {
@@ -220,6 +237,7 @@ test("UX Audit batch — login once and scan pages", async ({ page, context }) =
         status: isBrowserClosedError(err) ? "error" : "audited",
         findings: reported.length || (match ? Number(match[1]) : isBrowserClosedError(err) ? 0 : 1),
         error: String(err.message || err).slice(0, 300),
+        ...overlayFields(err),
       });
     }
 
@@ -227,13 +245,13 @@ test("UX Audit batch — login once and scan pages", async ({ page, context }) =
   }
 
   const outDir = path.join(process.cwd(), "test-results", "ux-audit-batch");
-  writeBatchSummary(rows, outDir, allIssues);
+  const summary = writeBatchSummary(rows, outDir, allIssues);
 
   const openErrors = rows.filter((row) => row.status === "error").length;
   const findings = rows.reduce((sum, row) => sum + (row.findings || 0), 0);
   if (openErrors || findings) {
     throw new Error(
-      `Batch UX audit finished with ${findings} finding(s) across ${rows.length} page(s); ${openErrors} page open error(s). See test-results/ux-audit-batch/SUMMARY.md and PATTERN_ROLLUP.md`,
+      `Batch UX audit finished with ${findings} finding(s) across ${rows.length} page(s); ${openErrors} page open error(s). Overlays opened: ${summary.modals} modal, ${summary.popups} popup, ${summary.sidebars} sidebar. See test-results/ux-audit-batch/SUMMARY.md and PATTERN_ROLLUP.md`,
     );
   }
 });

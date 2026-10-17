@@ -1,6 +1,6 @@
 const { test } = require("@playwright/test");
 const { flowStep: soft, reportFlowIssue } = require("../../helpers/flowStep");
-const { openSignIn, signIn, openAdminPage, runFullUxAudit } = require("./uxAuditSteps");
+const { openSignIn, signIn, openAdminPage, runFullUxAudit, runUserActionSteps } = require("./uxAuditSteps");
 
 const entry = {
   "hub": "CRM",
@@ -24,6 +24,10 @@ test("CRM: D2C UI UX audit", async ({ page }) => {
 
   await soft("CRM-D2C-04", "Confirm D2C stayed on /crm/ContactManage", async () => {
     await openAdminPage(page, entry);
+  });
+
+  await soft(entry.stepPrefix + "-05A", "List user actions, run each one, and return to this page", async () => {
+    await runUserActionSteps(page, entry, soft);
   });
 
   await soft("CRM-D2C-05", "Run all UI audit rules on CRM D2C", async () => {

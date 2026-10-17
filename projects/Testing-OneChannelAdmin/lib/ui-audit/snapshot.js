@@ -590,11 +590,25 @@ function collectInPage(limits) {
 
   const overlays = [];
   document
-    .querySelectorAll("[role=dialog], [role=alertdialog], dialog, [aria-modal=true], [data-audit-drawer]")
+    .querySelectorAll(
+      "[role=dialog], [role=alertdialog], dialog, [aria-modal=true], [data-audit-drawer], .p-dialog, .p-sidebar, .p-drawer, .p-overlaypanel",
+    )
     .forEach((el) => {
       const style = getComputedStyle(el);
       const rect = el.getBoundingClientRect();
-      if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) {
+      if (!visible(el, style, rect) || rect.width < 80 || rect.height < 80) return;
+      const onScreen =
+        rect.right > 8 &&
+        rect.bottom > 8 &&
+        rect.left < window.innerWidth - 8 &&
+        rect.top < window.innerHeight - 8;
+      if (!onScreen) return;
+      if (el.getAttribute("aria-label") === "Home navigation") return;
+      const cls = String(el.className || "");
+      if (
+        /\bp-dialog-mask\b|\bp-sidebar-mask\b|\bp-component-overlay\b/.test(cls) &&
+        !/dialog/i.test(el.getAttribute("role") || "")
+      ) {
         return;
       }
       const labelledby = el.getAttribute("aria-labelledby");
@@ -609,20 +623,28 @@ function collectInPage(limits) {
       }
       const heading = el.querySelector("h1,h2,h3,h4,[role=heading]");
       if (!name && heading) name = textOf(heading);
+      let kind = "modal";
+      let role = el.getAttribute("role") || (el.tagName === "DIALOG" ? "dialog" : null);
+      if (/\bp-sidebar\b|\bp-drawer\b|\bDrawer\b/.test(cls) || el.hasAttribute("data-audit-drawer")) {
+        kind = "sidebar";
+        role = role && role !== "complementary" ? role : "drawer";
+      } else if (/\bp-overlaypanel\b|\bpopover\b/i.test(cls)) {
+        kind = "popup";
+        role = role || "dialog";
+      } else {
+        role = role || "dialog";
+      }
       overlays.push({
         selector: selectorFor(el),
-        role: el.getAttribute("role") || (el.tagName === "DIALOG" ? "dialog" : null),
+        role,
+        kind,
         name,
-        ariaModal: el.getAttribute("aria-modal") === "true" || el.tagName === "DIALOG",
+        ariaModal: el.getAttribute("aria-modal") === "true" || el.tagName === "DIALOG" || kind === "modal",
         bbox: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
         borderRadius: style.borderRadius,
-        offscreen:
-          rect.bottom < 0 ||
-          rect.top > window.innerHeight ||
-          rect.right < 0 ||
-          rect.left > window.innerWidth,
+        offscreen: false,
         hasClose: !!el.querySelector(
-          "[data-audit-close], button[aria-label*='close' i], button[aria-label*='dismiss' i]",
+          "[data-audit-close], button[aria-label*='close' i], button[aria-label*='dismiss' i], .p-dialog-header-close, .p-sidebar-close, .p-dialog-header-icons button, .p-sidebar-header button",
         ),
       });
     });

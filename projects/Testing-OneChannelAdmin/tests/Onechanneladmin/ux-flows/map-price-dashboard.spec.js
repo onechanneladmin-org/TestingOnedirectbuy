@@ -1,6 +1,6 @@
 const { test } = require("@playwright/test");
 const { flowStep: soft, reportFlowIssue } = require("../../helpers/flowStep");
-const { openSignIn, signIn, openAdminPage, runFullUxAudit } = require("./uxAuditSteps");
+const { openSignIn, signIn, openAdminPage, runFullUxAudit, runUserActionSteps } = require("./uxAuditSteps");
 
 const entry = {
   "hub": "Map Price",
@@ -24,6 +24,10 @@ test("Map Price: Dashboard UI UX audit", async ({ page }) => {
 
   await soft("MAP-PRICE-DASHBOAR-04", "Confirm Dashboard stayed on /map-price/dashboard", async () => {
     await openAdminPage(page, entry);
+  });
+
+  await soft(entry.stepPrefix + "-05A", "List user actions, run each one, and return to this page", async () => {
+    await runUserActionSteps(page, entry, soft);
   });
 
   await soft("MAP-PRICE-DASHBOAR-05", "Run all UI audit rules on Map Price Dashboard", async () => {

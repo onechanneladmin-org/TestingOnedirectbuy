@@ -1,6 +1,6 @@
 const { test } = require("@playwright/test");
 const { flowStep: soft, reportFlowIssue } = require("../../helpers/flowStep");
-const { openSignIn, signIn, openAdminPage, runFullUxAudit } = require("./uxAuditSteps");
+const { openSignIn, signIn, openAdminPage, runFullUxAudit, runUserActionSteps } = require("./uxAuditSteps");
 
 const entry = {
   "hub": "Accounting",
@@ -24,6 +24,10 @@ test("Accounting: Customers UI UX audit", async ({ page }) => {
 
   await soft("ACCOUNTING-CUSTOME-04", "Confirm Customers stayed on /accounting/customers", async () => {
     await openAdminPage(page, entry);
+  });
+
+  await soft(entry.stepPrefix + "-05A", "List user actions, run each one, and return to this page", async () => {
+    await runUserActionSteps(page, entry, soft);
   });
 
   await soft("ACCOUNTING-CUSTOME-05", "Run all UI audit rules on Accounting Customers", async () => {

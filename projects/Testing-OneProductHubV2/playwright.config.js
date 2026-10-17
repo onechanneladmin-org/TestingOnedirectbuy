@@ -146,7 +146,10 @@ export default defineConfig({
     screenshot: "only-on-failure",
 
     /* Video on failure */
-    video: testEnv === "production" ? "off" : "retain-on-failure",
+    video:
+      process.env.PW_VIDEO === "0" || testEnv === "production"
+        ? "off"
+        : "retain-on-failure",
 
     /* Trace on failure */
     trace: testEnv === "production" ? "off" : "retain-on-failure",

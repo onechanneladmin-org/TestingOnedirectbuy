@@ -1,6 +1,6 @@
 const { test } = require("@playwright/test");
 const { flowStep: soft, reportFlowIssue } = require("../../helpers/flowStep");
-const { openSignIn, signIn, openAdminPage, runFullUxAudit } = require("./uxAuditSteps");
+const { openSignIn, signIn, openAdminPage, runFullUxAudit, runUserActionSteps } = require("./uxAuditSteps");
 
 const entry = {
   "hub": "WMS",
@@ -24,6 +24,10 @@ test("WMS: Manage 3pl Billing/Addons UI UX audit", async ({ page }) => {
 
   await soft("WMS-MANAGE-3PL-BIL-04", "Confirm Manage 3pl Billing/Addons stayed on /wms/manage3pladdons", async () => {
     await openAdminPage(page, entry);
+  });
+
+  await soft(entry.stepPrefix + "-05A", "List user actions, run each one, and return to this page", async () => {
+    await runUserActionSteps(page, entry, soft);
   });
 
   await soft("WMS-MANAGE-3PL-BIL-05", "Run all UI audit rules on WMS Manage 3pl Billing/Addons", async () => {

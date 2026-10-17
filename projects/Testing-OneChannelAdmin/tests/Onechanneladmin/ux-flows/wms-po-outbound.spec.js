@@ -1,6 +1,6 @@
 const { test } = require("@playwright/test");
 const { flowStep: soft, reportFlowIssue } = require("../../helpers/flowStep");
-const { openSignIn, signIn, openAdminPage, runFullUxAudit } = require("./uxAuditSteps");
+const { openSignIn, signIn, openAdminPage, runFullUxAudit, runUserActionSteps } = require("./uxAuditSteps");
 
 const entry = {
   "hub": "WMS",
@@ -24,6 +24,10 @@ test("WMS: PO Outbound UI UX audit", async ({ page }) => {
 
   await soft("WMS-PO-OUTBOUND-04", "Confirm PO Outbound stayed on /wms/purchaseorders?warehouse=wh1", async () => {
     await openAdminPage(page, entry);
+  });
+
+  await soft(entry.stepPrefix + "-05A", "List user actions, run each one, and return to this page", async () => {
+    await runUserActionSteps(page, entry, soft);
   });
 
   await soft("WMS-PO-OUTBOUND-05", "Run all UI audit rules on WMS PO Outbound", async () => {
