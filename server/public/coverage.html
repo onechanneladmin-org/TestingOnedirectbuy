@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OneDirectBuy — Use-case coverage</title>
+    <link rel="stylesheet" href="/ui/styles.css?v=5" />
+    <style>
+      .cov { max-width: 1200px; margin: 0 auto; padding: 1rem 1.35rem 3rem; }
+      .cov h2 { font-size: 1rem; margin: 1.6rem 0 0.6rem; }
+      .cov table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+      .cov th, .cov td { text-align: left; padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+      .cov th { color: var(--muted); font-weight: 500; }
+      .cov .num { text-align: right; font-variant-numeric: tabular-nums; }
+      .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; }
+      .tile { border: 1px solid var(--line); border-radius: var(--radius); padding: 0.8rem 0.9rem; background: var(--bg-1); }
+      .tile .v { font-size: 1.5rem; }
+      .tile .l { color: var(--muted); font-size: 0.8rem; }
+      .pill { padding: 0.05rem 0.45rem; border-radius: 999px; font-size: 0.75rem; border: 1px solid var(--line); }
+      .pill.failed, .pill.blocked { color: var(--fail); border-color: var(--fail); }
+      .pill.passed { color: var(--pass); border-color: var(--pass); }
+      .bar { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+      .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
+      .muted { color: var(--muted); }
+      .err { color: var(--fail); white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <p class="brand-name">OneDirectBuy</p>
+          <p class="brand-sub">Use-case coverage</p>
+        </div>
+      </div>
+      <div class="topbar-actions bar">
+        <a class="btn ghost" href="/">Flows</a>
+        <button type="button" class="btn ghost" id="btnSync" title="Pull the Google Sheet now">Sync sheet</button>
+        <a class="btn ghost" id="btnExport" href="/api/usecases/export.csv">Export results CSV</a>
+        <button type="button" class="btn ghost" id="btnRefresh">Refresh</button>
+      </div>
+    </header>
+
+    <main class="cov">
+      <p class="muted" id="meta">Loading…</p>
+      <p class="err" id="error" hidden></p>
+
+      <div class="tiles" id="tiles"></div>
+
+      <h2>By priority</h2>
+      <table id="prio"></table>
+
+      <div class="grid2">
+        <div>
+          <h2>By layer</h2>
+          <table id="layer"></table>
+        </div>
+        <div>
+          <h2>By flow</h2>
+          <table id="flow"></table>
+        </div>
+      </div>
+
+      <h2>Failing now (latest run)</h2>
+      <table id="failing"></table>
+
+      <h2>P0 without an expected result</h2>
+      <p class="muted" id="p0missing"></p>
+    </main>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="/ui/coverage.js?v=1"></script>
+  </body>
+</html>

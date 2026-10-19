@@ -8,6 +8,7 @@ const { spawn } = require("child_process");
 const { randomUUID } = require("crypto");
 const Flow = require("../models/Flow");
 const RunningOccurrence = require("../models/RunningOccurrence");
+const { recordOccurrenceResults } = require("./useCaseStore");
 const Report = require("../models/Report");
 const { ROOT, STATUS_API_URL, MONGODB_URI } = require("../config");
 const {
@@ -487,6 +488,13 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   ).length;
   occurrence.currentStepId = null;
   await occurrence.save();
+
+  // Latest result per use-case ID for the coverage dashboard (never fails the finalize).
+  try {
+    await recordOccurrenceResults(occurrence);
+  } catch (err) {
+    console.warn("[runFlow] use-case results not recorded:", err.message);
+  }
 
   clearMeta(occurrenceId);
 

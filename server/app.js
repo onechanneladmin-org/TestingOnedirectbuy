@@ -4,6 +4,7 @@ const cors = require("cors");
 const { optionalAuth } = require("./middleware/auth");
 const flowsRouter = require("./routes/flows");
 const occurrencesRouter = require("./routes/occurrences");
+const usecasesRouter = require("./routes/usecases");
 const { seedFlows } = require("./services/seedFlows");
 
 const PUBLIC_DIR = path.join(__dirname, "public");
@@ -22,6 +23,9 @@ function createApp() {
   app.use("/ui", express.static(PUBLIC_DIR));
   app.get("/", (_req, res) => {
     res.sendFile(path.join(PUBLIC_DIR, "index.html"));
+  });
+  app.get("/coverage", (_req, res) => {
+    res.sendFile(path.join(PUBLIC_DIR, "coverage.html"));
   });
 
   // API routes (optional bearer token when API_TOKEN is set)
@@ -46,6 +50,7 @@ function createApp() {
 
   api.use("/flows", flowsRouter);
   api.use("/occurrences", occurrencesRouter);
+  api.use("/usecases", usecasesRouter);
 
   app.use("/api", api);
 
