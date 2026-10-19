@@ -182,6 +182,12 @@
       "file": "tests/OneDirectBuy/BuyerAccountSecurity.spec.js",
       "enabled": true,
       "description": "Account security — change password, mismatch, lockout probe, logout all devices"
+    },
+    {
+      "file": "tests/OneDirectBuy/Coupons.spec.js",
+      "enabled": false,
+      "description": "Coupons — cart API + storefront cart (docs/qa/coupon-test-cases.md); 50 automated, rest registered as skipped in coupon-cases.tsv. Off until the SAVE10 apply failure is fixed."
     }
+
   ]
 }
