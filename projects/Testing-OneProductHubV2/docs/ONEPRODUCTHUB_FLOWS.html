@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>One Product Hub — Website Flows Documentation</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #f3f6f8;
+      --bg-elev: #ffffff;
+      --ink: #14212b;
+      --muted: #5a6b78;
+      --line: #d5dee5;
+      --accent: #0d7a6f;
+      --accent-soft: #dcefeb;
+      --ok: #1f6b43;
+      --ok-bg: #e6f4ec;
+      --warn: #8a5a00;
+      --warn-bg: #fff3d6;
+      --nav: #0f1c24;
+      --nav-ink: #e7eef3;
+      --code-bg: #e8eef2;
+      --radius: 10px;
+      --shadow: 0 1px 2px rgba(20, 33, 43, 0.06), 0 8px 24px rgba(20, 33, 43, 0.06);
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+      --mono: "Cascadia Code", "Consolas", "SF Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(1100px 480px at 0% -10%, #d9ebe7 0%, transparent 55%),
+        radial-gradient(900px 420px at 100% 0%, #e4e9f0 0%, transparent 50%),
+        var(--bg);
+      line-height: 1.55;
+    }
+    a { color: var(--accent); text-underline-offset: 2px; }
+    a:hover { color: #095a52; }
+    .layout { display: grid; grid-template-columns: 290px minmax(0, 1fr); min-height: 100vh; }
+    aside {
+      position: sticky; top: 0; height: 100vh; overflow: auto;
+      background: var(--nav); color: var(--nav-ink);
+      padding: 1.25rem 1rem 2rem; border-right: 1px solid #0a1319;
+    }
+    aside .brand { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8fa3b3; margin-bottom: 0.35rem; }
+    aside h1 { font-size: 1.12rem; margin: 0 0 1rem; line-height: 1.3; }
+    .search {
+      width: 100%; padding: 0.55rem 0.7rem; border-radius: 8px;
+      border: 1px solid #2a3d4a; background: #0b151c; color: var(--nav-ink);
+      font: inherit; margin-bottom: 0.75rem;
+    }
+    .search:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    .filters { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1rem; }
+    .filters button {
+      border: 1px solid #334856; background: transparent; color: #c2d0db;
+      border-radius: 999px; padding: 0.2rem 0.55rem; font-size: 0.72rem; cursor: pointer;
+    }
+    .filters button.active, .filters button:hover {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+    .toc { list-style: none; margin: 0; padding: 0; }
+    .toc a {
+      display: block; color: #b6c6d3; text-decoration: none;
+      padding: 0.35rem 0.5rem; border-radius: 6px; font-size: 0.86rem;
+    }
+    .toc a:hover { background: #1c2d38; color: #fff; }
+    .toc .id { display: inline-block; min-width: 1.6rem; color: #7f93a3; font-variant-numeric: tabular-nums; }
+    main { padding: 2rem clamp(1rem, 3vw, 2.5rem) 4rem; max-width: 980px; }
+    .hero {
+      background: var(--bg-elev); border: 1px solid var(--line);
+      border-radius: calc(var(--radius) + 2px); box-shadow: var(--shadow);
+      padding: 1.5rem 1.6rem; margin-bottom: 1.5rem;
+    }
+    .hero h2 { margin: 0 0 0.5rem; font-size: clamp(1.45rem, 2.3vw, 1.95rem); }
+    .hero p { margin: 0; color: var(--muted); max-width: 64ch; }
+    .meta-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem; margin-top: 1.1rem;
+    }
+    .meta-card {
+      background: #f7fafb; border: 1px solid var(--line);
+      border-radius: 8px; padding: 0.7rem 0.85rem;
+    }
+    .meta-card dt {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--muted); margin-bottom: 0.2rem;
+    }
+    .meta-card dd { margin: 0; font-size: 0.92rem; word-break: break-word; }
+    section.block {
+      background: var(--bg-elev); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 1.25rem 1.4rem 1.4rem; margin-bottom: 1.1rem;
+    }
+    section.block h2 {
+      margin: 0 0 0.75rem; font-size: 1.25rem;
+      padding-bottom: 0.55rem; border-bottom: 1px solid var(--line);
+    }
+    section.block h3 {
+      margin: 1.1rem 0 0.4rem; font-size: 0.95rem;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .flow { scroll-margin-top: 1rem; }
+    .flow-head {
+      display: flex; flex-wrap: wrap; align-items: center;
+      gap: 0.5rem 0.75rem; margin-bottom: 0.35rem;
+    }
+    .flow-head h2 { border: 0; padding: 0; margin: 0; flex: 1 1 auto; }
+    .badge {
+      display: inline-flex; align-items: center; font-size: 0.72rem;
+      font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 999px;
+    }
+    .badge.ci-yes { background: var(--ok-bg); color: var(--ok); }
+    .badge.cat { background: var(--accent-soft); color: #0a5a52; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 0.4rem 0 0.6rem; }
+    th, td { text-align: left; padding: 0.55rem 0.65rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--muted); background: #f7fafb;
+    }
+    tr:hover td { background: #f9fbfc; }
+    ol.steps, ul.alts { margin: 0.35rem 0 0.5rem; padding-left: 1.2rem; }
+    ol.steps li, ul.alts li { margin: 0.28rem 0; }
+    code { font-family: var(--mono); font-size: 0.84em; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+    pre {
+      background: #0f1c24; color: #e7eef3; padding: 0.9rem 1rem;
+      border-radius: 8px; overflow: auto; font-family: var(--mono); font-size: 0.82rem;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+    .mermaid {
+      background: #f7fafb; border: 1px solid var(--line);
+      border-radius: 8px; padding: 0.75rem; margin: 0.75rem 0; overflow: auto;
+    }
+    .callout {
+      border-left: 3px solid var(--accent); background: var(--accent-soft);
+      padding: 0.7rem 0.9rem; border-radius: 0 8px 8px 0; margin: 0.75rem 0; font-size: 0.92rem;
+    }
+    .auto-grid {
+      display: grid; grid-template-columns: 110px 1fr;
+      gap: 0.35rem 0.75rem; font-size: 0.9rem; margin-top: 0.35rem;
+    }
+    .auto-grid dt { color: var(--muted); }
+    .auto-grid dd { margin: 0; }
+    .matrix td.yes { color: var(--ok); font-weight: 700; text-align: center; }
+    .matrix td.no { color: #a33; text-align: center; }
+    .matrix td.dash { color: var(--muted); text-align: center; }
+    .hidden { display: none !important; }
+    footer.doc-foot { margin-top: 1.5rem; color: var(--muted); font-size: 0.85rem; }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { position: relative; height: auto; }
+      .toc { columns: 2; }
+    }
+    @media (max-width: 560px) { .toc { columns: 1; } }
+    @media print {
+      aside { display: none; }
+      .layout { grid-template-columns: 1fr; }
+      section.block, .hero { box-shadow: none; break-inside: avoid; }
+      body { background: #fff; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">OneProductHub</div>
+      <h1>Website Flows</h1>
+      <input class="search" id="q" type="search" placeholder="Filter flows…" aria-label="Filter flows" />
+      <div class="filters" role="group" aria-label="Category filters">
+        <button type="button" data-filter="all" class="active">All</button>
+        <button type="button" data-filter="guest">Guest</button>
+        <button type="button" data-filter="auth">Auth</button>
+        <button type="button" data-filter="admin">Admin</button>
+        <button type="button" data-filter="brand">Brand</button>
+        <button type="button" data-filter="client">Client</button>
+        <button type="button" data-filter="e2e">E2E</button>
+      </div>
+      <nav aria-label="Table of contents">
+        <ul class="toc" id="toc">
+          <li><a href="#overview"><span class="id">—</span> Overview</a></li>
+          <li><a href="#actors"><span class="id">—</span> Actors</a></li>
+          <li><a href="#flow-index"><span class="id">—</span> Flow index</a></li>
+          <li><a href="#journey-map"><span class="id">—</span> Journey map</a></li>
+          <li data-flow data-cats="auth"><a href="#flow-1"><span class="id">1</span> Smoke Auth</a></li>
+          <li data-flow data-cats="auth guest"><a href="#flow-2"><span class="id">2</span> Auth &amp; Access</a></li>
+          <li data-flow data-cats="guest"><a href="#flow-3"><span class="id">3</span> Public pages</a></li>
+          <li data-flow data-cats="admin brand client"><a href="#flow-4"><span class="id">4</span> Nav Matrices</a></li>
+          <li data-flow data-cats="admin"><a href="#flow-5"><span class="id">5</span> Admin</a></li>
+          <li data-flow data-cats="brand"><a href="#flow-6"><span class="id">6</span> Brand</a></li>
+          <li data-flow data-cats="client"><a href="#flow-7"><span class="id">7</span> Client</a></li>
+          <li data-flow data-cats="e2e brand client"><a href="#flow-8"><span class="id">8</span> E2E Journeys</a></li>
+          <li><a href="#matrix"><span class="id">—</span> Capability matrix</a></li>
+          <li><a href="#routes"><span class="id">—</span> Hash routes</a></li>
+          <li><a href="#env"><span class="id">—</span> Env vars</a></li>
+          <li><a href="#related"><span class="id">—</span> Related files</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="hero" id="overview">
+        <h2>One Product Hub — Website Flows</h2>
+        <p>
+          Senior reference for every portal and public flow on
+          <strong>oneproducthub.com</strong> — AI product-data enrichment and sharing across
+          Guest, Brand, Client, and Admin roles. Derived from the live site plus the
+          Testing-OneProductHubV2 automation catalog.
+        </p>
+        <dl class="meta-grid">
+          <div class="meta-card"><dt>Base URL</dt><dd><code>https://oneproducthub.com</code></dd></div>
+          <div class="meta-card"><dt>API</dt><dd><code>oneproducthub-backend.onechanneladmin.com</code></dd></div>
+          <div class="meta-card"><dt>Routing</dt><dd>SPA hash routes (<code>#/…</code>)</dd></div>
+          <div class="meta-card"><dt>Flow catalog</dt><dd><code>flows.config.json</code> (8 flows)</dd></div>
+          <div class="meta-card"><dt>Step catalog</dt><dd><code>server/data/flow-steps.json</code></dd></div>
+          <div class="meta-card"><dt>Markdown twin</dt><dd><a href="ONEPRODUCTHUB_FLOWS.md">ONEPRODUCTHUB_FLOWS.md</a></dd></div>
+        </dl>
+        <div class="callout" style="margin-top:1rem">
+          <strong>Product truth:</strong> Brands publish and enrich catalog data; Clients consume after access is granted;
+          Admins govern registry, clients, and RBAC. Login is role-gated (Continue as Brand / Client); Superadmin uses the Brand portal.
+        </div>
+      </header>
+
+      <section class="block" id="actors">
+        <h2>Actors</h2>
+        <table>
+          <thead><tr><th>Actor</th><th>Entry</th><th>Landing</th><th>Scope</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Guest</strong></td><td>Public home</td><td>Find Product Information</td><td>Search, policies, About, Start Free / Log In</td></tr>
+            <tr><td><strong>Brand</strong></td><td>Continue as Brand</td><td>Workspace Overview</td><td>Products, AI Studio, import/export, client access, data quality</td></tr>
+            <tr><td><strong>Client</strong></td><td>Continue as Client</td><td>Welcome back</td><td>Brand directory, catalog, export, drafts, team</td></tr>
+            <tr><td><strong>Admin</strong></td><td>Brand portal + superadmin</td><td>Admin Dashboard</td><td>Platform, registry, clients, RBAC, read-mostly studio</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="block" id="flow-index">
+        <h2>Flow index</h2>
+        <table>
+          <thead><tr><th>ID</th><th>Flow</th><th>Category</th><th>Auth</th><th>Steps</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1</strong></td><td><a href="#flow-1">Smoke Auth</a></td><td>Auth</td><td>Yes</td><td>3</td></tr>
+            <tr><td><strong>2</strong></td><td><a href="#flow-2">Auth &amp; Access</a></td><td>Auth</td><td>Mixed</td><td>11</td></tr>
+            <tr><td><strong>3</strong></td><td><a href="#flow-3">Public pages</a></td><td>Guest</td><td>No</td><td>7</td></tr>
+            <tr><td><strong>4</strong></td><td><a href="#flow-4">Nav Matrices</a></td><td>All roles</td><td>Yes</td><td>30</td></tr>
+            <tr><td><strong>5</strong></td><td><a href="#flow-5">Admin</a></td><td>Admin</td><td>Admin</td><td>9</td></tr>
+            <tr><td><strong>6</strong></td><td><a href="#flow-6">Brand</a></td><td>Brand</td><td>Brand</td><td>16</td></tr>
+            <tr><td><strong>7</strong></td><td><a href="#flow-7">Client</a></td><td>Client</td><td>Client</td><td>12</td></tr>
+            <tr><td><strong>8</strong></td><td><a href="#flow-8">E2E Journeys</a></td><td>Cross-role</td><td>Brand + Client</td><td>4</td></tr>
+          </tbody>
+        </table>
+        <h3>Run</h3>
+        <pre><code>npm run test:flow              # all enabled flows
+npm run test:flow:smoke        # flow 1 only
+# single flow:
+npx cross-env CI_TESTS_CONFIG=flows.config.json node scripts/run-ci-tests.js flow:6</code></pre>
+      </section>
+
+      <section class="block" id="journey-map">
+        <h2>End-to-end journey map</h2>
+        <div class="mermaid">
+flowchart TD
+  guest[Public Home Search] --> role[Login Role Selection]
+  role --> brandLogin[Brand Sign In]
+  role --> clientLogin[Client Sign In]
+  brandLogin --> brandWS[Brand Workspace]
+  brandLogin --> adminDash[Admin Dashboard]
+  clientLogin --> clientDash[Client Dashboard]
+  brandWS --> addProduct[Add Product]
+  addProduct --> studio[AI Product Studio]
+  brandWS --> clientAccess[Client Access Hub]
+  clientDash --> directory[Brand Directory]
+  directory --> request[Request Access]
+  request --> clientAccess
+  clientDash --> catalog[Product Catalog]
+  catalog --> exportCtr[Export Center]
+  guest --> policies[Privacy Terms About]
+        </div>
+        <p><strong>Primary value path:</strong> Guest discovers → Brand publishes → Client requests access → Brand approves → Client browses / exports.</p>
+      </section>
+
+      <!-- FLOW 1 -->
+      <section class="block flow" id="flow-1" data-cats="auth" data-search="smoke login admin brand client sign-in dashboard">
+        <div class="flow-head">
+          <h2>Flow 1 — Smoke Auth</h2>
+          <span class="badge cat">Auth</span>
+          <span class="badge ci-yes">Enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Prove each role can authenticate and land on the correct workspace shell.</p>
+        <h3>Actors</h3>
+        <p>Admin, Brand, Client</p>
+        <h3>Entry points</h3>
+        <table>
+          <thead><tr><th>Role</th><th>Path</th></tr></thead>
+          <tbody>
+            <tr><td>All</td><td>Home → <strong>Log In</strong> → role choice</td></tr>
+            <tr><td>Brand / Admin</td><td>Continue as Brand → Sign In</td></tr>
+            <tr><td>Client</td><td>Continue as Client → Sign In</td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li><strong>Admin:</strong> Superadmin sign-in → Admin Dashboard.</li>
+          <li><strong>Brand:</strong> Sign-in → Workspace Overview.</li>
+          <li><strong>Client:</strong> Sign-in → Welcome back dashboard.</li>
+        </ol>
+        <h3>Preconditions</h3>
+        <p><code>ONEPRODUCTHUB_ADMIN_*</code>, <code>ONEPRODUCTHUB_BRAND_*</code>, <code>ONEPRODUCTHUB_CLIENT_*</code></p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>1</code></dd>
+          <dt>Specs</dt><dd><code>LoginAdmin</code>, <code>LoginBrand</code>, <code>LoginClient</code></dd>
+          <dt>Run</dt><dd><code>npm run test:flow:smoke</code></dd>
+          <dt>Steps</dt><dd>OPH-LOGIN-ADMIN-1, OPH-LOGIN-BRAND-1, OPH-LOGIN-CLIENT-1</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 2 -->
+      <section class="block flow" id="flow-2" data-cats="auth guest" data-search="invalid credentials wrong portal logout session signup forgot password guard">
+        <div class="flow-head">
+          <h2>Flow 2 — Auth &amp; Access</h2>
+          <span class="badge cat">Auth</span>
+          <span class="badge ci-yes">Enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Harden identity: bad credentials, portal isolation, logout, session persistence, forgot password, signup forms, role selection, and guest guards on authenticated hashes.</p>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Role selection shows Brand and Client choices.</li>
+          <li>Brand and Client signup forms expose required fields.</li>
+          <li>Forgot password UI opens from brand login.</li>
+          <li>Brand session survives full page reload.</li>
+          <li>Client Sign Out returns to public home (“Find Product Information”).</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Wrong password → error; stay on login.</li>
+          <li>Brand credentials rejected on Client portal (and reverse).</li>
+          <li>Guest opening <code>#/dashboard</code> or <code>#/products</code> sees public home.</li>
+        </ul>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>2</code></dd>
+          <dt>Specs</dt><dd>LoginInvalidCredentials, LoginWrongPortal, Logout, SessionPersistence, ForgotPassword, SignupBrand, SignupClient, RoleSelection, UnauthenticatedGuard</dd>
+          <dt>Steps</dt><dd>OPH-LOGIN-INVALID-1, OPH-LOGIN-WRONG-PORTAL-*, OPH-LOGOUT-1, OPH-SESSION-PERSIST-1, OPH-FORGOT-PASSWORD-1, OPH-SIGNUP-*, OPH-ROLE-SELECTION-1, OPH-UNAUTH-GUARD-*</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 3 -->
+      <section class="block flow" id="flow-3" data-cats="guest" data-search="public home search privacy terms about legal policies">
+        <div class="flow-head">
+          <h2>Flow 3 — Public pages</h2>
+          <span class="badge cat">Guest</span>
+          <span class="badge ci-yes">Enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Public discovery: home search and legal/about footer destinations. Live CTAs include Start Free, Book a Demo, Log In.</p>
+        <h3>Entry points</h3>
+        <table>
+          <thead><tr><th>Surface</th><th>Entry</th></tr></thead>
+          <tbody>
+            <tr><td>Home</td><td><code>/</code> — Find Product Information</td></tr>
+            <tr><td>Search</td><td>Products, brands, MPN, SKU…</td></tr>
+            <tr><td>Footer</td><td>Privacy, Terms, Legal &amp; Policies, About</td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Open public home.</li>
+          <li>Run a catalog search.</li>
+          <li>Open Privacy Policy, Terms of Service, Legal &amp; Policies, About.</li>
+        </ol>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>3</code></dd>
+          <dt>Specs</dt><dd><code>PublicHomeSearch.spec.js</code>, <code>PublicPolicies.spec.js</code></dd>
+          <dt>Steps</dt><dd>OPH-PUBLIC-HOME-1, OPH-PUBLIC-SEARCH-1, OPH-PUBLIC-PRIVACY-1, OPH-PUBLIC-TERMS-1, OPH-PUBLIC-LEGAL-1, OPH-PUBLIC-ABOUT-1</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 4 -->
+      <section class="block flow" id="flow-4" data-cats="admin brand client" data-search="nav matrix sidebar admin brand client headings">
+        <div class="flow-head">
+          <h2>Flow 4 — Nav Matrices</h2>
+          <span class="badge cat">All roles</span>
+          <span class="badge ci-yes">Enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Walk every primary sidebar destination for Admin, Brand, and Client; assert headings and role-specific absences.</p>
+        <h3>Admin sidebar</h3>
+        <p>Platform · Workspace · Brand Directory · Clients · Brand Registry · Product Catalog · AI Product Studio · Distributions · Export Center · Import Center · Product Change Log · RBAC Access · Settings</p>
+        <h3>Brand sidebar</h3>
+        <p>Dashboard · AI Product Studio · Distributions · Client Access · Data Quality Dashboard · Export Center · Import Center · Product Change Log · Settings · Subscription</p>
+        <h3>Client sidebar</h3>
+        <p>Dashboard · Brand Directory · Product Catalog · Export Center · Product Change Log · Settings · Subscription</p>
+        <div class="callout"><strong>Client must not see:</strong> Import Center, AI Product Studio (brand-only).</div>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Sign in as each role.</li>
+          <li>Click each sidebar item; heading matches expected cue.</li>
+          <li>Confirm role-specific items absent where required.</li>
+        </ol>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>4</code></dd>
+          <dt>Specs</dt><dd>NavMatrixAdmin, NavMatrixBrand, NavMatrixClient</dd>
+          <dt>Helpers</dt><dd><code>clickSidebarNav</code>, <code>expectHeading</code>, <code>navigateToHash</code></dd>
+          <dt>Steps</dt><dd>OPH-NAV-ADMIN-* (13), OPH-NAV-BRAND-* (10), OPH-NAV-CLIENT-* (7)</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 5 -->
+      <section class="block flow" id="flow-5" data-cats="admin" data-search="admin platform registry clients catalog rbac import export studio settings">
+        <div class="flow-head">
+          <h2>Flow 5 — Admin</h2>
+          <span class="badge cat">Admin</span>
+          <span class="badge ci-yes">Enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Platform operator surfaces: brands, clients, catalog, import/export, RBAC, settings. AI Studio is view-oriented (no brand-style Add Product).</p>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Platform / Admin Dashboard overview.</li>
+          <li>Brand Registry with review controls.</li>
+          <li>Brand Directory — inspect a brand.</li>
+          <li>Clients management.</li>
+          <li>Product Catalog browse.</li>
+          <li>Import Center and Export Center.</li>
+          <li>AI Product Studio (admin; no add-product workflow).</li>
+          <li>RBAC Access.</li>
+          <li>Settings.</li>
+        </ol>
+        <h3>Alternate paths</h3>
+        <ul class="alts">
+          <li>Admin AI Studio may surface Add Product UI but block with platform-admin messaging.</li>
+        </ul>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>5</code></dd>
+          <dt>Specs</dt><dd>AdminPlatformDashboard, AdminBrandRegistry, AdminBrandDirectoryDrilldown, AdminClientsManagement, AdminProductCatalog, AdminImportExport, AdminAIProductStudio, AdminRbac, AdminSettings</dd>
+          <dt>Steps</dt><dd>OPH-ADMIN-DASHBOARD … OPH-ADMIN-SETTINGS</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 6 -->
+      <section class="block flow" id="flow-6" data-cats="brand" data-search="brand add product studio distribution client access data quality import export subscription">
+        <div class="flow-head">
+          <h2>Flow 6 — Brand</h2>
+          <span class="badge cat">Brand</span>
+          <span class="badge ci-yes">Enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Brand product workspace: create products, enrich in AI Studio, distribute, manage client access, data quality, import/export, changelog, settings, subscription.</p>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Brand Dashboard (Workspace Overview).</li>
+          <li><strong>Add Product:</strong> open → fill name/SKU/price/brand/category/description/stock → Save → verify.</li>
+          <li>Open product detail from Studio.</li>
+          <li>AI Product Studio with filters.</li>
+          <li>Distributions / channel sync.</li>
+          <li>Client Access hub (pending / approved / revoked).</li>
+          <li>Data Quality Dashboard.</li>
+          <li>Export Center and Import Center.</li>
+          <li>Product Change Log.</li>
+          <li>Settings (+ <code>#/settings?section=profile</code>).</li>
+          <li>Subscription plans.</li>
+        </ol>
+        <h3>Alternate paths</h3>
+        <ul class="alts">
+          <li>Category picker: select existing or Create "{name}".</li>
+          <li>Save validation if required fields empty.</li>
+        </ul>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>6</code></dd>
+          <dt>Specs</dt><dd>BrandDashboard, BrandAddProduct, BrandProductDetail, BrandAIProductStudio, BrandDistribution, BrandClientAccess, BrandDataQuality, BrandExport, BrandImport, BrandProductChangelog, BrandSettings, BrandSubscription</dd>
+          <dt>Steps</dt><dd>OPH-BRAND-DASHBOARD, OPH-BRAND-ADD-*, OPH-BRAND-PRODUCT-DETAIL, OPH-BRAND-AI-STUDIO, … OPH-BRAND-SUBSCRIPTION</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 7 -->
+      <section class="block flow" id="flow-7" data-cats="client" data-search="client brand directory catalog export drafts team gate import data quality">
+        <div class="flow-head">
+          <h2>Flow 7 — Client</h2>
+          <span class="badge cat">Client</span>
+          <span class="badge ci-yes">Enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Client consumption: browse brands and catalog, access drafts and team, export, subscription — blocked from brand-only tools.</p>
+        <h3>Entry points</h3>
+        <table>
+          <thead><tr><th>Surface</th><th>Route / nav</th></tr></thead>
+          <tbody>
+            <tr><td>Access drafts</td><td><code>#/client-access-drafts</code></td></tr>
+            <tr><td>Team invite</td><td><code>#/client-team</code></td></tr>
+            <tr><td>Gated</td><td><code>#/import</code>, <code>#/data-quality</code> → blocked</td></tr>
+          </tbody>
+        </table>
+        <h3>Happy path</h3>
+        <ol class="steps">
+          <li>Dashboard → Brand Directory.</li>
+          <li>Browse Brand Directory and Product Catalog.</li>
+          <li>Product Change Log.</li>
+          <li>Access drafts and Team invite.</li>
+          <li>Export Center, Settings, Subscription.</li>
+        </ol>
+        <h3>Alternate / negative paths</h3>
+        <ul class="alts">
+          <li>Deep-link Import / Data Quality → blocked.</li>
+          <li>Import / AI Product Studio absent from Client sidebar.</li>
+        </ul>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>7</code></dd>
+          <dt>Specs</dt><dd>ClientDashboard, ClientBrandDirectory, ClientProductCatalog, ClientProductChangelog, ClientAccessDrafts, ClientExport, ClientTeam, ClientSettings, ClientSubscription, ClientCannotAccessBrandOnly</dd>
+          <dt>Steps</dt><dd>OPH-CLIENT-* including OPH-CLIENT-GATE-IMPORT, OPH-CLIENT-GATE-DATA-QUALITY</dd>
+        </dl>
+      </section>
+
+      <!-- FLOW 8 -->
+      <section class="block flow" id="flow-8" data-cats="e2e brand client" data-search="e2e lifecycle create product studio client access directory">
+        <div class="flow-head">
+          <h2>Flow 8 — E2E Journeys</h2>
+          <span class="badge cat">Cross-role</span>
+          <span class="badge ci-yes">Enabled</span>
+        </div>
+        <h3>Purpose</h3>
+        <p>Prove the core marketplace loop: Brand creates a product visible in Studio; Client and Brand see complementary access surfaces.</p>
+        <h3>Journey A — Brand product lifecycle</h3>
+        <ol class="steps">
+          <li>Sign in as Brand → Workspace Overview.</li>
+          <li>Add Product (unique name/SKU, price, brand, category, description, stock) → Save.</li>
+          <li>Assert product visible.</li>
+          <li>AI Product Studio → same product/SKU visible.</li>
+        </ol>
+        <h3>Journey B — Client ↔ Brand access</h3>
+        <ol class="steps">
+          <li><strong>Client:</strong> Brand Directory → Request access / Edit draft when present.</li>
+          <li><strong>Brand:</strong> Client Access hub → pending/approved/revoked language.</li>
+        </ol>
+        <div class="mermaid">
+sequenceDiagram
+  participant Brand
+  participant OPH
+  participant Client
+  Brand->>OPH: Create product
+  Brand->>OPH: Visible in AI Product Studio
+  Client->>OPH: Open Brand Directory
+  Client->>OPH: Request or draft access
+  Brand->>OPH: Client Access hub status
+        </div>
+        <h3>Preconditions</h3>
+        <p>Brand + Client credentials. API rewrite via <code>ensureApiRewrite</code> when frontend still calls <code>localhost:4000</code>.</p>
+        <h3>Automation</h3>
+        <dl class="auto-grid">
+          <dt>Flow ID</dt><dd><code>8</code></dd>
+          <dt>Specs</dt><dd><code>E2E_BrandProductLifecycle.spec.js</code>, <code>E2E_ClientBrandAccessFlow.spec.js</code></dd>
+          <dt>Steps</dt><dd>OPH-E2E-CREATE-PRODUCT, OPH-E2E-VERIFY-STUDIO, OPH-E2E-CLIENT-DIRECTORY, OPH-E2E-BRAND-CLIENT-ACCESS</dd>
+        </dl>
+      </section>
+
+      <section class="block" id="matrix">
+        <h2>Role capability matrix</h2>
+        <table class="matrix">
+          <thead>
+            <tr><th>Capability</th><th>Guest</th><th>Brand</th><th>Client</th><th>Admin</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Public search</td><td class="yes">✓</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td></tr>
+            <tr><td>Legal / About</td><td class="yes">✓</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td></tr>
+            <tr><td>Add / edit products</td><td class="dash">—</td><td class="yes">✓</td><td class="dash">—</td><td class="dash">—</td></tr>
+            <tr><td>AI Product Studio</td><td class="dash">—</td><td class="yes">✓</td><td class="no">✗</td><td class="yes">View</td></tr>
+            <tr><td>Import Center</td><td class="dash">—</td><td class="yes">✓</td><td class="no">✗</td><td class="yes">✓</td></tr>
+            <tr><td>Export Center</td><td class="dash">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Data Quality</td><td class="dash">—</td><td class="yes">✓</td><td class="no">✗</td><td class="dash">—</td></tr>
+            <tr><td>Client Access hub</td><td class="dash">—</td><td class="yes">✓</td><td class="dash">—</td><td class="dash">—</td></tr>
+            <tr><td>Brand Directory</td><td class="dash">—</td><td class="dash">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Access drafts / Team</td><td class="dash">—</td><td class="dash">—</td><td class="yes">✓</td><td class="dash">—</td></tr>
+            <tr><td>Brand Registry / RBAC</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td><td class="yes">✓</td></tr>
+            <tr><td>Clients management</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td><td class="yes">✓</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="block" id="routes">
+        <h2>Quick reference — hash routes</h2>
+        <table>
+          <thead><tr><th>Hash</th><th>Typical user</th></tr></thead>
+          <tbody>
+            <tr><td><code>#/dashboard</code></td><td>Authenticated home (role-specific)</td></tr>
+            <tr><td><code>#/products</code></td><td>Product / studio context</td></tr>
+            <tr><td><code>#/import</code></td><td>Brand / Admin (Client gated)</td></tr>
+            <tr><td><code>#/data-quality</code></td><td>Brand (Client gated)</td></tr>
+            <tr><td><code>#/settings?section=profile</code></td><td>Brand settings profile</td></tr>
+            <tr><td><code>#/client-access-drafts</code></td><td>Client</td></tr>
+            <tr><td><code>#/client-team</code></td><td>Client</td></tr>
+          </tbody>
+        </table>
+        <p>Most navigation is <strong>sidebar label-driven</strong>, not deep-link driven.</p>
+      </section>
+
+      <section class="block" id="env">
+        <h2>Environment variables</h2>
+        <table>
+          <thead><tr><th>Variable</th><th>Used by</th></tr></thead>
+          <tbody>
+            <tr><td><code>ONEPRODUCTHUB_BASE_URL</code></td><td>All navigation</td></tr>
+            <tr><td><code>ONEPRODUCTHUB_API_BASE_URL</code></td><td>API rewrite target</td></tr>
+            <tr><td><code>ONEPRODUCTHUB_ADMIN_EMAIL</code> / <code>_PASSWORD</code></td><td>Flows 1, 4, 5</td></tr>
+            <tr><td><code>ONEPRODUCTHUB_BRAND_EMAIL</code> / <code>_PASSWORD</code></td><td>Flows 1, 2, 4, 6, 8</td></tr>
+            <tr><td><code>ONEPRODUCTHUB_CLIENT_EMAIL</code> / <code>_PASSWORD</code></td><td>Flows 1, 2, 4, 7, 8</td></tr>
+          </tbody>
+        </table>
+        <p>Never commit <code>.env</code>.</p>
+      </section>
+
+      <section class="block" id="related">
+        <h2>Related files</h2>
+        <table>
+          <thead><tr><th>File</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td><code>flows.config.json</code></td><td>Flow enablement + test lists</td></tr>
+            <tr><td><code>scripts/run-ci-tests.js</code></td><td>Flow runner</td></tr>
+            <tr><td><code>scripts/extract-flow-steps.js</code></td><td>Rebuilds flow-steps.json from soft() markers</td></tr>
+            <tr><td><code>tests/helpers/oneProductHubV2Auth.js</code></td><td>Login, roles, API rewrite</td></tr>
+            <tr><td><code>tests/helpers/oneProductHubV2Nav.js</code></td><td>Hash nav, sidebar, sign-out</td></tr>
+            <tr><td><a href="ONEPRODUCTHUB_FLOWS.md">ONEPRODUCTHUB_FLOWS.md</a></td><td>Markdown twin</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <footer class="doc-foot">
+        One Product Hub Website Flows · HTML documentation · Source: live site + Testing-OneProductHubV2 automation catalog
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose", flowchart: { curve: "basis" } });
+    const q = document.getElementById("q");
+    const filters = document.querySelectorAll(".filters button");
+    const flows = document.querySelectorAll("section.flow");
+    const tocItems = document.querySelectorAll("#toc [data-flow]");
+    let activeFilter = "all";
+    function apply() {
+      const term = (q.value || "").trim().toLowerCase();
+      flows.forEach((section) => {
+        const cats = (section.dataset.cats || "").split(/\s+/);
+        const hay = ((section.dataset.search || "") + " " + section.textContent).toLowerCase();
+        let ok = activeFilter === "all" || cats.includes(activeFilter);
+        if (term && !hay.includes(term)) ok = false;
+        section.classList.toggle("hidden", !ok);
+      });
+      tocItems.forEach((li) => {
+        const cats = (li.dataset.cats || "").split(/\s+/);
+        const text = li.textContent.toLowerCase();
+        let ok = activeFilter === "all" || cats.includes(activeFilter);
+        if (term && !text.includes(term)) ok = false;
+        li.classList.toggle("hidden", !ok);
+      });
+    }
+    q.addEventListener("input", apply);
+    filters.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filters.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeFilter = btn.dataset.filter;
+        apply();
+      });
+    });
+  </script>
+</body>
+</html>

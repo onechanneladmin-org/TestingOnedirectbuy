@@ -5,7 +5,6 @@ import {
 } from "../helpers/oneDirectBuyNav.js";
 import {
   ensureLoggedInBuyer,
-  hasBuyerCredentials,
   gotoAuthenticatedPage,
   ONE_DIRECT_BUY_BUYER_CREDENTIALS,
 } from "../helpers/oneDirectBuyAuth.js";
@@ -54,10 +53,6 @@ test.describe("OneDirectBuy — Buyer Orders (authenticated)", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(DESKTOP);
-    if (!hasBuyerCredentials()) {
-      test.skip(true, "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD");
-      return;
-    }
     await ensureLoggedInBuyer(page);
   });
 

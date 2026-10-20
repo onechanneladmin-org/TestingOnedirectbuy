@@ -1,0 +1,4 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-043	Catalog Validation	System	product validation requires title, brand, category, images, mpn, gtin or exemption	product validation requires title, brand, category, images, mpn, gtin or exemption	P0	Yes	Working
+ODB-UX-044	Catalog Validation	System	product validation rejects missing images and mpn	product validation rejects missing images and mpn	P0	Yes	Working
+ODB-UX-045	Catalog Validation	System	listing validation requires price greater than zero and qty	listing validation requires price greater than zero and qty	P0	Yes	Working

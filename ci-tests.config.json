@@ -1,5 +1,14 @@
 {
   "$comment": "Control which Playwright specs run in GitHub Actions (Chromium only). Set enabled: false to skip. Authenticated buyer account/address specs skip themselves when ONEDIRECTBUY_BUYER_* secrets are missing.",
+  "$targetComment": "Runs target BASE_URL (default https://dev.onedirectbuy.com). Production is refused unless ALLOW_PROD=1, and then only the productionReadOnly specs run (lib/targetEnv.cjs). Specs that create data (e.g. buyer registration) also skip themselves unless BASE_URL is a dev/staging/local host.",
+  "productionReadOnly": [
+    "tests/OneDirectBuy/Homepage.spec.js",
+    "tests/OneDirectBuy/Navigation.spec.js",
+    "tests/OneDirectBuy/Search.spec.js",
+    "tests/OneDirectBuy/LegalPages.spec.js",
+    "tests/OneDirectBuy/ErrorHandlingSeo.spec.js",
+    "tests/OneDirectBuy/ResponsiveAccessibility.spec.js"
+  ],
   "workers": 4,
   "retries": 1,
   "suites": {
@@ -61,7 +70,8 @@
     {
       "file": "tests/OneDirectBuy/BuyerAccount.spec.js",
       "enabled": true,
-      "description": "Public auth — register form, terms, guest orders gate"
+      "description": "Public auth — register form, terms, guest orders gate. ODB-UC-001/002 register new buyer accounts and run only when BASE_URL is non-prod",
+      "nonProdOnlyTests": ["ODB-UC-001", "ODB-UC-002"]
     },
     {
       "file": "tests/OneDirectBuy/BuyerAccountAuthenticated.spec.js",
@@ -129,6 +139,16 @@
       "description": "Sheet group 16 — seller inventory probes (no live stock or order change)"
     },
     {
+      "file": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+      "enabled": true,
+      "description": "Sheet group 17 — seller fulfillment/shipping probes (no live order or label change)"
+    },
+    {
+      "file": "tests/OneDirectBuy/OneFulfillment3pl.spec.js",
+      "enabled": true,
+      "description": "Sheet group 18 — OneFulfillmentCenter / 3PL (later versions)"
+    },
+    {
       "file": "tests/OneDirectBuy/SellerMessaging.spec.js",
       "enabled": true,
       "description": "Contact Seller → Conversations; auth order messaging shell"
@@ -182,6 +202,101 @@
       "file": "tests/OneDirectBuy/BuyerAccountSecurity.spec.js",
       "enabled": true,
       "description": "Account security — change password, mismatch, lockout probe, logout all devices"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/VariationAggregates.spec.js",
+      "enabled": true,
+      "description": "UX Modules — variation aggregates (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/SellerRating.spec.js",
+      "enabled": true,
+      "description": "UX Modules — seller rating eligibility (backend node:test)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/ProductAtlasSearch.spec.js",
+      "enabled": true,
+      "description": "UX Modules — product Atlas search clauses (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/MultiSellerOrder.spec.js",
+      "enabled": true,
+      "description": "UX Modules — multi-seller order status (backend node:test)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/ListingVariationResolver.spec.js",
+      "enabled": true,
+      "description": "UX Modules — listing variation resolver (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/ListingPricing.spec.js",
+      "enabled": true,
+      "description": "UX Modules — listing B2B pricing (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/FitmentKeys.spec.js",
+      "enabled": true,
+      "description": "UX Modules — fitment keys (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/FitmentIndex.spec.js",
+      "enabled": true,
+      "description": "UX Modules — fitment index matching (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/CategoryPathService.spec.js",
+      "enabled": true,
+      "description": "UX Modules — category path service (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/CatalogValidation.spec.js",
+      "enabled": true,
+      "description": "UX Modules — catalog payload validation (backend node:test)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/SellerStatus.spec.js",
+      "enabled": true,
+      "description": "UX Modules — seller status permissions (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/SellerOnboardingPayload.spec.js",
+      "enabled": true,
+      "description": "UX Modules — seller onboarding payload (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/AuditLogs.spec.js",
+      "enabled": true,
+      "description": "UX Modules — security audit logs (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/VerifyRecaptcha.spec.js",
+      "enabled": true,
+      "description": "UX Modules — recaptcha bot guards (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/PrivacyRequest.spec.js",
+      "enabled": true,
+      "description": "UX Modules — privacy export/deletion (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/ScheduledJobs.spec.js",
+      "enabled": true,
+      "description": "UX Modules — scheduled jobs (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/JobQueue.spec.js",
+      "enabled": true,
+      "description": "UX Modules — background job queue (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/TransactionIntegrity.spec.js",
+      "enabled": true,
+      "description": "UX Modules — checkout transaction integrity (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/ux-modules/ApiKey.spec.js",
+      "enabled": true,
+      "description": "UX Modules — seller API keys (backend Jest)"
     },
     {
       "file": "tests/OneDirectBuy/Coupons.spec.js",

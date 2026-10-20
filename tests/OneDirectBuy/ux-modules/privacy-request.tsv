@@ -1,0 +1,4 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-061	Privacy Request	System	Data access export includes allowed records and excludes restricted internal data	Data access export includes allowed records and excludes restricted internal data	P0	Yes	Working
+ODB-UX-062	Privacy Request	System	Deletion respects legal retention — orders retained and personal fields anonymized	Deletion respects legal retention — orders retained and personal fields anonymized	P0	Yes	Working
+ODB-UX-063	Privacy Request	System	Privacy request audit log records action, admin, timestamp, reason, and result	Privacy request audit log records action, admin, timestamp, reason, and result	P0	Yes	Working

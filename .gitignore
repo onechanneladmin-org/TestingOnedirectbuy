@@ -8,9 +8,20 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+/.playwright-browsers/
 
 # Local secrets
 .env
 
+# Disk-backed Mongo memory DB (recent runs persistence)
+/server/data/mongo-memory/
+/server/data/occurrence-archive/
+
+# Local UX-module backend install
+/local/AutopartMarketplaceBackend/node_modules/
+
+# Scratch output
+tmp-ocr/
+fix.txt
 # Use-case workbook copies (internal data; the source is the private Google Sheet)
 docs/qa/use-cases-v2.xlsx

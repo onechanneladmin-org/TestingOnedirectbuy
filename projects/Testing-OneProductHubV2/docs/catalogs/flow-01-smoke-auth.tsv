@@ -1,0 +1,4 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-LOGIN-ADMIN-1	Smoke Auth	Admin	Admin can sign in and land on Admin Dashboard	Covered before this pass	P0	Yes	Working
+OPH-LOGIN-BRAND-1	Smoke Auth	Brand	Brand can sign in and land on Workspace Overview	Covered before this pass	P0	Yes	Working
+OPH-LOGIN-CLIENT-1	Smoke Auth	Client	Client can sign in and land on Welcome back dashboard	Covered before this pass	P0	Yes	Working

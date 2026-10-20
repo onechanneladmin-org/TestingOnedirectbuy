@@ -13,11 +13,11 @@ ODB-UC-101	Garage	Buyer	Remove saved vehicle	Buyer can remove a saved vehicle.	P
 ODB-UC-102	Garage	Buyer	Set default vehicle	Buyer can set a default garage vehicle.	P1	Yes	Working
 ODB-UC-103	Garage	Buyer	Clear selected vehicle	Buyer can clear the active vehicle.	P1	Yes	Working
 ODB-UC-104	Fitment Data	Seller	Upload ACES file	Seller uploads ACES fitment data.	P0	Yes	Working
-ODB-UC-105	Fitment Data	Seller	Invalid ACES file	System rejects an invalid ACES file.	P0	Yes	Not Required
+ODB-UC-105	Fitment Data	Seller	Invalid ACES file	System rejects an invalid ACES file.	P0	Yes	Working
 ODB-UC-106	PIES Data	Seller	Upload PIES file	Seller uploads PIES product attribute data.	P1	Yes	Working
 ODB-UC-107	PIES Data	Seller	Invalid PIES file	System rejects an invalid PIES file.	P1	Yes	Working
-ODB-UC-108	Fitment Data	Admin	Review fitment data	Admin reviews and approves fitment data.	P1	Yes	Not Required
+ODB-UC-108	Fitment Data	Admin	Review fitment data	Admin reviews and approves fitment data.	P1	Yes	Working
 ODB-UC-109	Auto Parts Search	Buyer	OEM part number search	Buyer searches by OEM or SKU part number.	P1	Yes	Working
-ODB-UC-110	Auto Parts Search	Buyer	Interchange part search	Buyer searches by interchange part number.	P1	Yes	Later versions to include
-ODB-UC-111	Fitment SEO	System	Generate fitment SEO pages	System generates year/make/model fitment pages.	P2	Yes	New Functionality
+ODB-UC-110	Auto Parts Search	Buyer	Interchange part search	Buyer searches by interchange part number.	P1	Yes	Working
+ODB-UC-111	Fitment SEO	System	Generate fitment SEO pages	System generates year/make/model fitment pages.	P2	Yes	Working
 ODB-UC-112	Fitment Checkout	Buyer	Checkout fitment warning	Checkout warns if a cart item may not fit the vehicle.	P0	Yes	Working

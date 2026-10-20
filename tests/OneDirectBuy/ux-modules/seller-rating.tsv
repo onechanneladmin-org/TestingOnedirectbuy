@@ -1,0 +1,6 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-006	Seller Rating	System	seller rating: cancelled order is ineligible	seller rating: cancelled order is ineligible	P0	Yes	Working
+ODB-UX-007	Seller Rating	System	seller rating: unpaid order is ineligible	seller rating: unpaid order is ineligible	P0	Yes	Working
+ODB-UX-008	Seller Rating	System	seller rating: shipped paid order is eligible	seller rating: shipped paid order is eligible	P0	Yes	Working
+ODB-UX-009	Seller Rating	System	seller rating: processing with shipped item is eligible	seller rating: processing with shipped item is eligible	P0	Yes	Working
+ODB-UX-010	Seller Rating	System	seller rating: new paid order with no shipped items is ineligible	seller rating: new paid order with no shipped items is ineligible	P0	Yes	Working
