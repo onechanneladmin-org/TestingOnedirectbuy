@@ -173,6 +173,8 @@ export default defineConfig({
     ["html", { outputFolder: reportOutputDir, open: "never" }],
     ["json", { outputFile: jsonReportPath }],
     ["./reporters/softIssuesReporter.js"],
+    // One result per use-case ID → test-results/usecase-results.json (+ /coverage upload with USECASE_RESULTS_UPLOAD=1)
+    ["./reporters/useCaseResultsReporter.js"],
     ...(ciFast
       ? []
       : [

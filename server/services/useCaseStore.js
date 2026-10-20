@@ -49,14 +49,29 @@ async function syncFromSheet({ fetchImpl } = {}) {
   return { synced: rows.length, retired: retired.modifiedCount || 0, tabs, at: now.toISOString() };
 }
 
-/** Record the outcome of a finished occurrence on every use case its steps map to. */
-async function recordOccurrenceResults(occurrence) {
-  const by = resultsByUseCase(occurrence && occurrence.steps);
-  if (!by.size) return { recorded: 0 };
-  const at = occurrence.finishedAt || new Date();
+const STATUSES = new Set(["passed", "failed", "skipped", "blocked"]);
+
+/**
+ * Record results (one per use-case ID) as the latest result + history.
+ * @param {{useCaseId:string,status:string,error?:string,stepIds?:string[],tests?:string[]}[]} results
+ * @param {{source?:string,runId?:string,flowId?:string,at?:Date}} meta
+ */
+async function recordResults(results, meta = {}) {
+  const valid = (results || []).filter((r) => r && r.useCaseId && STATUSES.has(r.status));
+  if (!valid.length) return { recorded: 0 };
+  const at = meta.at || new Date();
   await UseCase.bulkWrite(
-    [...by.entries()].map(([useCaseId, r]) => {
-      const result = { status: r.status, occurrenceId: occurrence.occurrenceId, flowId: occurrence.flowId, at, error: String(r.error || "").slice(0, 2000), stepIds: r.stepIds };
+    valid.map((r) => {
+      const useCaseId = String(r.useCaseId).toUpperCase();
+      const result = {
+        status: r.status,
+        occurrenceId: String(meta.runId || ""),
+        flowId: String(meta.flowId || ""),
+        source: String(meta.source || ""),
+        at,
+        error: String(r.error || "").slice(0, 2000),
+        stepIds: (r.stepIds || r.tests || []).map(String).slice(0, 50),
+      };
       return {
         updateOne: {
           filter: { useCaseId },
@@ -71,7 +86,17 @@ async function recordOccurrenceResults(occurrence) {
     }),
     { ordered: false },
   );
-  return { recorded: by.size };
+  return { recorded: valid.length };
 }
 
-module.exports = { syncFromSheet, recordOccurrenceResults, sheetConfigured, DEFINITION_FIELDS };
+/** Record the outcome of a finished occurrence on every use case its steps map to. */
+async function recordOccurrenceResults(occurrence) {
+  const by = resultsByUseCase(occurrence && occurrence.steps);
+  if (!by.size) return { recorded: 0 };
+  return recordResults(
+    [...by.entries()].map(([useCaseId, r]) => ({ useCaseId, ...r })),
+    { source: "flow-control", runId: occurrence.occurrenceId, flowId: occurrence.flowId, at: occurrence.finishedAt || new Date() },
+  );
+}
+
+module.exports = { syncFromSheet, recordResults, recordOccurrenceResults, sheetConfigured, DEFINITION_FIELDS };

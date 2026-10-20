@@ -6,6 +6,8 @@ const ResultSchema = new mongoose.Schema(
     status: { type: String, enum: ["passed", "failed", "skipped", "blocked"], required: true },
     occurrenceId: { type: String, default: "" },
     flowId: { type: String, default: "" },
+    /** who reported it: flow-control | playwright-reporter | 1ca-e2e | manual … */
+    source: { type: String, default: "" },
     at: { type: Date, default: null },
     error: { type: String, default: "" },
     stepIds: [{ type: String }],
