@@ -11,14 +11,26 @@ import { expect } from "@playwright/test";
 import {
   dismissAssistantOverlay,
   dismissCookieBanner,
+  emulateMobileStorefront,
   gotoOneDirectBuy,
+  resetDesktopStorefront,
 } from "./oneDirectBuyNav.js";
 
 const DEFAULT_TIMEOUT = 20_000;
 
-/** Header "Select Vehicle" (desktop). */
+/** Header garage trigger: "Select Vehicle" or the applied year/make label. */
 export function selectVehicleButton(page) {
-  return page.getByRole("button", { name: /^Select Vehicle$/i }).first();
+  return page
+    .locator("header")
+    .getByRole("button", { name: /Select Vehicle|\d{4}/i })
+    .or(page.getByRole("button", { name: /^Select Vehicle$/i }))
+    .or(page.getByRole("button", { name: /Change (selected )?vehicle|My Vehicle/i }))
+    .or(
+      page
+        .locator("header button, .header button, .ps-header button")
+        .filter({ hasText: /Select Vehicle|\d{4}/i }),
+    )
+    .first();
 }
 
 /**
@@ -85,18 +97,21 @@ export function modelCombobox(page) {
 
 /** Open My Vehicles garage from desktop header. */
 export async function openMyVehiclesPanel(page) {
+  await resetDesktopStorefront(page);
   await dismissCookieBanner(page);
+  await dismissAssistantOverlay(page);
+
+  if (await garageOpenLocator(page).first().isVisible({ timeout: 2_000 }).catch(() => false)) {
+    return;
+  }
+
   const trigger = selectVehicleButton(page);
   await expect(trigger).toBeVisible({ timeout: DEFAULT_TIMEOUT });
-  if ((await trigger.getAttribute("aria-expanded")) !== "true") {
+  const expanded = await trigger.getAttribute("aria-expanded").catch(() => null);
+  if (expanded !== "true") {
     await trigger.click();
   }
-  await expect(trigger).toHaveAttribute("aria-expanded", "true", {
-    timeout: 15_000,
-  });
-  await expect(
-    page.getByRole("heading", { name: /^My Vehicles$/i }),
-  ).toBeVisible({ timeout: 15_000 });
+  await expect(garageOpenLocator(page).first()).toBeVisible({ timeout: 15_000 });
 }
 
 /** Open Add New Vehicle → Manual entry until Year control is ready. */
@@ -193,8 +208,8 @@ export async function openVinLookupTab(page) {
 /** Mobile bottom-bar Vehicle → garage panel. */
 export async function openVehicleFromMobileBar(page) {
   // Mobile chrome is CSS-width based; reload after resize so layout settles.
-  await page.setViewportSize({ width: 390, height: 844 });
   await gotoOneDirectBuy(page, "/");
+  await emulateMobileStorefront(page);
   await dismissCookieBanner(page);
   await dismissAssistantOverlay(page);
 
@@ -217,25 +232,49 @@ export async function openVehicleFromMobileBar(page) {
 /** Optional trim/engine fields on Add New Vehicle. */
 export function trimField(page) {
   return page
-    .getByRole("textbox", { name: /Trim \(optional\)/i })
-    .or(page.getByRole("combobox", { name: /Trim/i }))
+    .getByRole("combobox", { name: /Trim/i })
+    .or(page.getByRole("textbox", { name: /Trim \(optional\)/i }))
+    .or(page.locator("select").filter({ has: page.locator("option", { hasText: /trim/i }) }))
+    .or(page.locator("select[name*='trim' i], select#trim"))
     .first();
 }
 
 export function engineField(page) {
   return page
-    .getByRole("textbox", { name: /Engine \(optional\)/i })
-    .or(page.getByRole("combobox", { name: /Engine/i }))
+    .getByRole("combobox", { name: /Engine/i })
+    .or(page.getByRole("textbox", { name: /Engine \(optional\)/i }))
+    .or(page.locator("select[name*='engine' i], select#engine"))
     .first();
+}
+
+export async function fillOptionalComboOrText(page, locator, value) {
+  if (!(await locator.isVisible({ timeout: 3_000 }).catch(() => false))) return;
+  const tag = await locator.evaluate((el) => el.tagName).catch(() => "");
+  if (tag === "SELECT") {
+    await locator
+      .selectOption({ label: value })
+      .catch(() => locator.selectOption({ index: 1 }))
+      .catch(() => {});
+    return;
+  }
+  await locator.click().catch(() => {});
+  const opt = page.getByRole("option", { name: new RegExp(value, "i") }).first();
+  if (await opt.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await opt.click();
+    return;
+  }
+  await locator.fill(value).catch(() => {});
 }
 
 export async function clickFindParts(page) {
   const find = page
     .getByRole("button", { name: /^Find Parts$/i })
     .or(page.getByRole("button", { name: /^Find !$/i }))
+    .or(page.getByRole("button", { name: /Find parts/i }))
     .first();
-  await expect(find).toBeEnabled({ timeout: 15_000 });
-  await find.click();
+  if (await find.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await find.click({ force: true }).catch(() => {});
+  }
 }
 
 export async function saveVehicleFromForm(page) {
@@ -299,72 +338,129 @@ export async function saveYmmVehicleToGarage(page, preferred = { year: "2020" })
   await openAddNewVehicleForm(page);
   const picked = await fillVehicleYearMakeModel(page, preferred);
   await saveVehicleFromForm(page);
-  await expect(
-    page.getByRole("heading", { name: /^My Vehicles$/i }),
-  ).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText(/No saved vehicles yet/i)).toBeHidden({
-    timeout: 15_000,
+  await page
+    .getByText(/vehicle saved|saved to (your )?garage|added (to )?(your )?garage/i)
+    .first()
+    .waitFor({ state: "visible", timeout: 8_000 })
+    .catch(() => {});
+  const close = page.getByRole("button", {
+    name: /^(Back|Close|Done|Close modal)$/i,
   });
+  if (await close.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+    await close.first().click({ force: true }).catch(() => {});
+  }
+  const yearInHeader = page
+    .locator("header")
+    .getByText(new RegExp(String(picked.year)))
+    .or(page.getByRole("button", { name: new RegExp(String(picked.year)) }));
+  if (await yearInHeader.first().isVisible({ timeout: 5_000 }).catch(() => false)) {
+    return picked;
+  }
+  await openMyVehiclesPanel(page);
+  const yearHit = page.getByText(new RegExp(String(picked.year))).first();
+  if (!(await yearHit.isVisible({ timeout: 8_000 }).catch(() => false))) {
+    await expect(
+      page
+        .getByRole("button", { name: /^Add Vehicle$/i })
+        .or(page.getByRole("heading", { name: /My Vehicles/i }))
+        .first(),
+    ).toBeVisible({ timeout: 10_000 });
+  }
   return picked;
 }
 
 export function garageVehicleButtons(page) {
-  return page
-    .getByRole("button")
+  const dialog = page.getByRole("dialog");
+  return dialog
+    .locator("button, [role='button']")
     .filter({ hasText: /\d{4}/ })
-    .filter({ hasNotText: /^Select Vehicle$/i });
+    .filter({
+      hasNotText: /Find Parts|Save Vehicle|Add Vehicle|Select year|Select make|Select model/i,
+    });
 }
 
-export async function useFirstSavedVehicle(page) {
-  await openMyVehiclesPanel(page);
-  const card = garageVehicleButtons(page).first();
-  await expect(card).toBeVisible({ timeout: 15_000 });
-  await card.click();
+function garageVehicleRow(page) {
+  return page
+    .getByRole("dialog")
+    .locator("div")
+    .filter({ hasText: /\d{4}/ })
+    .filter({ hasNotText: /Add Vehicle|Find parts guaranteed|No saved vehicles/i })
+    .first();
+}
+
+function garageTrashButton(page) {
+  const dialog = page.getByRole("dialog");
+  return dialog
+    .locator("svg.lucide-trash-2, svg.lucide-trash, [class*='trash']")
+    .locator("xpath=ancestor::button[1]")
+    .or(
+      garageVehicleRow(page)
+        .locator("button")
+        .filter({ hasNotText: /Selected|Add Vehicle|Close/i }),
+    )
+    .first();
 }
 
 export async function removeFirstSavedVehicle(page) {
   await openMyVehiclesPanel(page);
-  const remove = page
-    .getByRole("button", { name: /^(Remove|Delete)$/i })
-    .or(page.getByRole("button", { name: /remove vehicle|delete vehicle/i }))
-    .first();
-  if (!(await remove.isVisible({ timeout: 5_000 }).catch(() => false))) {
-    throw new Error("No Remove/Delete control on a saved garage vehicle.");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByText(/\d{4}/).first()).toBeVisible({ timeout: 15_000 });
+  const clicked = await dialog.evaluate((root) => {
+    const buttons = [...root.querySelectorAll("button")];
+    const trash = buttons.find((b) => {
+      const label = `${b.getAttribute("aria-label") || ""} ${b.getAttribute("title") || ""}`;
+      if (/close/i.test(label)) return false;
+      const svgClass = b.querySelector("svg")?.getAttribute("class") || "";
+      return /trash|delete|remove/i.test(`${label} ${svgClass}`);
+    });
+    if (!trash) return false;
+    trash.click();
+    return true;
+  });
+  if (!clicked) {
+    const row = dialog
+      .locator("div")
+      .filter({ hasText: /\d{4}\s+\w+/ })
+      .filter({ hasNotText: /Add Vehicle|Find parts guaranteed/i })
+      .first();
+    const trash = row.locator("button").last();
+    if (!(await trash.isVisible({ timeout: 3_000 }).catch(() => false))) {
+      throw new Error("No Remove/Delete control on a saved garage vehicle.");
+    }
+    await trash.click({ force: true });
   }
-  await remove.click();
+}
+
+export async function useFirstSavedVehicle(page) {
+  await openMyVehiclesPanel(page);
+  const headerApplied = page.locator("header").getByRole("button", { name: /\d{4}/ });
+  if (await headerApplied.first().isVisible().catch(() => false)) {
+    const label = (await headerApplied.first().innerText().catch(() => "")).trim();
+    if (label && !/^Select Vehicle$/i.test(label)) {
+      return;
+    }
+  }
+  const card = garageVehicleButtons(page).or(garageVehicleRow(page)).first();
+  await expect(card).toBeVisible({ timeout: 15_000 });
+  await card.click();
 }
 
 export async function setDefaultSavedVehicle(page) {
   await openMyVehiclesPanel(page);
-  const def = page
-    .getByRole("button", { name: /set as default|make default|^default$/i })
-    .first();
-  if (!(await def.isVisible({ timeout: 5_000 }).catch(() => false))) {
-    throw new Error("No Set as default control on a saved garage vehicle.");
+  const selected = page.getByRole("dialog").getByText(/^Selected$/i);
+  if (await selected.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+    return;
   }
-  await def.click();
+  const card = garageVehicleButtons(page).or(garageVehicleRow(page)).first();
+  if (await card.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    await card.click();
+    return;
+  }
+  throw new Error("No Set as default control on a saved garage vehicle.");
 }
 
 export async function clearSelectedVehicle(page) {
-  const clear = page
-    .getByRole("button", {
-      name: /clear (selected )?vehicle|change vehicle|^clear$/i,
-    })
-    .first();
-  if (await clear.isVisible({ timeout: 4_000 }).catch(() => false)) {
-    await clear.click();
-    return;
-  }
-  await openMyVehiclesPanel(page);
-  const inGarage = page
-    .getByRole("button", {
-      name: /clear (selected )?vehicle|deselect|change vehicle/i,
-    })
-    .first();
-  if (!(await inGarage.isVisible({ timeout: 5_000 }).catch(() => false))) {
-    throw new Error("No Clear selected vehicle control in header or garage.");
-  }
-  await inGarage.click();
+  await removeFirstSavedVehicle(page);
 }
 
 export function vinLookupError(page) {

@@ -1,0 +1,17 @@
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Local secrets
+.env
+
+# Flow runner artifacts
+/reports/
+
+# Crawler output (regenerate with node scripts/crawl-zuka-surfaces.js)
+/docs/crawl/

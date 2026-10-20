@@ -1,0 +1,5 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-031	Fitment Keys	System	buildProgressiveKeysFromVehicle base and full key	buildProgressiveKeysFromVehicle base and full key	P1	Yes	Working
+ODB-UX-032	Fitment Keys	System	buildUserFitmentKeys YMM exact	buildUserFitmentKeys YMM exact	P1	Yes	Working
+ODB-UX-033	Fitment Keys	System	computeFitmentKeysFromEntries dedupes	computeFitmentKeysFromEntries dedupes	P1	Yes	Working
+ODB-UX-034	Fitment Keys	System	extractYearsFromFitmentKeys	extractYearsFromFitmentKeys	P1	Yes	Working

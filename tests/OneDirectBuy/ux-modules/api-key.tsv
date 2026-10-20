@@ -1,0 +1,6 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-072	API Keys	System	API key generated and shown once — raw key shown once and only hashed value stored	API key generated and shown once — raw key shown once and only hashed value stored	P0	Yes	Working
+ODB-UX-073	API Keys	System	Revoked API key blocked — API returns unauthorized	Revoked API key blocked — API returns unauthorized	P0	Yes	Working
+ODB-UX-074	API Keys	System	API key scope enforcement — endpoint outside scope returns forbidden	API key scope enforcement — endpoint outside scope returns forbidden	P0	Yes	Working
+ODB-UX-075	API Keys	System	API key rate limit — exceeding threshold returns 429 and rate limit headers	API key rate limit — exceeding threshold returns 429 and rate limit headers	P0	Yes	Working
+ODB-UX-076	API Keys	System	API usage logging — records key ID, endpoint, status, latency, and timestamp	API usage logging — records key ID, endpoint, status, latency, and timestamp	P0	Yes	Working

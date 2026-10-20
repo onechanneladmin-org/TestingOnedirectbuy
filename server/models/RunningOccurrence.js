@@ -1,5 +1,27 @@
 const mongoose = require("mongoose");
 
+const ChildStepResultSchema = new mongoose.Schema(
+  {
+    stepId: { type: String, required: true },
+    title: { type: String, default: "" },
+    specFile: { type: String, default: "" },
+    order: { type: Number, default: 0 },
+    dependsOn: { type: String, default: null },
+    status: {
+      type: String,
+      enum: ["pending", "running", "passed", "failed", "skipped", "blocked"],
+      default: "pending",
+    },
+    startedAt: { type: Date, default: null },
+    finishedAt: { type: Date, default: null },
+    durationMs: { type: Number, default: null },
+    error: { type: String, default: "" },
+    marker: { type: String, default: "" },
+    severity: { type: String, default: "" },
+  },
+  { _id: false },
+);
+
 const StepResultSchema = new mongoose.Schema(
   {
     stepId: { type: String, required: true },
@@ -23,6 +45,7 @@ const StepResultSchema = new mongoose.Schema(
     priority: { type: String, default: "" },
     automation: { type: String, default: "" },
     currentStatus: { type: String, default: "" },
+    children: { type: [ChildStepResultSchema], default: [] },
   },
   { _id: false },
 );
@@ -30,6 +53,12 @@ const StepResultSchema = new mongoose.Schema(
 const RunningOccurrenceSchema = new mongoose.Schema(
   {
     occurrenceId: { type: String, required: true, unique: true, index: true },
+    projectId: {
+      type: String,
+      required: true,
+      default: "onedirectbuy",
+      index: true,
+    },
     flowId: { type: String, required: true, index: true },
     flowName: { type: String, default: "" },
     status: {

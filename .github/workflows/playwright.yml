@@ -1,10 +1,8 @@
 name: Playwright Tests
 
+# Manual only (owner decision 2026-10-21): the suite drives live sites with real test accounts, so it
+# never starts on push or pull_request. Run it from Actions → Playwright Tests → Run workflow.
 on:
-  push:
-    branches: [main, master, develop]
-  pull_request:
-    branches: [main, master, develop]
   workflow_dispatch:
     inputs:
       suite:
@@ -29,7 +27,6 @@ jobs:
     env:
       CI: "true"
       CI_FAST: "1"
-      CI_SOFT_PASS: "1"
       HEADLESS: "true"
       PW_HEADLESS: "1"
       # Journey is heavy; keep CI workers modest to avoid flaky cart/checkout races.
@@ -39,9 +36,12 @@ jobs:
       TEST_ENV: ci
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
 
-      # Site URL (optional repo Variable; defaults in code to https://onedirectbuy.com)
-      ONEDIRECTBUY_BASE_URL: ${{ vars.ONEDIRECTBUY_BASE_URL || 'https://onedirectbuy.com' }}
-      BASE_URL: ${{ vars.BASE_URL || vars.ONEDIRECTBUY_BASE_URL || 'https://onedirectbuy.com' }}
+      # Site URL (optional repo Variable). Defaults to dev. Production is refused
+      # unless ALLOW_PROD=1 is also set, and then only read-only specs run
+      # (ci-tests.config.json → productionReadOnly, enforced in lib/targetEnv.cjs).
+      ONEDIRECTBUY_BASE_URL: ${{ vars.ONEDIRECTBUY_BASE_URL || 'https://dev.onedirectbuy.com' }}
+      BASE_URL: ${{ vars.BASE_URL || vars.ONEDIRECTBUY_BASE_URL || 'https://dev.onedirectbuy.com' }}
+      ALLOW_PROD: ${{ vars.ALLOW_PROD || '0' }}
 
       # Required secrets — set in GitHub → Settings → Secrets and variables → Actions
       ONEDIRECTBUY_BUYER_EMAIL: ${{ secrets.ONEDIRECTBUY_BUYER_EMAIL }}

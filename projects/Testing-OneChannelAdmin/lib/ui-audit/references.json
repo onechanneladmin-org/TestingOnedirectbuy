@@ -1,0 +1,176 @@
+{
+  "primary-button": {
+    "kind": "primary-button",
+    "componentId": "019-button-export",
+    "pagePath": "/home/dashboard",
+    "pageName": "Home / Dashboard",
+    "shotFile": "shots/019-button-export.png",
+    "inventoryRel": "test-results/ui-component-inventory/shots/019-button-export.png",
+    "tokens": {
+      "height": 40,
+      "heightTol": 4,
+      "radiusMin": 4,
+      "radiusMax": 14,
+      "paddingXMin": 12,
+      "colorR": 131,
+      "colorG": 120,
+      "colorB": 255,
+      "colorTol": 28
+    },
+    "expected": "top-right header button, fill rgb(131, 120, 255), height 40±4px, radius 4–14px (ref Export)"
+  },
+  "form-dropdown": {
+    "kind": "form-dropdown",
+    "componentId": "526-dropdown-currency-currency",
+    "pagePath": "/settings/general",
+    "pageName": "Fulfillment / Default Shipping Address",
+    "shotFile": "shots/526-dropdown-currency-currency.png",
+    "inventoryRel": "test-results/ui-component-inventory/shots/526-dropdown-currency-currency.png",
+    "tokens": {
+      "height": 40,
+      "heightTol": 8,
+      "fontMin": 12,
+      "fontMax": 16,
+      "paddingXMin": 12
+    },
+    "expected": "height 40±8px, font 12–16px, padding-x >= 12 (ref 526-dropdown-currency)"
+  },
+  "date-pills": {
+    "kind": "date-pills",
+    "componentId": "013-chip-today-last-7-days-this-month-this-year-custom",
+    "pagePath": "/home/dashboard",
+    "pageName": "Home / Dashboard",
+    "shotFile": "shots/013-chip-today-last-7-days-this-month-this-year-custom.png",
+    "inventoryRel": "test-results/ui-component-inventory/shots/013-chip-today-last-7-days-this-month-this-year-custom.png",
+    "tokens": {
+      "height": 40,
+      "heightTol": 4
+    },
+    "expected": "segmented date group height 40±4px with one clear active pill (ref 013)"
+  },
+  "search-input": {
+    "kind": "search-input",
+    "componentId": "475-input-search-orderid-sku-upc",
+    "pagePath": "/fulfill/orders/archived",
+    "pageName": "Fulfillment / Archived Orders",
+    "shotFile": "shots/475-input-search-orderid-sku-upc.png",
+    "inventoryRel": "test-results/ui-component-inventory/shots/475-input-search-orderid-sku-upc.png",
+    "tokens": {
+      "height": 40,
+      "heightTol": 4
+    },
+    "expected": "search field height 40±4px (ref 475-input-search)"
+  },
+  "metric-card": {
+    "kind": "metric-card",
+    "componentId": "518-metric-card-0-total-refunds",
+    "rowComponentId": "483-metric-card-330-total-orders-248-open-orders-34-cancelled-orders",
+    "pagePath": "/fulfill/orders/dashboard",
+    "pageName": "Fulfillment / Dashboard",
+    "shotFile": "shots/518-metric-card-0-total-refunds.png",
+    "inventoryRel": "test-results/ui-component-inventory/shots/518-metric-card-0-total-refunds.png",
+    "tokens": {
+      "height": 108,
+      "heightTol": 8,
+      "rowHeightSpreadMax": 8,
+      "valueFontMin": 20,
+      "labelFontMax": 16
+    },
+    "expected": "dark dash-metric ~108px, left accent, value > label, equal row height (ref 518 / 483)"
+  },
+  "content-card": {
+    "kind": "content-card",
+    "componentId": "382-card-product-count-by-brand-brand-name-product-count-published-draft-all-qtys-price-v",
+    "pagePath": "/products/dashboard",
+    "pageName": "Catalog / Dashboard",
+    "shotFile": "shots/382-card-product-count-by-brand-brand-name-product-count-published-draft-all-qtys-price-v.png",
+    "inventoryRel": "test-results/ui-component-inventory/shots/382-card-product-count-by-brand-brand-name-product-count-published-draft-all-qtys-price-v.png",
+    "tokens": {
+      "radiusMin": 6,
+      "radiusMax": 16,
+      "paddingMin": 12,
+      "minWidth": 240,
+      "minHeight": 120
+    },
+    "expected": "content card with title, radius 6–16px, padding >= 12 (ref 382)"
+  },
+  "chart": {
+    "kind": "chart",
+    "componentId": "549-chart-customer-deliveries-completedwarehouse-outbound-dispatched-06-am-08-am-10-am-12",
+    "pagePath": "/delivery/hub",
+    "pageName": "Fulfillment / Driver Hub",
+    "shotFile": "shots/549-chart-customer-deliveries-completedwarehouse-outbound-dispatched-06-am-08-am-10-am-12.png",
+    "inventoryRel": "test-results/ui-component-inventory/shots/549-chart-customer-deliveries-completedwarehouse-outbound-dispatched-06-am-08-am-10-am-12.png",
+    "tokens": {
+      "minWidth": 280,
+      "minHeight": 180
+    },
+    "expected": "chart container >= 280x180 with axes/legend when multi-series (ref 549)"
+  },
+  "table": {
+    "kind": "table",
+    "componentId": "609-table-name-updated-by-update-on-ups-shipping-chart-admin-onechanneladmin-com-10-24-202",
+    "pagePath": "/fulfill/settings/rates",
+    "pageName": "Fulfillment / Shipping Lookuplist",
+    "shotFile": "shots/609-table-name-updated-by-update-on-ups-shipping-chart-admin-onechanneladmin-com-10-24-202.png",
+    "inventoryRel": "test-results/ui-component-inventory/shots/609-table-name-updated-by-update-on-ups-shipping-chart-admin-onechanneladmin-com-10-24-202.png",
+    "tokens": {
+      "headerHeightMin": 32,
+      "headerHeightMax": 64,
+      "rowHeightMin": 28,
+      "rowHeightMax": 72
+    },
+    "expected": "table with header 32–64px and body rows 28–72px when data present (ref 609)"
+  },
+  "underline-tabs": {
+    "kind": "underline-tabs",
+    "componentId": "settings-general-underline-tabs",
+    "pagePath": "/settings/general",
+    "pageName": "Settings / General",
+    "shotFile": "",
+    "inventoryRel": "",
+    "tokens": {
+      "borderBottomMin": 2
+    },
+    "expected": "active underline tab border-bottom >= 2px (Settings General pattern)"
+  },
+  "pill-tabs": {
+    "kind": "pill-tabs",
+    "componentId": "445-tabs-companies-contacts",
+    "pagePath": "/crm/company",
+    "pageName": "CRM / B2B Accounts",
+    "shotFile": "shots/445-tabs-companies-contacts.png",
+    "inventoryRel": "test-results/ui-component-inventory/shots/445-tabs-companies-contacts.png",
+    "tokens": {
+      "height": 45,
+      "heightTol": 8
+    },
+    "expected": "pill tabs: active filled pill, inactive muted, height ~45±8 (ref 445)"
+  },
+  "sidebar": {
+    "kind": "sidebar",
+    "componentId": "008-sidebar-home-catalog-channel-fulfillment-wms-marketing-crm-analytics-reports-b2b-3pl-a",
+    "pagePath": "/home/dashboard",
+    "pageName": "Home / Dashboard",
+    "shotFile": "shots/008-sidebar-home-catalog-channel-fulfillment-wms-marketing-crm-analytics-reports-b2b-3pl-a.png",
+    "inventoryRel": "test-results/ui-component-inventory/shots/008-sidebar-home-catalog-channel-fulfillment-wms-marketing-crm-analytics-reports-b2b-3pl-a.png",
+    "tokens": {
+      "width": 256,
+      "widthTol": 24
+    },
+    "expected": "sidebar width ~256±24px with section labels (ref 008)"
+  },
+  "nav-item": {
+    "kind": "nav-item",
+    "componentId": "023-nav-button-catalog",
+    "pagePath": "/home/dashboard",
+    "pageName": "Home / Dashboard",
+    "shotFile": "shots/023-nav-button-catalog.png",
+    "inventoryRel": "test-results/ui-component-inventory/shots/023-nav-button-catalog.png",
+    "tokens": {
+      "height": 43,
+      "heightTol": 6
+    },
+    "expected": "nav item height ~43±6px with icon + label (ref 023)"
+  }
+}

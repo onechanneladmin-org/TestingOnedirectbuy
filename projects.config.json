@@ -1,0 +1,31 @@
+{
+  "$comment": "All automation projects are bundled below projects/ so local and container deployments use the same paths.",
+  "defaultProjectId": "onedirectbuy",
+  "projects": [
+    {
+      "id": "onedirectbuy",
+      "name": "OneDirectBuy",
+      "root": ".",
+      "flowsConfig": "flows.config.json"
+    },
+    {
+      "id": "onechanneladmin",
+      "name": "Testing-OneChannelAdmin",
+      "root": "projects/Testing-OneChannelAdmin",
+      "flowsConfig": "server/data/external-flows/onechanneladmin.flows.json",
+      "flowsConfigRelativeTo": "hub"
+    },
+    {
+      "id": "oneproducthubv2",
+      "name": "Testing-OneProductHubV2",
+      "root": "projects/Testing-OneProductHubV2",
+      "flowsConfig": "flows.config.json"
+    },
+    {
+      "id": "zukaongo",
+      "name": "Testing-Zukaongo",
+      "root": "projects/Testing-Zukaongo",
+      "flowsConfig": "flows.config.json"
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Test suite to run"
+        required: true
+        default: regression
+        type: choice
+        options:
+          - smoke
+          - regression
+          - all
+      workers:
+        description: "Playwright worker count"
+        required: false
+        default: "2"
+
+concurrency:
+  group: playwright-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    timeout-minutes: 120
+    runs-on: ubuntu-latest
+    env:
+      CI: "true"
+      HEADLESS: "true"
+      PW_HEADLESS: "1"
+      PW_WORKERS: ${{ github.event.inputs.workers || '2' }}
+      TEST_ENV: ci
+      ONEPRODUCTHUB_BASE_URL: ${{ vars.ONEPRODUCTHUB_BASE_URL }}
+      ONEPRODUCTHUB_API_BASE_URL: ${{ vars.ONEPRODUCTHUB_API_BASE_URL }}
+      BASE_URL: ${{ vars.BASE_URL || vars.ONEPRODUCTHUB_BASE_URL }}
+      ONEPRODUCTHUB_CLIENT_EMAIL: ${{ secrets.ONEPRODUCTHUB_CLIENT_EMAIL }}
+      ONEPRODUCTHUB_CLIENT_PASSWORD: ${{ secrets.ONEPRODUCTHUB_CLIENT_PASSWORD }}
+      ONEPRODUCTHUB_BRAND_EMAIL: ${{ secrets.ONEPRODUCTHUB_BRAND_EMAIL }}
+      ONEPRODUCTHUB_BRAND_PASSWORD: ${{ secrets.ONEPRODUCTHUB_BRAND_PASSWORD }}
+      ONEPRODUCTHUB_ADMIN_EMAIL: ${{ secrets.ONEPRODUCTHUB_ADMIN_EMAIL }}
+      ONEPRODUCTHUB_ADMIN_PASSWORD: ${{ secrets.ONEPRODUCTHUB_ADMIN_PASSWORD }}
+      REPORT_UPLOAD: "0"
+      REPORT_UPLOAD_URL: ${{ secrets.REPORT_UPLOAD_URL }}
+      REPORT_UPLOAD_AUTH_TOKEN: ${{ secrets.REPORT_UPLOAD_AUTH_TOKEN }}
+      REPORT_API_URL: ${{ secrets.REPORT_API_URL }}
+      API_URL: ${{ secrets.REPORT_API_URL }}
+      API_TOKEN: ${{ secrets.API_TOKEN }}
+      DASHBOARD_UPLOAD: "0"
+      UI_ANALYSIS: "0"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright OS deps (cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Run smoke tests
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.suite == 'smoke'
+        run: npm run test:smoke
+
+      - name: Run regression tests
+        if: >-
+          github.event_name != 'workflow_dispatch' ||
+          github.event.inputs.suite == 'regression' ||
+          github.event.inputs.suite == 'all'
+        run: npm run test:regression
+
+      - name: Generate / verify reports
+        if: ${{ !cancelled() }}
+        run: |
+          ls -la test-results || true
+          ls -la playwright-report || true
+          test -f test-results/results.json && echo "JSON report OK" || echo "JSON report missing"
+          test -f test-results/junit.xml && echo "JUnit report OK" || echo "JUnit report missing"
+
+      - name: Upload HTML report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report
+          path: playwright-report/
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload JSON / JUnit reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-machine-reports
+          path: |
+            test-results/results.json
+            test-results/junit.xml
+            test-results/dashboard-payload.json
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots
+          path: |
+            test-results/**/*.png
+            test-results/**/screenshots/**
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Upload videos
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-videos
+          path: |
+            test-results/**/*.webm
+            test-results/**/*.mp4
+            test-results/**/video*
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Upload traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: |
+            test-results/**/trace.zip
+            test-results/**/*trace*
+          retention-days: 14
+          if-no-files-found: ignore

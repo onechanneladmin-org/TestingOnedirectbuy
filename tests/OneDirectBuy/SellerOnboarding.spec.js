@@ -1,21 +1,24 @@
 import { test, expect } from "../helpers/softTest.js";
-import { gotoOneDirectBuy } from "../helpers/oneDirectBuyNav.js";
+import {
+  dismissAssistantOverlay,
+  dismissCookieBanner,
+  gotoOneDirectBuy,
+} from "../helpers/oneDirectBuyNav.js";
 import {
   openBecomeVendorPage,
   clickStartSelling,
   openVendorStoreList,
   openSellerApplication,
 } from "../helpers/oneDirectBuySeller.js";
-import {
-  ensureLoggedInBuyer,
-  hasBuyerCredentials,
-} from "../helpers/oneDirectBuyAuth.js";
+import { ensureLoggedInBuyer } from "../helpers/oneDirectBuyAuth.js";
 
 const DESKTOP = { width: 1920, height: 1080 };
 
 test.describe("OneDirectBuy — Seller Onboarding (public)", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(DESKTOP);
+    await dismissCookieBanner(page);
+    await dismissAssistantOverlay(page);
   });
 
   test("ODB-UC-183: guest seller starts application from Sell page", async ({
@@ -42,7 +45,11 @@ test.describe("OneDirectBuy — Seller Onboarding (public)", () => {
       await clickStartSelling(page);
       await expect(page).toHaveURL(/\/vendor\/seller-application/);
       await expect(
-        page.getByRole("heading", { name: /Apply to sell on OneDirect Buy/i }),
+        page
+          .getByRole("heading", {
+            name: /Apply to sell on OneDirect\s?Buy/i,
+          })
+          .first(),
       ).toBeVisible();
     });
   });
@@ -53,16 +60,19 @@ test.describe("OneDirectBuy — Seller Onboarding (public)", () => {
   }) => {
     await soft("ODB-UC-185", "FAQ + Seller Requirements on landing", async () => {
       await openBecomeVendorPage(page);
+      await dismissAssistantOverlay(page);
       await expect(
-        page.getByRole("heading", { name: /^Seller Requirements$/i }),
+        page.getByRole("heading", { name: /^Seller Requirements$/i }).first(),
       ).toBeVisible();
-      await expect(
-        page.getByRole("button", {
+      const faq = page
+        .getByRole("button", {
           name: /How long does the approval process take/i,
-        }),
-      ).toBeVisible();
+        })
+        .or(page.getByText(/How long does the approval process take/i));
+      await faq.first().scrollIntoViewIfNeeded().catch(() => {});
+      await expect(faq.first()).toBeVisible();
       await expect(
-        page.getByText(/Valid business registration or tax ID/i),
+        page.getByText(/Valid business registration or tax ID/i).first(),
       ).toBeVisible();
     });
   });
@@ -92,7 +102,11 @@ test.describe("OneDirectBuy — Seller Onboarding (public)", () => {
     await soft("ODB-UC-380", "/info/fee-schedule OneDirect Fee Schedule", async () => {
       await gotoOneDirectBuy(page, "/info/fee-schedule");
       await expect(
-        page.getByRole("heading", { name: /OneDirect Fee Schedule|Fee Schedule/i }),
+        page
+          .getByRole("heading", {
+            name: /OneDirect\s?Buy\s*Fee Schedule|Fee Schedule/i,
+          })
+          .first(),
       ).toBeVisible({ timeout: 30_000 });
     });
   });
@@ -104,7 +118,7 @@ test.describe("OneDirectBuy — Seller Onboarding (public)", () => {
     await soft("ODB-UC-381", "Prohibited products policy heading", async () => {
       await gotoOneDirectBuy(page, "/info/prohibited-restricted-products-policy");
       await expect(
-        page.getByRole("heading", { name: /Prohibited/i }),
+        page.getByRole("heading", { level: 1, name: /Prohibited/i }).first(),
       ).toBeVisible({ timeout: 30_000 });
     });
   });
@@ -155,10 +169,6 @@ test.describe("OneDirectBuy — Seller Onboarding (public)", () => {
 test.describe("OneDirectBuy — Seller Onboarding (authenticated checks)", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(DESKTOP);
-    if (!hasBuyerCredentials()) {
-      test.skip(true, "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD");
-      return;
-    }
     await ensureLoggedInBuyer(page);
   });
 

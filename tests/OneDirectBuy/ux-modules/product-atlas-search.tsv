@@ -1,0 +1,9 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-011	Product Atlas Search	System	buildFitmentKeysAtlasClause uses equals for a single YMM key	buildFitmentKeysAtlasClause uses equals for a single YMM key	P1	Yes	Working
+ODB-UX-012	Product Atlas Search	System	buildFitmentKeysAtlasClause uses in for multiple keys	buildFitmentKeysAtlasClause uses in for multiple keys	P1	Yes	Working
+ODB-UX-013	Product Atlas Search	System	buildVehicleFitAtlasClause includes universal for fitMode all	buildVehicleFitAtlasClause includes universal for fitMode all	P1	Yes	Working
+ODB-UX-014	Product Atlas Search	System	buildVehicleFitAtlasClause returns null when trim/engine present	buildVehicleFitAtlasClause returns null when trim/engine present	P1	Yes	Working
+ODB-UX-015	Product Atlas Search	System	buildAtlasSearchCompound status filter is approved-only	buildAtlasSearchCompound status filter is approved-only	P1	Yes	Working
+ODB-UX-016	Product Atlas Search	System	buildFallbackMongoFilter uses fitmentKeys for YMM	buildFallbackMongoFilter uses fitmentKeys for YMM	P1	Yes	Working
+ODB-UX-017	Product Atlas Search	System	buildFallbackMongoFilter uses fitmentIndex elemMatch for trim	buildFallbackMongoFilter uses fitmentIndex elemMatch for trim	P1	Yes	Working
+ODB-UX-018	Product Atlas Search	System	Atlas index definition includes filter fields used by search	Atlas index definition includes filter fields used by search	P1	Yes	Working

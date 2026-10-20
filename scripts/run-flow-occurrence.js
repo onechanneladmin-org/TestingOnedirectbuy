@@ -1,6 +1,7 @@
 /**
  * Launcher for a single flow occurrence (opened in a visible terminal).
- * Reads reports/.odb-flow-run.json (or path arg), sets env, runs Playwright.
+ * Reads reports/.odb-flow-run.json (or path arg), sets env, runs Playwright
+ * in the selected project's directory.
  *
  * Usage: node scripts/run-flow-occurrence.js [metaPath]
  */
@@ -8,8 +9,20 @@ const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
 const { META_PATH } = require("../lib/occurrenceLive");
+const {
+  sanitizePlaywrightBrowsersPath,
+} = require("../lib/playwrightBrowsers.cjs");
 
-const ROOT = path.resolve(__dirname, "..");
+const HUB_ROOT = path.resolve(__dirname, "..");
+
+function resolvePlaywrightCli(projectRoot) {
+  const candidates = [
+    process.env.PLAYWRIGHT_CLI_PATH,
+    path.join(projectRoot, "node_modules", "@playwright", "test", "cli.js"),
+    path.join(HUB_ROOT, "node_modules", "@playwright", "test", "cli.js"),
+  ].filter(Boolean);
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[0];
+}
 
 function main() {
   const metaPath = path.resolve(process.argv[2] || META_PATH);
@@ -26,9 +39,24 @@ function main() {
     process.exit(1);
   }
 
-  console.log(`\n=== OneDirectBuy flow runner ===`);
+  const pidFile = path.join(HUB_ROOT, "reports", `.flow-pid-${occurrenceId}.txt`);
+  try {
+    fs.mkdirSync(path.dirname(pidFile), { recursive: true });
+    fs.writeFileSync(pidFile, `${process.pid}\n`, "utf8");
+  } catch (err) {
+    console.warn("Failed to write pid file:", err.message);
+  }
+
+  const projectRoot = meta.projectRoot
+    ? path.resolve(meta.projectRoot)
+    : HUB_ROOT;
+  const projectId = meta.projectId || "onedirectbuy";
+
+  console.log(`\n=== Flow Control Plane runner ===`);
+  console.log(`Project:    ${projectId}`);
   console.log(`Flow:       ${flowId}`);
   console.log(`Occurrence: ${occurrenceId}`);
+  console.log(`Cwd:        ${projectRoot}`);
   console.log(
     `Mongo:      ${(meta.mongoUri || process.env.MONGODB_URI || "").replace(
       /:\/\/.*@/,
@@ -38,15 +66,22 @@ function main() {
   console.log(`API:        ${meta.statusApiUrl || process.env.STATUS_API_URL || ""}`);
   console.log(`===============================\n`);
 
+  if (!fs.existsSync(projectRoot)) {
+    console.error(`Project folder not found: ${projectRoot}`);
+    process.exit(1);
+  }
+
   const env = {
     ...process.env,
     CI_TESTS_CONFIG: "flows.config.json",
     RUNNING_OCCURRENCE_ID: occurrenceId,
     STATUS_API_URL: meta.statusApiUrl || process.env.STATUS_API_URL || "",
     MONGODB_URI: meta.mongoUri || process.env.MONGODB_URI || "",
+    PLAYWRIGHT_CLI_PATH: resolvePlaywrightCli(projectRoot),
     // Always real exit for control-plane (UI must not fake PASSED)
     CI_SOFT_PASS: "0",
   };
+  sanitizePlaywrightBrowsersPath(env);
 
   if (meta.headed) {
     env.PW_HEADED = "1";
@@ -57,26 +92,80 @@ function main() {
     env.HEADLESS = env.HEADLESS || "true";
   }
 
-  const script = path.join(ROOT, "scripts", "run-ci-tests.js");
-  console.log(`Starting: node scripts/run-ci-tests.js flow:${flowId}\n`);
+  if (meta.uiAnalysis && process.env.UI_ANALYSIS !== "0") {
+    env.UI_ANALYSIS = "1";
+  }
 
-  const result = spawnSync(process.execPath, [script, `flow:${flowId}`], {
-    cwd: ROOT,
-    env,
-    stdio: "inherit",
-    windowsHide: false,
-  });
+  if (Array.isArray(meta.uxPages) && meta.uxPages.length) {
+    env.UX_AUDIT_PAGES = JSON.stringify(meta.uxPages);
+  }
+
+  if (meta.grep) {
+    env.PW_GREP = meta.grep;
+  }
+  if (meta.workers) {
+    env.PW_WORKERS = String(meta.workers);
+  }
+
+  const ciRunner = path.join(projectRoot, "scripts", "run-ci-tests.js");
+  const useCiRunner =
+    meta.runner !== "playwright" && fs.existsSync(ciRunner);
+
+  let result;
+  if (useCiRunner) {
+    console.log(`Starting: node scripts/run-ci-tests.js flow:${flowId}\n`);
+    if (meta.useCaseId) {
+      console.log(`Use case: ${meta.useCaseId}`);
+    }
+    if (meta.grep) {
+      console.log(`Grep:     ${meta.grep}`);
+    }
+    result = spawnSync(process.execPath, [ciRunner, `flow:${flowId}`], {
+      cwd: projectRoot,
+      env,
+      stdio: "inherit",
+      windowsHide: false,
+    });
+  } else {
+    const tests = Array.isArray(meta.tests) ? meta.tests.filter(Boolean) : [];
+    if (!tests.length) {
+      console.error("No test files in meta.tests and no run-ci-tests.js");
+      process.exit(1);
+    }
+    const pwCli = resolvePlaywrightCli(projectRoot);
+    if (!fs.existsSync(pwCli)) {
+      console.error(`Playwright CLI not found: ${pwCli}`);
+      console.error("Run npm install in that project folder first.");
+      process.exit(1);
+    }
+    const args = ["test", ...tests];
+    if (meta.headed) args.push("--headed");
+    if (meta.grep) args.push("--grep", meta.grep);
+    console.log(`Starting: playwright ${args.join(" ")}\n`);
+    result = spawnSync(process.execPath, [pwCli, ...args], {
+      cwd: projectRoot,
+      env,
+      stdio: "inherit",
+      windowsHide: false,
+    });
+  }
 
   const code = result.status ?? 1;
   const exitFile =
     meta.exitFile ||
-    path.join(ROOT, "reports", `.flow-exit-${occurrenceId}.txt`);
+    path.join(HUB_ROOT, "reports", `.flow-exit-${occurrenceId}.txt`);
   try {
     fs.mkdirSync(path.dirname(exitFile), { recursive: true });
     fs.writeFileSync(exitFile, `${code}\n`, "utf8");
     console.log(`Wrote exit file: ${exitFile} → ${code}`);
   } catch (err) {
     console.error("Failed to write exit file:", err.message);
+  }
+
+  try {
+    if (fs.existsSync(pidFile)) fs.unlinkSync(pidFile);
+  } catch {
+    // ignore
   }
 
   console.log(`\nFlow finished with exit code ${code}`);

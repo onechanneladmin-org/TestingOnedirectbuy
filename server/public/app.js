@@ -1,12 +1,23 @@
 const state = {
   flows: [],
+  projects: [],
+  projectId: localStorage.getItem("odb_project_id") || "",
   filter: "all",
+  groupTab: "sheet",
   search: "",
   selectedFlowId: null,
+  selectedUseCaseId: null,
+  expandedUseCaseIds: new Set(),
+  checkedFlowIds: new Set(),
+  queueWatch: null,
   occurrenceId: null,
+  lastOccurrence: null,
+  history: [],
   pollTimer: null,
   token: localStorage.getItem("odb_api_token") || "",
 };
+
+const SHEET_COLSPAN = 14;
 
 const $ = (id) => document.getElementById(id);
 
@@ -27,7 +38,13 @@ function headers(json = true) {
 }
 
 async function api(path, opts = {}) {
-  const res = await fetch(path, {
+  const url = new URL(path, window.location.origin);
+  if (state.projectId && !url.searchParams.has("projectId")) {
+    if (path.startsWith("/api/flows") || path.startsWith("/api/occurrences")) {
+      url.searchParams.set("projectId", state.projectId);
+    }
+  }
+  const res = await fetch(`${url.pathname}${url.search}`, {
     ...opts,
     headers: { ...headers(Boolean(opts.body)), ...(opts.headers || {}) },
   });
@@ -56,6 +73,7 @@ function filteredFlows() {
       String(f.flowId),
       f.catalog,
       ...(f.tests || []),
+      ...(f.steps || []).flatMap((s) => [s.stepId, s.useCase, s.title, s.module]),
     ]
       .filter(Boolean)
       .join(" ")
@@ -64,8 +82,27 @@ function filteredFlows() {
   });
 }
 
+function isUxModuleFlow(f) {
+  return String(f.group || "") === "ux-modules";
+}
+
 function isSheetFlow(f) {
+  if (isUxModuleFlow(f)) return false;
   return Boolean(f.catalog) || (f.steps || []).some((s) => s.module || s.useCase);
+}
+
+function flowGroup(f) {
+  if (isUxModuleFlow(f) || String(f.group || "") === "ui-ux") return "ux-modules";
+  if (isSheetFlow(f)) return "sheet";
+  return "other";
+}
+
+function isMergedLegacyFlow(f) {
+  return /merged into/i.test(String(f.name || ""));
+}
+
+function activeFlows(flows = state.flows) {
+  return (flows || []).filter((f) => !isMergedLegacyFlow(f));
 }
 
 function flowIdSortKey(id) {
@@ -79,37 +116,266 @@ function sheetGroupOrder(f) {
   return flowIdSortKey(f.flowId);
 }
 
+function groupedTabFlows() {
+  const tab = state.groupTab || "sheet";
+  const flows = filteredFlows().filter((f) => flowGroup(f) === tab);
+  if (tab === "sheet") {
+    return flows.sort((a, b) => sheetGroupOrder(a) - sheetGroupOrder(b));
+  }
+  return flows.sort((a, b) => flowIdSortKey(a.flowId) - flowIdSortKey(b.flowId));
+}
+
+function listedFlowsInOrder() {
+  return groupedTabFlows();
+}
+
+function selectedFlowIdsInOrder() {
+  return listedFlowsInOrder()
+    .map((f) => String(f.flowId))
+    .filter((id) => state.checkedFlowIds.has(id));
+}
+
+function syncSelectAllBox() {
+  const box = $("flowSelectAll");
+  if (!box) return;
+  const ids = listedFlowsInOrder().map((f) => String(f.flowId));
+  const selected = ids.filter((id) => state.checkedFlowIds.has(id));
+  box.checked = ids.length > 0 && selected.length === ids.length;
+  box.indeterminate = selected.length > 0 && selected.length < ids.length;
+}
+
+function updateQueueRunButtons() {
+  const n = selectedFlowIdsInOrder().length;
+  const railBtn = $("btnRunSelected");
+  if (railBtn) {
+    railBtn.disabled = n === 0 || Boolean(state.queueWatch);
+    railBtn.textContent = n ? `Run selected (${n})` : "Run selected";
+  }
+  const btnLabel = $("btnRunLabel");
+  if (btnLabel && n > 1) {
+    btnLabel.textContent = `Run ${n} flows`;
+  } else if (btnLabel && n === 1 && !state.selectedUseCaseId) {
+    btnLabel.textContent = "Run selected";
+  } else if (btnLabel) {
+    setRunLabels(Boolean(state.selectedUseCaseId));
+  }
+}
+
+function childCount(s) {
+  return Array.isArray(s?.children) ? s.children.length : 0;
+}
+
+function catalogUseCases(flows) {
+  const out = [];
+  for (const f of flows) {
+    if (!isSheetFlow(f) && !isUxModuleFlow(f)) continue;
+    for (const s of f.steps || []) {
+      out.push({
+        flowId: f.flowId,
+        flowName: f.name,
+        flowEnabled: f.enabled,
+        stepId: s.stepId,
+        title: s.useCase || s.title || s.stepId,
+        module: s.module || "",
+        childrenCount: childCount(s),
+        createdAt: s.createdAt,
+        updatedAt: s.updatedAt,
+      });
+    }
+  }
+  return out;
+}
+
+function filteredUseCases() {
+  const q = state.search.trim().toLowerCase();
+  const allowed = new Set(groupedTabFlows().map((f) => String(f.flowId)));
+  return catalogUseCases(state.flows).filter((uc) => {
+    if (!allowed.has(String(uc.flowId))) return false;
+    if (state.filter === "enabled" && !uc.flowEnabled) return false;
+    if (state.filter === "disabled" && uc.flowEnabled) return false;
+    if (!q) return true;
+    return [uc.stepId, uc.title, uc.module, uc.flowName]
+      .join(" ")
+      .toLowerCase()
+      .includes(q);
+  });
+}
+
 function flowItemHtml(f) {
-  const active = String(f.flowId) === String(state.selectedFlowId) ? "active" : "";
+  const active =
+    String(f.flowId) === String(state.selectedFlowId) && !state.selectedUseCaseId
+      ? "active"
+      : "";
+  const checked = state.checkedFlowIds.has(String(f.flowId));
   return `
-        <li>
+        <li class="flow-row">
+          <label class="flow-check" title="Queue this flow">
+            <input type="checkbox" class="flow-checkbox" data-id="${escapeAttr(
+              f.flowId,
+            )}" ${checked ? "checked" : ""} />
+          </label>
           <button type="button" class="flow-item ${active}" data-id="${escapeAttr(f.flowId)}">
             <span class="name">${escapeHtml(f.name)}</span>
             <span class="meta">
               <span>#${escapeHtml(String(f.flowId))}</span>
               <span>${f.stepsTotal || 0} steps</span>
               <span>${f.enabled ? "enabled" : "off"}</span>
+              ${recordTimeLabel(f) ? `<span class="when">${escapeHtml(recordTimeLabel(f))}</span>` : ""}
             </span>
           </button>
         </li>`;
 }
 
+function useCaseItemHtml(uc) {
+  const active =
+    String(uc.flowId) === String(state.selectedFlowId) &&
+    String(uc.stepId) === String(state.selectedUseCaseId)
+      ? "active"
+      : "";
+  return `
+        <li>
+          <button type="button" class="flow-item uc-item ${active}" data-id="${escapeAttr(
+            uc.flowId,
+          )}" data-uc="${escapeAttr(uc.stepId)}">
+            <span class="name">${escapeHtml(uc.stepId)} · ${escapeHtml(uc.title)}</span>
+            <span class="meta">
+              <span>${uc.childrenCount} steps</span>
+              <span>${escapeHtml(uc.module || uc.flowName)}</span>
+              ${recordTimeLabel(uc) ? `<span class="when">${escapeHtml(recordTimeLabel(uc))}</span>` : ""}
+            </span>
+          </button>
+        </li>`;
+}
+
+function useCaseRailHtml() {
+  const items = filteredUseCases();
+  if (!items.length) return "";
+  const groups = new Map();
+  for (const uc of items) {
+    const key = uc.flowName || "Use cases";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(uc);
+  }
+  const flowByName = new Map(state.flows.map((f) => [f.name, f]));
+  const groupNames = [...groups.keys()].sort(
+    (a, b) =>
+      sheetGroupOrder(flowByName.get(a) || {}) -
+      sheetGroupOrder(flowByName.get(b) || {}),
+  );
+  let html = `<li class="rail-group">Use cases</li>`;
+  for (const name of groupNames) {
+    html += `<li class="rail-subgroup">${escapeHtml(name)}</li>`;
+    html += groups.get(name).map(useCaseItemHtml).join("");
+  }
+  return html;
+}
+
+function groupTabLabel(tab) {
+  if (tab === "ux-modules") return "UX Modules";
+  if (tab === "other") return "Other flows";
+  return "Sheet modules";
+}
+
+const UX_HUBS = [
+  "Operations Hub",
+  "Analytics & Reports",
+  "Map Price",
+  "Fulfillment",
+  "Marketing",
+  "Catalog",
+  "Channel",
+  "Accounting",
+  "Admin",
+  "WMS",
+  "CRM",
+  "B2B",
+  "3PL",
+];
+
+function coveredAuditFlows() {
+  return activeFlows().filter((flow) => {
+    const name = String(flow.name || "");
+    return (
+      String(flow.group || "") === "ui-ux" ||
+      name.startsWith("UX Audit — ") ||
+      /Home Dashboard UI UX/i.test(name)
+    );
+  });
+}
+
+function coveredPageRow(flow) {
+  const name = String(flow.name || "");
+  let hub = "Home";
+  let page = "Dashboard";
+  if (name.startsWith("UX Audit — ")) {
+    const rest = name.slice("UX Audit — ".length);
+    hub = UX_HUBS.find((item) => rest.startsWith(item)) || "Other";
+    page = rest.slice(hub === "Other" ? 0 : hub.length).trim();
+  }
+  const stay = (flow.steps || [])
+    .map((step) => String(step.title || ""))
+    .find((title) => /stayed on\s+\//.test(title));
+  const path = stay ? stay.replace(/.*stayed on\s+/, "").trim() : "";
+  return { hub, page, path };
+}
+
+function coveredPageLines() {
+  return coveredAuditFlows()
+    .map(coveredPageRow)
+    .sort((a, b) => a.hub.localeCompare(b.hub) || a.page.localeCompare(b.page))
+    .map((row) => `${row.hub}\t${row.page}\t${row.path}`);
+}
+
+function renderCoveredPages() {
+  const panel = $("coveredPages");
+  if (!panel) return;
+  const show = state.groupTab === "ux-modules";
+  panel.classList.toggle("hidden", !show);
+  if (!show) return;
+  const rows = coveredPageLines();
+  $("coveredPagesCount").textContent = String(rows.length);
+  $("coveredPagesBody").innerHTML = `
+    <table class="page-sheet">
+      <thead><tr><th>Hub</th><th>Page</th><th>Path</th></tr></thead>
+      <tbody>
+        ${rows
+          .map((line) => {
+            const [hub, page, path] = line.split("\t");
+            return `<tr><td>${escapeHtml(hub)}</td><td>${escapeHtml(page)}</td><td class="mono">${escapeHtml(path)}</td></tr>`;
+          })
+          .join("")}
+      </tbody>
+    </table>`;
+}
+
+async function copyCoveredPages() {
+  const lines = coveredPageLines();
+  const text = ["Hub\tPage\tPath", ...lines].join("\n");
+  try {
+    await navigator.clipboard.writeText(text);
+    toast(`Copied ${lines.length} pages`);
+  } catch {
+    const area = document.createElement("textarea");
+    area.value = text;
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand("copy");
+    area.remove();
+    toast(`Copied ${lines.length} pages`);
+  }
+}
+
 function renderFlowList() {
   const list = $("flowList");
-  const flows = filteredFlows();
-  $("flowCount").textContent = `${flows.length} shown · ${state.flows.length} total`;
+  const flows = groupedTabFlows();
+  const ucCount = filteredUseCases().length;
+  $("flowCount").textContent = `${flows.length} shown · ${activeFlows().length} flows · ${ucCount} use cases`;
+  renderStats();
 
-  if (!flows.length) {
+  if (!flows.length && !ucCount) {
     list.innerHTML = `<li class="flow-empty muted">No flows match that search.</li>`;
     return;
   }
-
-  const sheet = flows
-    .filter(isSheetFlow)
-    .sort((a, b) => sheetGroupOrder(a) - sheetGroupOrder(b));
-  const other = flows
-    .filter((f) => !isSheetFlow(f))
-    .sort((a, b) => flowIdSortKey(a.flowId) - flowIdSortKey(b.flowId));
 
   const section = (label, items) => {
     if (!items.length) return "";
@@ -118,15 +384,35 @@ function renderFlowList() {
       .join("")}`;
   };
 
-  list.innerHTML = `${section("Sheet modules", sheet)}${section("Other flows", other)}`;
+  const useCases = state.groupTab === "other" ? "" : useCaseRailHtml();
+  list.innerHTML = `${section(groupTabLabel(state.groupTab), flows)}${useCases}`;
 
   list.querySelectorAll(".flow-item").forEach((btn) => {
-    btn.addEventListener("click", () => selectFlow(btn.dataset.id));
+    btn.addEventListener("click", () => {
+      selectFlow(btn.dataset.id, btn.dataset.uc || null);
+    });
   });
+  list.querySelectorAll(".flow-checkbox").forEach((box) => {
+    box.addEventListener("click", (ev) => ev.stopPropagation());
+    box.addEventListener("change", () => {
+      const id = String(box.dataset.id);
+      if (box.checked) state.checkedFlowIds.add(id);
+      else state.checkedFlowIds.delete(id);
+      syncSelectAllBox();
+      updateQueueRunButtons();
+    });
+  });
+  syncSelectAllBox();
+  updateQueueRunButtons();
+  renderCoveredPages();
 }
 
 function hasSheetCatalog(flow) {
   return (flow?.steps || []).some((s) => s.module || s.useCase || s.priority);
+}
+
+function findUseCase(flow, useCaseId) {
+  return (flow?.steps || []).find((s) => s.stepId === useCaseId) || null;
 }
 
 function sheetStatusLabel(status) {
@@ -146,7 +432,7 @@ function cleanIssueText(raw) {
     .trim();
 }
 
-function issuesForRow(stepId, occ) {
+function issuesForRow(stepId, occ, live) {
   const issues = occ?.liveIssues || [];
   const matched = issues.filter((issue) => {
     const id = String(issue.id || issue.step || "");
@@ -159,11 +445,64 @@ function issuesForRow(stepId, occ) {
         .join(" · "),
     ).slice(0, 280);
   }
-  const step = (occ?.steps || []).find((s) => s.stepId === stepId);
-  if (step?.error) return cleanIssueText(step.error).slice(0, 280);
-  const label = sheetStatusLabel(step?.status);
+  const childErr = (live?.children || [])
+    .map((c) => c.error)
+    .filter(Boolean)
+    .join(" · ");
+  if (childErr) return cleanIssueText(childErr).slice(0, 280);
+  if (live?.error) return cleanIssueText(live.error).slice(0, 280);
+  const label = sheetStatusLabel(live?.status);
   if (label === "pass") return "no issue";
   return "";
+}
+
+function nestedStepsHtml(s, live) {
+  const children = live?.children?.length ? live.children : s.children || [];
+  if (!children.length) {
+    return `<p class="muted uc-step-empty">No extracted steps for this use case.</p>`;
+  }
+  return `<ol class="uc-step-list">${children
+    .map((c) => {
+      const st = c.status || "pending";
+      const label = sheetStatusLabel(st) || st;
+      return `<li>
+        <span class="sid">${escapeHtml(c.stepId)}</span>
+        <span>${escapeHtml(c.title || "")}</span>
+        ${recordTimeLabel(c) ? `<span class="when">${escapeHtml(recordTimeLabel(c))}</span>` : ""}
+        <span class="sheet-status ${escapeAttr(st)}">${escapeHtml(label)}</span>
+      </li>`;
+    })
+    .join("")}</ol>`;
+}
+
+function bindSheetEvents() {
+  const body = $("useCaseSheetBody");
+  if (!body) return;
+  body.querySelectorAll("tr.uc-row").forEach((row) => {
+    row.addEventListener("click", (ev) => {
+      if (ev.target.closest(".uc-run")) return;
+      const id = row.dataset.step;
+      if (!id) return;
+      if (state.expandedUseCaseIds.has(id)) state.expandedUseCaseIds.delete(id);
+      else state.expandedUseCaseIds.add(id);
+      const flow = state.flows.find(
+        (f) => String(f.flowId) === String(state.selectedFlowId),
+      );
+      if (!flow) return;
+      const occ =
+        state.lastOccurrence &&
+        String(state.lastOccurrence.flowId) === String(flow.flowId)
+          ? state.lastOccurrence
+          : null;
+      renderUseCaseSheet(flow, occ);
+    });
+  });
+  body.querySelectorAll(".uc-run").forEach((btn) => {
+    btn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      startRun({ useCaseId: btn.dataset.uc, keepSheet: true });
+    });
+  });
 }
 
 function renderUseCaseSheet(flow, occ) {
@@ -179,10 +518,17 @@ function renderUseCaseSheet(flow, occ) {
       const live = (occ?.steps || []).find((x) => x.stepId === s.stepId);
       const status = live?.status || "pending";
       const statusLabel = sheetStatusLabel(status);
-      const issues = occ ? issuesForRow(s.stepId, occ) : "";
+      const issues = occ ? issuesForRow(s.stepId, occ, live) : "";
+      const expanded = state.expandedUseCaseIds.has(s.stepId);
+      const n = childCount(s);
       return `
-        <tr data-step="${escapeAttr(s.stepId)}">
-          <td class="mono">${escapeHtml(s.stepId)}</td>
+        <tr class="uc-row${expanded ? " expanded" : ""}" data-step="${escapeAttr(
+          s.stepId,
+        )}" aria-expanded="${expanded ? "true" : "false"}">
+          <td class="expand-cell"><span class="uc-chevron">▸</span></td>
+          <td class="mono">${escapeHtml(s.stepId)}<span class="uc-step-count">${n} step${
+            n === 1 ? "" : "s"
+          }</span></td>
           <td>${escapeHtml(s.module || "")}</td>
           <td>${escapeHtml(s.actor || "")}</td>
           <td>${escapeHtml(s.useCase || s.title || "")}</td>
@@ -190,6 +536,7 @@ function renderUseCaseSheet(flow, occ) {
           <td>${escapeHtml(s.priority || "")}</td>
           <td>${escapeHtml(s.automation || "Yes")}</td>
           <td>${escapeHtml(s.currentStatus || "")}</td>
+          <td class="when">${escapeHtml(recordTimeLabel(s))}</td>
           <td>${escapeHtml(testedBy)}</td>
           <td class="issues"><span class="issues-text" title="${escapeAttr(
             issues,
@@ -197,19 +544,90 @@ function renderUseCaseSheet(flow, occ) {
           <td class="status-cell"><span class="sheet-status ${escapeAttr(status)}">${escapeHtml(
             statusLabel,
           )}</span></td>
-        </tr>`;
+          <td class="run-cell">
+            <button type="button" class="btn ghost sm uc-run" data-uc="${escapeAttr(
+              s.stepId,
+            )}">Run</button>
+          </td>
+        </tr>
+        ${
+          expanded
+            ? `<tr class="uc-steps"><td colspan="${SHEET_COLSPAN}">${nestedStepsHtml(
+                s,
+                live,
+              )}</td></tr>`
+            : ""
+        }`;
     })
+    .join("");
+
+  bindSheetEvents();
+}
+
+function stepCatalogItems(steps) {
+  return (steps || [])
+    .map(
+      (s) => `
+      <li>
+        <div>
+          <span class="sid">${escapeHtml(s.stepId)}${
+            s.dependsOn ? ` · after ${escapeHtml(s.dependsOn)}` : ""
+          }</span>
+          ${escapeHtml(s.title || "")}
+          ${recordTimeLabel(s) ? `<span class="when">${escapeHtml(recordTimeLabel(s))}</span>` : ""}
+        </div>
+      </li>`,
+    )
     .join("");
 }
 
-function showFlowLayout(flow) {
-  const sheet = hasSheetCatalog(flow);
-  $("listLayout").classList.toggle("hidden", sheet);
-  $("sheetLayout").classList.toggle("hidden", !sheet);
+function liveStepEntries(occ) {
+  const steps = occ?.steps || [];
+  if (steps.length === 1 && (steps[0].children || []).length) {
+    return steps[0].children;
+  }
+  return steps;
 }
 
-function selectFlow(flowId) {
+function setRunLabels(isUseCase) {
+  const label = isUseCase ? "Run use case" : "Run flow";
+  const btnLabel = $("btnRunLabel");
+  if (btnLabel) btnLabel.textContent = label;
+  const emptyAction = $("liveEmptyAction");
+  if (emptyAction) emptyAction.textContent = label;
+}
+
+function showFlowLayout(flow) {
+  const useCaseView = Boolean(state.selectedUseCaseId);
+  const sheet = hasSheetCatalog(flow) && !useCaseView;
+  $("listLayout").classList.toggle("hidden", sheet);
+  $("sheetLayout").classList.toggle("hidden", !sheet);
+  setRunLabels(useCaseView);
+}
+
+function renderSelectedCatalog(flow, occ) {
+  if (state.selectedUseCaseId) {
+    const uc = findUseCase(flow, state.selectedUseCaseId);
+    const children =
+      (occ?.steps || []).find((s) => s.stepId === state.selectedUseCaseId)?.children ||
+      uc?.children ||
+      [];
+    const list = children.length
+      ? children
+      : uc
+        ? [{ stepId: uc.stepId, title: uc.useCase || uc.title, dependsOn: null }]
+        : [];
+    $("stepCatalogCount").textContent = String(list.length);
+    $("stepCatalog").innerHTML = stepCatalogItems(list);
+    return;
+  }
+  $("stepCatalogCount").textContent = String(flow.steps?.length || 0);
+  $("stepCatalog").innerHTML = stepCatalogItems(flow.steps);
+}
+
+function selectFlow(flowId, useCaseId = null) {
   state.selectedFlowId = String(flowId);
+  state.selectedUseCaseId = useCaseId ? String(useCaseId) : null;
   const flow = state.flows.find((f) => String(f.flowId) === state.selectedFlowId);
   renderFlowList();
 
@@ -221,31 +639,111 @@ function selectFlow(flowId) {
 
   $("emptyState").classList.add("hidden");
   $("flowDetail").classList.remove("hidden");
-  $("flowEyebrow").textContent = `Flow ${flow.flowId}`;
-  $("flowTitle").textContent = flow.name;
-  $("flowMeta").textContent = `${flow.tests?.length || 0} spec file(s) · ${
-    flow.enabled ? "enabled" : "disabled in config"
-  }`;
-  $("stepCatalogCount").textContent = String(flow.steps?.length || 0);
+
+  const uc = state.selectedUseCaseId
+    ? findUseCase(flow, state.selectedUseCaseId)
+    : null;
+  if (uc) {
+    $("flowEyebrow").textContent = `Flow ${flow.flowId} · Use case`;
+    $("flowTitle").textContent = `${uc.stepId} — ${uc.useCase || uc.title || uc.stepId}`;
+    $("flowMeta").textContent = `${flow.name} · ${childCount(uc)} step(s) · ${
+      flow.enabled ? "enabled" : "disabled in config"
+    } · ${recordTimeLabel(uc) || recordTimeLabel(flow)}`;
+  } else {
+    $("flowEyebrow").textContent = `Flow ${flow.flowId}`;
+    $("flowTitle").textContent = flow.name;
+    $("flowMeta").textContent = `${flow.tests?.length || 0} spec file(s) · ${
+      flow.enabled ? "enabled" : "disabled in config"
+    } · ${recordTimeLabel(flow)}`;
+  }
+
   showFlowLayout(flow);
 
-  if (hasSheetCatalog(flow)) {
-    renderUseCaseSheet(flow, null);
-    $("sheetIdleHint").classList.remove("hidden");
+  const activeOcc = (state.history || []).find(
+    (o) =>
+      String(o.flowId) === state.selectedFlowId &&
+      ["running", "queued"].includes(o.status),
+  );
+
+  syncLastRunButton();
+
+  if (activeOcc) {
+    api(`/api/occurrences/${encodeURIComponent(activeOcc.occurrenceId)}`)
+      .then((occ) => {
+        renderOccurrence(occ);
+        if (["running", "queued"].includes(occ.status)) {
+          startPolling(occ.occurrenceId);
+        }
+      })
+      .catch(() => {
+        setLiveIdle();
+      });
   } else {
-    $("stepCatalog").innerHTML = (flow.steps || [])
-      .map(
-        (s) => `
-      <li>
-        <div>
-          <span class="sid">${escapeHtml(s.stepId)}${
-            s.dependsOn ? ` · after ${escapeHtml(s.dependsOn)}` : ""
-          }</span>
-          ${escapeHtml(s.title)}
-        </div>
-      </li>`,
-      )
-      .join("");
+    setLiveIdle();
+  }
+}
+
+function lastFinishedOccurrenceForFlow(flowId) {
+  if (!flowId) return null;
+  return (
+    (state.history || []).find(
+      (o) =>
+        String(o.flowId) === String(flowId) &&
+        ["passed", "failed", "cancelled"].includes(o.status),
+    ) || null
+  );
+}
+
+function lastRunButtonLabel(occ) {
+  if (!occ) return "Last run";
+  const passed = Number(occ.passed || 0);
+  const failed = Number(occ.failed || 0);
+  if (failed) return `Last run · ${failed} failed`;
+  if (passed) return `Last run · ${passed} passed`;
+  return `Last run · ${occ.status || "done"}`;
+}
+
+function syncLastRunButton() {
+  const btn = $("btnLastRun");
+  if (!btn) return;
+  const last = lastFinishedOccurrenceForFlow(state.selectedFlowId);
+  if (!last) {
+    btn.disabled = true;
+    btn.textContent = "Last run";
+    btn.title = "No previous run for this flow";
+    return;
+  }
+  btn.disabled = false;
+  btn.textContent = lastRunButtonLabel(last);
+  const when = formatTime(last.finishedAt || last.startedAt || last.createdAt);
+  const passed = Number(last.passed || 0);
+  const failed = Number(last.failed || 0);
+  const skipped = Number(last.skipped || 0);
+  btn.title = `${when} · ${passed} passed · ${failed} failed · ${skipped} skipped`;
+}
+
+function highlightHistory(occurrenceId) {
+  document.querySelectorAll(".history-item").forEach((el) => {
+    el.classList.toggle("active", el.dataset.id === String(occurrenceId || ""));
+  });
+}
+
+async function openLastRun() {
+  const last = lastFinishedOccurrenceForFlow(state.selectedFlowId);
+  if (!last) {
+    toast("No last run for this flow", true);
+    return;
+  }
+  try {
+    const occ = await api(
+      `/api/occurrences/${encodeURIComponent(last.occurrenceId)}`,
+    );
+    state.occurrenceId = occ.occurrenceId;
+    stopPolling();
+    renderOccurrence(occ);
+    highlightHistory(occ.occurrenceId);
+  } catch (err) {
+    toast(err.message, true);
   }
 }
 
@@ -256,16 +754,30 @@ function setLiveIdle() {
   $("liveBody").classList.add("hidden");
   $("runProgress").classList.add("hidden");
   $("btnLoadReport").disabled = true;
+  $("btnReportDocx") && ($("btnReportDocx").disabled = true);
+  setReportFullscreen(false);
+  $("btnStop")?.classList.add("hidden");
+  $("btnRun").disabled = false;
   $("reportBody").innerHTML =
     '<p class="muted">Report appears when the occurrence finishes.</p>';
+  state.lastOccurrence = null;
+  state.occurrenceId = null;
+  highlightHistory(null);
+  syncLastRunButton();
   const flow = state.flows.find((f) => String(f.flowId) === state.selectedFlowId);
-  if (flow && hasSheetCatalog(flow)) {
+  if (!flow) return;
+  if (hasSheetCatalog(flow) && !state.selectedUseCaseId) {
     $("sheetIdleHint").classList.remove("hidden");
     renderUseCaseSheet(flow, null);
+  } else {
+    renderSelectedCatalog(flow, null);
   }
 }
 
 function renderOccurrence(occ) {
+  state.lastOccurrence = occ;
+  highlightHistory(occ.occurrenceId);
+  syncLastRunButton();
   $("liveEmpty").classList.add("hidden");
   $("liveBody").classList.remove("hidden");
   $("runProgress").classList.remove("hidden");
@@ -274,24 +786,47 @@ function renderOccurrence(occ) {
   $("runBadge").className = `status-pill ${status}`;
   $("runBadge").textContent = status;
 
+  const passed = occ.passed ?? occ.progress?.passed ?? 0;
+  const failed = occ.failed ?? occ.progress?.failed ?? 0;
+  const skipped = occ.skipped ?? occ.progress?.skipped ?? 0;
   const pct = occ.progress?.percent ?? 0;
   $("progressFill").style.width = `${pct}%`;
-  $("progressLabel").textContent = `${occ.stepsCompleted || 0} / ${
-    occ.stepsTotal || 0
-  } steps`;
+  $("progressLabel").textContent = `${passed} passed · ${failed} failed · ${skipped} skipped`;
   $("progressPct").textContent = `${pct}%`;
   $("occurrenceId").textContent = occ.occurrenceId;
 
   const terminal = ["passed", "failed", "cancelled"].includes(status);
   $("btnLoadReport").disabled = !terminal;
+  syncReportActions(occ);
   $("btnRun").disabled = status === "running" || status === "queued";
+  const btnStop = $("btnStop");
+  if (btnStop) {
+    if (status === "running" || status === "queued") {
+      btnStop.classList.remove("hidden");
+      btnStop.disabled = false;
+      const isUc = Boolean(occ.useCaseId);
+      const stopLabel = $("btnStopLabel");
+      if (stopLabel) stopLabel.textContent = isUc ? "Stop use case" : "Stop flow";
+    } else {
+      btnStop.classList.add("hidden");
+    }
+  }
 
   const flow = state.flows.find((f) => String(f.flowId) === String(occ.flowId));
-  if (flow && hasSheetCatalog(flow)) {
+  const occUseCase = occ.useCaseId || "";
+  if (occUseCase && !state.selectedUseCaseId) {
+    // keep sheet if the user launched a row run from the module view
+  } else if (occUseCase && state.selectedUseCaseId !== occUseCase) {
+    state.selectedUseCaseId = occUseCase;
+    if (flow) showFlowLayout(flow);
+  }
+
+  if (flow && hasSheetCatalog(flow) && !state.selectedUseCaseId) {
     $("sheetIdleHint").classList.add("hidden");
     renderUseCaseSheet(flow, occ);
   } else {
-    $("liveSteps").innerHTML = (occ.steps || [])
+    if (flow) renderSelectedCatalog(flow, occ);
+    $("liveSteps").innerHTML = liveStepEntries(occ)
       .map((s) => {
         const err = s.error
           ? `<span class="err">${escapeHtml(String(s.error).slice(0, 220))}</span>`
@@ -312,29 +847,21 @@ function renderOccurrence(occ) {
       .join("");
   }
 
-  // Live issues from DB (source of truth during the run)
   const liveIssues = occ.liveIssues || [];
   if (liveIssues.length && !terminal) {
     $("reportBody").innerHTML =
       `<p><strong>${liveIssues.length}</strong> live issue(s) in DB</p>` +
       liveIssues
-        .slice(0, 30)
-        .map((issue) => {
-          const sev = (issue.severity || "major").toLowerCase();
-          return `
-            <div class="issue ${escapeAttr(sev)}">
-              <p class="ih">${escapeHtml(issue.marker || "")} ${escapeHtml(
-                issue.id || issue.step || "",
-              )} — ${escapeHtml(issue.title || "")}</p>
-              <p class="im">${escapeHtml(issue.evidence || issue.message || "")}</p>
-            </div>`;
-        })
+        .slice(0, 40)
+        .map((issue) => renderIssueCard(issue, occ.occurrenceId))
         .join("");
+    hydrateIssueShots($("reportBody"));
   }
 
   if (terminal) {
     stopPolling();
     $("btnRun").disabled = false;
+    $("btnStop")?.classList.add("hidden");
     loadReport(occ.occurrenceId).catch(() => {});
   }
 }
@@ -356,17 +883,8 @@ async function loadReport(occurrenceId) {
       html += `<p class="muted" style="margin-top:0.75rem">No soft issues recorded for this run.</p>`;
     } else {
       html += list
-        .slice(0, 40)
-        .map((issue) => {
-          const sev = (issue.severity || "major").toLowerCase();
-          return `
-            <div class="issue ${escapeAttr(sev)}">
-              <p class="ih">${escapeHtml(issue.marker || "")} ${escapeHtml(
-                issue.id || issue.step || "",
-              )} — ${escapeHtml(issue.title || "")}</p>
-              <p class="im">${escapeHtml(issue.evidence || issue.message || "")}</p>
-            </div>`;
-        })
+        .slice(0, 200)
+        .map((issue) => renderIssueCard(issue, id))
         .join("");
     }
 
@@ -377,6 +895,8 @@ async function loadReport(occurrenceId) {
     }
 
     $("reportBody").innerHTML = html;
+    hydrateIssueShots($("reportBody"));
+    syncReportActions(state.lastOccurrence);
   } catch (err) {
     $("reportBody").innerHTML = `<p class="muted">${escapeHtml(
       err.message || "Report not ready",
@@ -411,36 +931,309 @@ function startPolling(occurrenceId) {
   state.pollTimer = setInterval(tick, 1000);
 }
 
-async function runSelectedFlow() {
+async function startRun({ useCaseId = "", keepSheet = false } = {}) {
   if (!state.selectedFlowId) return;
-  $("btnRun").disabled = true;
+  const id = useCaseId || state.selectedUseCaseId || "";
+  if (id && !keepSheet && !state.selectedUseCaseId) {
+    state.selectedUseCaseId = id;
+  }
   setLiveIdle();
+  $("btnRun").disabled = true;
+  const btnStop = $("btnStop");
+  if (btnStop) {
+    btnStop.classList.remove("hidden");
+    btnStop.disabled = false;
+    const stopLabel = $("btnStopLabel");
+    if (stopLabel) stopLabel.textContent = id ? "Stop use case" : "Stop flow";
+  }
   try {
     const data = await api(
       `/api/flows/${encodeURIComponent(state.selectedFlowId)}/run`,
       {
         method: "POST",
-        body: JSON.stringify({ headed: $("headedMode").checked }),
+        body: JSON.stringify({
+          headed: $("headedMode").checked,
+          projectId: state.projectId,
+          ...(id ? { useCaseId: id } : {}),
+        }),
       },
     );
     toast(`Started occurrence ${data.occurrenceId.slice(0, 8)}…`);
+    loadHistory().catch(() => {});
     startPolling(data.occurrenceId);
   } catch (err) {
     toast(err.message, true);
     $("btnRun").disabled = false;
+    $("btnStop")?.classList.add("hidden");
   }
+}
+
+async function stopRunningOccurrence() {
+  const occId = state.occurrenceId || state.lastOccurrence?.occurrenceId;
+  const flowId = state.selectedFlowId;
+  if (!occId && !flowId) return;
+
+  const btnStop = $("btnStop");
+  const stopLabel = $("btnStopLabel");
+  const prevLabel = stopLabel ? stopLabel.textContent : "Stop";
+
+  if (btnStop) {
+    btnStop.disabled = true;
+  }
+  if (stopLabel) {
+    stopLabel.textContent = "Stopping…";
+  }
+
+  try {
+    await api("/api/flows/queue", { method: "DELETE" }).catch(() => {});
+    stopQueueWatch();
+
+    let res;
+    if (occId) {
+      res = await api(`/api/occurrences/${encodeURIComponent(occId)}/stop`, {
+        method: "POST",
+        body: JSON.stringify({ reason: "Stopped from dashboard UI" }),
+      });
+    } else {
+      res = await api(`/api/flows/${encodeURIComponent(flowId)}/stop`, {
+        method: "POST",
+        body: JSON.stringify({
+          projectId: state.projectId,
+          reason: "Stopped from dashboard UI",
+        }),
+      });
+    }
+
+    toast("Stopped — remaining queue cleared");
+    stopPolling();
+
+    const updatedOcc = res?.occurrence;
+    if (updatedOcc) {
+      renderOccurrence(updatedOcc);
+    } else if (occId) {
+      try {
+        const fresh = await api(`/api/occurrences/${encodeURIComponent(occId)}`);
+        renderOccurrence(fresh);
+      } catch {
+        // ignore
+      }
+    }
+    await loadHistory();
+  } catch (err) {
+    toast(`Failed to stop: ${err.message}`, true);
+    if (btnStop) {
+      btnStop.disabled = false;
+    }
+    if (stopLabel) {
+      stopLabel.textContent = prevLabel;
+    }
+  }
+}
+
+async function runSelectedFlow() {
+  const queued = selectedFlowIdsInOrder();
+  if (queued.length > 1 || (queued.length === 1 && !state.selectedUseCaseId)) {
+    await runFlowQueue(queued);
+    return;
+  }
+  await startRun({
+    useCaseId: state.selectedUseCaseId || "",
+    keepSheet: !state.selectedUseCaseId,
+  });
+}
+
+async function runFlowQueue(flowIds) {
+  const ids = (flowIds || selectedFlowIdsInOrder()).filter(Boolean);
+  if (!ids.length) {
+    toast("Select one or more flows to run", true);
+    return;
+  }
+  $("btnRun").disabled = true;
+  const railBtn = $("btnRunSelected");
+  if (railBtn) railBtn.disabled = true;
+  const btnStop = $("btnStop");
+  if (btnStop) {
+    btnStop.classList.remove("hidden");
+    btnStop.disabled = false;
+    const stopLabel = $("btnStopLabel");
+    if (stopLabel) stopLabel.textContent = "Stop queue";
+  }
+  try {
+    const data = await api("/api/flows/queue", {
+      method: "POST",
+      body: JSON.stringify({
+        flowIds: ids,
+        headed: Boolean($("headedMode")?.checked),
+        projectId: state.projectId,
+      }),
+    });
+    const firstId =
+      data.firstOccurrence?.occurrenceId || data.activeOccurrenceId;
+    const firstFlow = data.firstOccurrence?.flowId || ids[0];
+    toast(`Queued ${ids.length} flow(s) — running one at a time`);
+    if (firstFlow) selectFlow(firstFlow);
+    if (firstId) {
+      startPolling(firstId);
+      watchQueue(ids.length);
+    }
+    loadHistory().catch(() => {});
+  } catch (err) {
+    toast(err.message, true);
+    $("btnRun").disabled = false;
+    updateQueueRunButtons();
+    $("btnStop")?.classList.add("hidden");
+  }
+}
+
+function stopQueueWatch() {
+  if (state.queueWatch) {
+    clearInterval(state.queueWatch);
+    state.queueWatch = null;
+  }
+}
+
+function watchQueue(total) {
+  stopQueueWatch();
+  state.queueWatch = setInterval(async () => {
+    try {
+      const q = await api("/api/flows/queue");
+      const remaining = q.remainingCount || 0;
+      const active = q.activeOccurrenceId;
+      if (active && active !== state.occurrenceId) {
+        const occ = await api(`/api/occurrences/${encodeURIComponent(active)}`);
+        if (occ.flowId && String(occ.flowId) !== String(state.selectedFlowId)) {
+          selectFlow(occ.flowId);
+        }
+        startPolling(active);
+      }
+      const stopLabel = $("btnStopLabel");
+      if (stopLabel && (active || remaining)) {
+        stopLabel.textContent = remaining
+          ? `Stop queue (${remaining} left)`
+          : "Stop queue";
+      }
+      if (!active && remaining === 0) {
+        stopQueueWatch();
+        updateQueueRunButtons();
+        toast("Queue finished");
+      }
+    } catch {
+      // keep polling; occurrence poller surfaces errors
+    }
+  }, 1500);
+}
+
+function projectStats() {
+  const all = state.flows || [];
+  const flows = activeFlows(all);
+  const sheet = flows.filter(isSheetFlow);
+  const ux = flows.filter(isUxModuleFlow);
+  const other = flows.filter((f) => flowGroup(f) === "other");
+  let steps = 0;
+  const specs = new Set();
+  let enabled = 0;
+  for (const f of flows) {
+    if (f.enabled) enabled += 1;
+    for (const t of f.tests || []) specs.add(String(t).replace(/\\/g, "/"));
+    for (const s of f.steps || []) {
+      const n = childCount(s);
+      steps += n > 0 ? n : 1;
+    }
+  }
+  const history = state.history || [];
+  const sheetUseCases = sheet.reduce(
+    (n, f) => n + (Array.isArray(f.steps) ? f.steps.length : 0),
+    0,
+  );
+  const uxCases = ux.reduce(
+    (n, f) => n + (Array.isArray(f.steps) ? f.steps.length : 0),
+    0,
+  );
+  return {
+    flows: flows.length,
+    sheet: sheet.length,
+    ux: ux.length,
+    other: other.length,
+    mergedOff: Math.max(0, all.length - flows.length),
+    enabled,
+    disabled: flows.length - enabled,
+    useCases: sheetUseCases,
+    uxCases,
+    steps,
+    specs: specs.size,
+    runs: history.length,
+    passed: history.filter((o) => o.status === "passed").length,
+    failed: history.filter((o) => o.status === "failed").length,
+    running: history.filter((o) =>
+      ["running", "queued"].includes(o.status),
+    ).length,
+  };
+}
+
+function setText(id, value) {
+  const el = $(id);
+  if (el) el.textContent = value;
+}
+
+function renderStats() {
+  if (!$("statStrip")) return;
+  const s = projectStats();
+  setText("statFlows", String(s.flows));
+  const flowParts = [];
+  if (s.sheet) flowParts.push(`${s.sheet} sheet`);
+  if (s.ux) flowParts.push(`${s.ux} UX`);
+  if (s.other) flowParts.push(`${s.other} other`);
+  if (s.mergedOff) flowParts.push(`${s.mergedOff} merged off`);
+  setText(
+    "statFlowsHint",
+    flowParts.length > 1
+      ? flowParts.join(" · ")
+      : `${s.enabled} enabled · ${s.disabled} off`,
+  );
+  setText("statUseCases", String(s.useCases));
+  setText(
+    "statUseCasesHint",
+    s.uxCases
+      ? `Sheet rows · ${s.uxCases} UX cases`
+      : "Sheet / catalog rows",
+  );
+  setText("statSteps", String(s.steps));
+  setText("statSpecs", String(s.specs));
+  setText("statRuns", String(s.runs));
+  const hint = $("statRunsHint");
+  if (!hint) return;
+  hint.classList.remove("pass", "fail");
+  if (!s.runs) {
+    hint.textContent = "No runs yet";
+    return;
+  }
+  const parts = [];
+  if (s.passed) parts.push(`${s.passed} passed`);
+  if (s.failed) parts.push(`${s.failed} failed`);
+  if (s.running) parts.push(`${s.running} running`);
+  hint.textContent = parts.join(" · ") || `Latest ${s.runs}`;
+  if (s.failed && !s.passed) hint.classList.add("fail");
+  else if (s.passed && !s.failed) hint.classList.add("pass");
 }
 
 async function loadFlows() {
   const data = await api("/api/flows");
   state.flows = data.flows || [];
   renderFlowList();
-  if (state.selectedFlowId) selectFlow(state.selectedFlowId);
+  if (state.selectedFlowId) {
+    selectFlow(state.selectedFlowId, state.selectedUseCaseId);
+  }
 }
 
 async function loadHistory() {
-  const data = await api("/api/occurrences?limit=20");
+  const qs = state.projectId
+    ? `?limit=50&projectId=${encodeURIComponent(state.projectId)}`
+    : "?limit=50";
+  const data = await api(`/api/occurrences${qs}`);
   const items = data.occurrences || [];
+  state.history = items;
+  renderStats();
+  syncLastRunButton();
   $("runHistory").innerHTML = items.length
     ? items
         .map(
@@ -454,7 +1247,7 @@ async function loadHistory() {
             <span class="status-pill ${escapeAttr(o.status)}" style="padding:0.1rem 0.4rem">${escapeHtml(
               o.status,
             )}</span>
-            <span>${o.stepsCompleted || 0}/${o.stepsTotal || 0}</span>
+            ${historyCountsHtml(o)}
             <span>${formatTime(o.startedAt || o.createdAt)}</span>
           </span>
         </button>
@@ -465,12 +1258,13 @@ async function loadHistory() {
 
   $("runHistory").querySelectorAll(".history-item").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      selectFlow(btn.dataset.flow);
-      state.occurrenceId = btn.dataset.id;
       try {
         const occ = await api(
           `/api/occurrences/${encodeURIComponent(btn.dataset.id)}`,
         );
+        selectFlow(btn.dataset.flow, occ.useCaseId || null);
+        if (occ.projectId) state.projectId = occ.projectId;
+        state.occurrenceId = btn.dataset.id;
         renderOccurrence(occ);
         if (["running", "queued"].includes(occ.status)) {
           startPolling(occ.occurrenceId);
@@ -485,18 +1279,44 @@ async function loadHistory() {
   });
 }
 
+function historyCountsHtml(o) {
+  const passed = Number(o.passed || 0);
+  const failed = Number(o.failed || 0);
+  const skipped = Number(o.skipped || 0);
+  return `<span class="history-counts" title="${passed + failed + skipped}/${
+    o.stepsTotal || 0
+  } steps">
+            <span class="pass">${passed} passed</span>
+            <span class="fail">${failed} failed</span>
+            <span class="skip">${skipped} skipped</span>
+          </span>`;
+}
+
 function formatTime(iso) {
   if (!iso) return "—";
   try {
     return new Date(iso).toLocaleString(undefined, {
       month: "short",
       day: "numeric",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
   } catch {
     return "—";
   }
+}
+
+function recordTimeLabel(record) {
+  const added = record?.createdAt || record?.addedAt;
+  const updated = record?.updatedAt;
+  if (!added && !updated) return "";
+  const addedMs = added ? new Date(added).getTime() : 0;
+  const updatedMs = updated ? new Date(updated).getTime() : 0;
+  if (updatedMs && addedMs && updatedMs - addedMs > 1000) {
+    return `Updated ${formatTime(updated)}`;
+  }
+  return `Added ${formatTime(added || updated)}`;
 }
 
 function escapeHtml(s) {
@@ -509,6 +1329,229 @@ function escapeHtml(s) {
 
 function escapeAttr(s) {
   return escapeHtml(s).replace(/'/g, "&#39;");
+}
+
+function formatIssueBody(issue) {
+  const evidence = String(issue.evidence || issue.message || "").trim();
+  if (evidence) return evidence;
+  return [
+    issue.pagePath ? `Page: ${issue.pagePath}` : "",
+    issue.expected ? `Expected: ${issue.expected}` : "",
+    issue.actual ? `Actual: ${issue.actual}` : "",
+    issue.selector ? `Selector: ${issue.selector}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function issueScreenshotUrl(occurrenceId, issue) {
+  const file = String(issue.screenshotFile || issue.screenshot || "").trim();
+  if (!occurrenceId || !file) return "";
+  const baseName = file.split(/[/\\]/).pop();
+  const base = `/api/occurrences/${encodeURIComponent(occurrenceId)}/screenshot`;
+  if (baseName.endsWith(".png")) {
+    return `${base}/${encodeURIComponent(baseName)}`;
+  }
+  return `${base}?file=${encodeURIComponent(baseName || file)}`;
+}
+
+/**
+ * Screenshots need the bearer token, which <img src> cannot send, so fetch
+ * each one with headers() and swap in a blob URL.
+ */
+function hydrateIssueShots(root) {
+  if (!root) return;
+  root.querySelectorAll("img.issue-shot[data-shot-src]").forEach(async (img) => {
+    const src = img.getAttribute("data-shot-src");
+    img.removeAttribute("data-shot-src");
+    try {
+      const res = await fetch(src, { headers: headers(false) });
+      if (!res.ok) throw new Error(String(res.status));
+      const blobUrl = URL.createObjectURL(await res.blob());
+      img.src = blobUrl;
+      const link = img.closest("a.issue-shot-link");
+      if (link) link.href = blobUrl;
+    } catch {
+      img.alt = "Screenshot unavailable";
+    }
+  });
+}
+
+function syncReportActions(occ) {
+  const btnDocx = $("btnReportDocx");
+  if (!btnDocx) return;
+  const id = occ?.occurrenceId || state.occurrenceId;
+  const status = occ?.status;
+  const terminal = status && ["passed", "failed", "cancelled"].includes(status);
+  const hasIssues = (occ?.liveIssues?.length || 0) > 0;
+  btnDocx.disabled = !id || (!terminal && !hasIssues);
+}
+
+function setReportFullscreen(on) {
+  const panel = $("reportPanel");
+  const btnIn = $("btnReportFullscreen");
+  const btnOut = $("btnReportExitFullscreen");
+  if (!panel) return;
+  panel.classList.toggle("report-panel--fullscreen", on);
+  document.body.classList.toggle("report-fullscreen-open", on);
+  btnIn?.classList.toggle("hidden", on);
+  btnOut?.classList.toggle("hidden", !on);
+}
+
+async function downloadReportDocx() {
+  const id = state.occurrenceId;
+  if (!id) {
+    toast("No occurrence to export", true);
+    return;
+  }
+  const url = new URL(
+    `/api/occurrences/${encodeURIComponent(id)}/report/docx`,
+    window.location.origin,
+  );
+  try {
+    const res = await fetch(`${url.pathname}${url.search}`, {
+      headers: headers(false),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Download failed (${res.status})`);
+    }
+    const blob = await res.blob();
+    const disp = res.headers.get("Content-Disposition") || "";
+    const match = /filename="([^"]+)"/i.exec(disp);
+    const name = match ? match[1] : `ux-report-${id.slice(0, 8)}.docx`;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    toast("Report downloaded");
+  } catch (err) {
+    toast(err.message, true);
+  }
+}
+
+function renderIssueCard(issue, occurrenceId) {
+  const sev = (issue.severity || "major").toLowerCase();
+  const body = formatIssueBody(issue);
+  const shotUrl = issueScreenshotUrl(occurrenceId, issue);
+  const shot = shotUrl
+    ? `<a class="issue-shot-link" href="#" target="_blank" rel="noopener">
+        <img class="issue-shot" data-shot-src="${escapeAttr(shotUrl)}" alt="Issue screenshot" />
+      </a>`
+    : "";
+  return `
+    <div class="issue ${escapeAttr(sev)}">
+      <p class="ih">${escapeHtml(issue.marker || "")} ${escapeHtml(
+        issue.id || issue.step || "",
+      )} — ${escapeHtml(issue.title || "")}</p>
+      <p class="im">${escapeHtml(body)}</p>
+      ${shot}
+    </div>`;
+}
+
+function currentProject() {
+  return (
+    state.projects.find((p) => p.id === state.projectId) ||
+    state.projects[0] ||
+    null
+  );
+}
+
+function closeProjectMenu() {
+  const menu = $("projectMenu");
+  const btn = $("projectMenuBtn");
+  if (!menu || !btn) return;
+  menu.classList.add("hidden");
+  btn.setAttribute("aria-expanded", "false");
+}
+
+function renderProjectSwitcher() {
+  const label = $("projectLabel");
+  const menu = $("projectMenu");
+  const btn = $("projectMenuBtn");
+  if (!label || !menu || !btn) return;
+
+  const current = currentProject();
+  label.textContent = current?.name || "Select project";
+  document.title = current
+    ? `${current.name} — Flow Control`
+    : "Flow Control Plane";
+
+  menu.innerHTML = state.projects
+    .map((p) => {
+      const selected = p.id === state.projectId ? "true" : "false";
+      const missing = p.available ? "" : " unavailable";
+      const status = p.runnable ? "ready" : "catalog only";
+      return `<li>
+        <button type="button" class="project-option${p.id === state.projectId ? " selected" : ""}${missing}" role="option" aria-selected="${selected}" data-id="${escapeAttr(p.id)}" ${p.available ? "" : "disabled"}>
+          <span class="project-option-name">${escapeHtml(p.name)}</span>
+          <span class="project-option-meta">${p.available ? status : "unavailable"}</span>
+        </button>
+      </li>`;
+    })
+    .join("");
+
+  menu.querySelectorAll(".project-option").forEach((item) => {
+    item.addEventListener("click", () => {
+      switchProject(item.dataset.id);
+    });
+  });
+}
+
+async function switchProject(projectId) {
+  const next = String(projectId || "").trim();
+  if (!next || next === state.projectId) {
+    closeProjectMenu();
+    return;
+  }
+  const project = state.projects.find((p) => p.id === next);
+  if (project && !project.available) {
+    toast(`${project.name} is unavailable`, true);
+    closeProjectMenu();
+    return;
+  }
+
+  stopPolling();
+  state.projectId = next;
+  localStorage.setItem("odb_project_id", next);
+  state.selectedFlowId = null;
+  state.selectedUseCaseId = null;
+  state.expandedUseCaseIds = new Set();
+  state.occurrenceId = null;
+  state.lastOccurrence = null;
+  state.history = [];
+  state.flows = [];
+  closeProjectMenu();
+  renderProjectSwitcher();
+  renderStats();
+  $("emptyState")?.classList.remove("hidden");
+  $("flowDetail")?.classList.add("hidden");
+  setLiveIdle();
+  try {
+    await Promise.all([loadFlows(), loadHistory()]);
+    toast(`Loaded ${currentProject()?.name || next}`);
+  } catch (err) {
+    toast(err.message, true);
+  }
+}
+
+async function loadProjects() {
+  const data = await api("/api/projects");
+  state.projects = data.projects || [];
+  const saved = state.projectId;
+  const match = state.projects.find((p) => p.id === saved && p.available);
+  const fallback =
+    state.projects.find((p) => p.id === data.defaultProjectId && p.available) ||
+    state.projects.find((p) => p.available) ||
+    state.projects[0];
+  state.projectId = (match || fallback)?.id || "";
+  if (state.projectId) {
+    localStorage.setItem("odb_project_id", state.projectId);
+  }
+  renderProjectSwitcher();
 }
 
 function bindUi() {
@@ -529,22 +1572,91 @@ function bindUi() {
   });
 
   $("btnRun").addEventListener("click", runSelectedFlow);
+  $("btnLastRun")?.addEventListener("click", () =>
+    openLastRun().catch((e) => toast(e.message, true)),
+  );
+  $("btnRunSelected")?.addEventListener("click", () =>
+    runFlowQueue(selectedFlowIdsInOrder()),
+  );
+  $("flowSelectAll")?.addEventListener("change", () => {
+    const box = $("flowSelectAll");
+    const ids = listedFlowsInOrder().map((f) => String(f.flowId));
+    if (box.checked) ids.forEach((id) => state.checkedFlowIds.add(id));
+    else ids.forEach((id) => state.checkedFlowIds.delete(id));
+    renderFlowList();
+  });
+  $("btnStop")?.addEventListener("click", stopRunningOccurrence);
   $("btnLoadReport").addEventListener("click", () =>
     loadReport().catch((e) => toast(e.message, true)),
   );
+  $("btnReportFullscreen")?.addEventListener("click", () => setReportFullscreen(true));
+  $("btnReportExitFullscreen")?.addEventListener("click", () =>
+    setReportFullscreen(false),
+  );
+  $("btnReportDocx")?.addEventListener("click", () =>
+    downloadReportDocx().catch((e) => toast(e.message, true)),
+  );
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape" && $("reportPanel")?.classList.contains("report-panel--fullscreen")) {
+      setReportFullscreen(false);
+    }
+  });
 
-  document.querySelectorAll(".chip").forEach((chip) => {
+  document.querySelectorAll(".rail-filters .chip").forEach((chip) => {
     chip.addEventListener("click", () => {
-      document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+      document.querySelectorAll(".rail-filters .chip").forEach((c) =>
+        c.classList.remove("active"),
+      );
       chip.classList.add("active");
       state.filter = chip.dataset.filter;
       renderFlowList();
     });
   });
 
+  document.querySelectorAll(".rail-groups .chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll(".rail-groups .chip").forEach((c) => {
+        c.classList.remove("active");
+        c.setAttribute("aria-selected", "false");
+      });
+      chip.classList.add("active");
+      chip.setAttribute("aria-selected", "true");
+      state.groupTab = chip.dataset.group || "sheet";
+      const headed = $("headedMode");
+      if (headed && state.groupTab === "ux-modules") {
+        headed.checked = true;
+      }
+      renderFlowList();
+    });
+  });
+
+  const copyPages = $("btnCopyPages");
+  if (copyPages) copyPages.addEventListener("click", () => copyCoveredPages());
+
   $("flowSearch").addEventListener("input", () => {
     state.search = $("flowSearch").value;
     renderFlowList();
+  });
+
+  const menuBtn = $("projectMenuBtn");
+  if (menuBtn) {
+    menuBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const menu = $("projectMenu");
+      if (!menu) return;
+      const open = menu.classList.contains("hidden");
+      menu.classList.toggle("hidden", !open);
+      menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+
+  document.addEventListener("click", (ev) => {
+    const switcher = ev.target.closest(".brand-switcher");
+    if (!switcher) closeProjectMenu();
+  });
+
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") closeProjectMenu();
   });
 }
 
@@ -552,6 +1664,7 @@ async function init() {
   bindUi();
   setLiveIdle();
   try {
+    await loadProjects();
     await Promise.all([loadFlows(), loadHistory()]);
   } catch (err) {
     toast(err.message || "Failed to load API", true);

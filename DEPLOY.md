@@ -36,7 +36,7 @@ kubectl create secret generic onetest-env \
   --from-literal=API_TOKEN='your-shared-token' \
   --from-literal=PUBLIC_UI_URL='https://onetest.onechanneladmin.com' \
   --from-literal=PUBLIC_API_URL='https://dev-onetest.onechanneladmin.com' \
-  --from-literal=ONEDIRECTBUY_BASE_URL='https://onedirectbuy.com' \
+  --from-literal=ONEDIRECTBUY_BASE_URL='https://dev.onedirectbuy.com' \
   --from-literal=ONEDIRECTBUY_BUYER_EMAIL='...' \
   --from-literal=ONEDIRECTBUY_BUYER_PASSWORD='...' \
   --from-literal=ONEDIRECTBUY_ADMIN_EMAIL='...' \
@@ -45,6 +45,13 @@ kubectl create secret generic onetest-env \
   --from-literal=ONEDIRECTBUY_SELLER_PASSWORD='...' \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
+
+`API_TOKEN` is required: without it every `/api` route answers 503 (only `/health` and
+`GET /api/health` stay open). Clients send it as `Authorization: Bearer <token>` or
+`x-api-token`; `?token=` is not accepted. Add `CORS_ORIGINS` (comma-separated) only if
+another origin must call the API. Runs target dev by default; pointing
+`ONEDIRECTBUY_BASE_URL` at production is refused unless `ALLOW_PROD=1`, which limits the
+run to `ci-tests.config.json → productionReadOnly`.
 
 In-pod Playwright still uses `STATUS_API_URL=http://127.0.0.1:8080` (set in the Deployment). External clients / docs use **`https://dev-onetest.onechanneladmin.com`**.
 

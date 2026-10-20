@@ -4,38 +4,210 @@
  */
 const fs = require("fs");
 const path = require("path");
-const { spawn } = require("child_process");
+const { spawn, spawnSync } = require("child_process");
 const { randomUUID } = require("crypto");
 const Flow = require("../models/Flow");
 const RunningOccurrence = require("../models/RunningOccurrence");
 const Report = require("../models/Report");
 const { ROOT, STATUS_API_URL, MONGODB_URI } = require("../config");
 const {
+  writeOccurrenceArchive,
+  pruneOccurrenceRetention,
+} = require("../lib/occurrenceArchive");
+const {
   writeMeta,
   clearMeta,
   META_PATH,
 } = require("../../lib/occurrenceLive");
+const { grepUseCasePattern } = require("../lib/useCaseCatalog");
+const {
+  defaultProjectId,
+  requireAvailableProject,
+} = require("../lib/projects");
+const {
+  applyLiveStep,
+  countCompleted,
+  countTotal,
+  skipIncomplete,
+  rollupStatus,
+} = require("../../lib/applyLiveStep");
+const {
+  sanitizePlaywrightBrowsersPath,
+} = require("../../lib/playwrightBrowsers.cjs");
 
 /** @type {Map<string, { timer?: NodeJS.Timeout }>} */
 const activeWatchers = new Map();
 
+/** Sequential flow queue — one Playwright process at a time. */
+const flowRunQueue = [];
+let flowQueueRunningId = null;
+
+function flowQueueSnapshot() {
+  return {
+    activeOccurrenceId: flowQueueRunningId,
+    remaining: flowRunQueue.map((item) => ({
+      flowId: item.flowId,
+      projectId: item.projectId || "",
+      useCaseId: item.useCaseId || "",
+    })),
+    remainingCount: flowRunQueue.length,
+  };
+}
+
+function clearFlowRunQueue() {
+  flowRunQueue.length = 0;
+}
+
+function releaseQueueSlot(occurrenceId) {
+  if (!occurrenceId || String(flowQueueRunningId) !== String(occurrenceId)) {
+    return;
+  }
+  flowQueueRunningId = null;
+  setImmediate(() => {
+    pumpFlowQueue().catch((err) => {
+      console.error("[runQueue] pump failed:", err);
+    });
+  });
+}
+
+async function pumpFlowQueue() {
+  if (flowQueueRunningId) return null;
+  while (flowRunQueue.length) {
+    const next = flowRunQueue.shift();
+    try {
+      const occ = await startFlowRun(next.flowId, next);
+      flowQueueRunningId = occ.occurrenceId;
+      console.log(
+        `[runQueue] started flow=${next.flowId} occ=${occ.occurrenceId.slice(0, 8)} remaining=${flowRunQueue.length}`,
+      );
+      return occ;
+    } catch (err) {
+      console.error(
+        `[runQueue] skipped flow=${next.flowId}:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+  return null;
+}
+
 /**
- * @param {string} flowId
- * @param {{ headed?: boolean }} [opts]
+ * Enqueue flows and start the first if idle. Runs one at a time in given order.
+ * @param {string[]} flowIds
+ * @param {{ headed?: boolean; projectId?: string; visibleTerminal?: boolean }} [opts]
  */
-async function startFlowRun(flowId, opts = {}) {
-  const key = String(flowId);
-  const flow = await Flow.findOne({ flowId: key });
-  if (!flow) {
-    const err = new Error(`Flow not found: ${key}`);
-    err.status = 404;
+async function enqueueFlowRuns(flowIds, opts = {}) {
+  let ids = (flowIds || []).map((id) => String(id).trim()).filter(Boolean);
+  if (!ids.length) {
+    const err = new Error("No flowIds to queue");
+    err.status = 400;
     throw err;
   }
 
-  const occurrenceId = randomUUID();
-  const steps = (flow.steps || []).map((s) => ({
+  const projectId = String(opts.projectId || defaultProjectId()).trim();
+  let uxPages = null;
+  let coalescedFrom = null;
+  if (ids.length > 1) {
+    const flows = await Flow.find({ projectId, flowId: { $in: ids } }).lean();
+    const byId = new Map(flows.map((flow) => [String(flow.flowId), flow]));
+    const selected = ids.map((id) => byId.get(id)).filter(Boolean);
+    const allUx =
+      selected.length === ids.length &&
+      selected.every(
+        (flow) =>
+          String(flow.group || "") === "ui-ux" ||
+          String(flow.name || "").startsWith("UX Audit") ||
+          /UI UX Audit/i.test(String(flow.name || "")),
+      );
+    if (allUx) {
+      const batch = await Flow.findOne({
+        projectId,
+        name: "UX Audit — All Covered Pages",
+      }).lean();
+      if (batch) {
+        uxPages = selected
+          .filter((flow) => String(flow.flowId) !== String(batch.flowId))
+          .map((flow) => {
+            const stay = (flow.steps || [])
+              .map((step) => String(step.title || ""))
+              .find((title) => /stayed on\s+\//.test(title));
+            const pagePath = stay
+              ? stay.replace(/.*stayed on\s+/, "").trim()
+              : /Home Dashboard/i.test(flow.name || "")
+                ? "/home/dashboard"
+                : "";
+            const rest = String(flow.name || "")
+              .replace(/^UX Audit —\s*/, "")
+              .replace(/\s+UI UX Audit$/i, "");
+            return {
+              hub: rest.split(" ")[0] || "Page",
+              name: rest,
+              path: pagePath || "/",
+              stepPrefix: ((flow.steps || [])[0]?.stepId || "UX").replace(
+                /-\d+$/,
+                "",
+              ),
+            };
+          })
+          .filter((page) => page.path && page.path !== "/");
+        if (uxPages.length) {
+          coalescedFrom = ids.slice();
+          ids = [String(batch.flowId)];
+        }
+      }
+    }
+  }
+
+  for (const flowId of ids) {
+    flowRunQueue.push({
+      flowId,
+      headed: Boolean(opts.headed),
+      projectId: opts.projectId,
+      visibleTerminal: opts.visibleTerminal,
+      uxPages,
+    });
+  }
+  const first = await pumpFlowQueue();
+  return {
+    queued: ids.length,
+    coalesced: Boolean(coalescedFrom),
+    coalescedFrom,
+    pages: uxPages ? uxPages.length : 0,
+    ...flowQueueSnapshot(),
+    firstOccurrence: first
+      ? {
+          occurrenceId: first.occurrenceId,
+          flowId: first.flowId,
+          flowName: first.flowName,
+          status: first.status,
+        }
+      : null,
+  };
+}
+
+function mapChildForOccurrence(c, i) {
+  return {
+    stepId: c.stepId,
+    title: c.title || c.stepId,
+    specFile: c.specFile || "",
+    order: c.order ?? i + 1,
+    dependsOn: c.dependsOn || null,
+    status: "pending",
+    startedAt: null,
+    finishedAt: null,
+    durationMs: null,
+    error: "",
+    marker: "",
+    severity: "",
+  };
+}
+
+function mapParentForOccurrence(s) {
+  const children = (s.children || []).map((c, i) => mapChildForOccurrence(c, i));
+  return {
     stepId: s.stepId,
     title: s.title,
+    specFile: s.specFile || "",
     status: "pending",
     order: s.order,
     startedAt: null,
@@ -51,7 +223,46 @@ async function startFlowRun(flowId, opts = {}) {
     priority: s.priority || "",
     automation: s.automation || "",
     currentStatus: s.currentStatus || "",
-  }));
+    children,
+  };
+}
+
+/**
+ * @param {string} flowId
+ * @param {{ headed?: boolean; useCaseId?: string; projectId?: string }} [opts]
+ */
+async function startFlowRun(flowId, opts = {}) {
+  const key = String(flowId);
+  const projectId = String(opts.projectId || defaultProjectId()).trim();
+  const project = requireAvailableProject(projectId);
+  const flow = await Flow.findOne({ projectId, flowId: key });
+  if (!flow) {
+    const err = new Error(`Flow not found: ${key} (${projectId})`);
+    err.status = 404;
+    throw err;
+  }
+  const projectRoot = project.root;
+  const hasCiRunner = fs.existsSync(
+    path.join(projectRoot, "scripts", "run-ci-tests.js"),
+  );
+
+  const useCaseId = opts.useCaseId ? String(opts.useCaseId).trim() : "";
+  let sourceSteps = flow.steps || [];
+  if (useCaseId) {
+    const parent = sourceSteps.find((s) => s.stepId === useCaseId);
+    if (!parent) {
+      const err = new Error(`Use case not found: ${useCaseId}`);
+      err.status = 404;
+      throw err;
+    }
+    sourceSteps = [parent];
+  }
+
+  const occurrenceId = randomUUID();
+  const steps = sourceSteps.map((s) => mapParentForOccurrence(s));
+  const grep = useCaseId ? grepUseCasePattern(useCaseId) : "";
+  const serialWorkers = Boolean(flow.catalog || useCaseId);
+  const flowName = useCaseId ? `${flow.name} · ${useCaseId}` : flow.name;
 
   const exitFile = path.join(ROOT, "reports", `.flow-exit-${occurrenceId}.txt`);
   try {
@@ -62,11 +273,12 @@ async function startFlowRun(flowId, opts = {}) {
 
   const occurrence = await RunningOccurrence.create({
     occurrenceId,
+    projectId,
     flowId: key,
-    flowName: flow.name,
+    flowName,
     status: "queued",
     stepsCompleted: 0,
-    stepsTotal: steps.length,
+    stepsTotal: countTotal(steps),
     steps,
     liveIssues: [],
     liveIssueCount: 0,
@@ -74,10 +286,20 @@ async function startFlowRun(flowId, opts = {}) {
     envSummary: {
       STATUS_API_URL,
       CI_TESTS_CONFIG: "flows.config.json",
-      suite: `flow:${key}`,
+      suite: useCaseId ? `flow:${key}:${useCaseId}` : `flow:${key}`,
       visibleTerminal: process.platform === "win32",
+      useCaseId,
+      grep,
+      projectId,
+      projectRoot,
+      tests: flow.tests || [],
+      runner: hasCiRunner ? "ci-tests" : "playwright",
     },
   });
+  writeOccurrenceArchive(occurrence);
+  if (!flowQueueRunningId) {
+    flowQueueRunningId = occurrenceId;
+  }
 
   // Ensure empty live-step feed for this occurrence
   try {
@@ -91,10 +313,21 @@ async function startFlowRun(flowId, opts = {}) {
   // Meta lives under reports/ (NOT test-results/) so Playwright cleanup cannot wipe it.
   writeMeta({
     occurrenceId,
+    projectId,
+    projectRoot,
     flowId: key,
+    tests: flow.tests || [],
+    runner: hasCiRunner ? "ci-tests" : "playwright",
+    useCaseId,
+    grep,
+    workers: serialWorkers ? 1 : undefined,
     statusApiUrl: STATUS_API_URL,
     mongoUri: MONGODB_URI,
     headed: Boolean(opts.headed),
+    uiAnalysis:
+      String(flow.group || "") === "ux-modules" ||
+      String(flow.group || "") === "ui-ux",
+    uxPages: Array.isArray(opts.uxPages) ? opts.uxPages : null,
     // Control-plane runs must report real Playwright exit (not CI soft-pass)
     softPass: "0",
     exitFile: exitFile.replace(/\\/g, "/"),
@@ -105,7 +338,7 @@ async function startFlowRun(flowId, opts = {}) {
   const useSmokeRunner = process.env.FLOW_SMOKE_RUNNER === "1";
 
   console.log(
-    `[runFlow] starting flow=${key} occurrence=${occurrenceId} visible=${process.platform === "win32"}`,
+    `[runFlow] starting project=${projectId} flow=${key}${useCaseId ? ` useCase=${useCaseId}` : ""} occurrence=${occurrenceId} cwd=${projectRoot} visible=${process.platform === "win32"}`,
   );
 
   occurrence.status = "running";
@@ -139,26 +372,43 @@ async function startFlowRun(flowId, opts = {}) {
     return occurrence.toObject();
   }
 
-  if (process.platform === "win32") {
+  const uniqueMetaPath = path.join(
+    ROOT,
+    "reports",
+    `odb-flow-run-${occurrenceId}.json`,
+  );
+
+  const isVisibleTerminal =
+    opts.visibleTerminal !== undefined
+      ? Boolean(opts.visibleTerminal)
+      : process.platform === "win32" && process.env.FLOW_VISIBLE_TERMINAL !== "0";
+
+  if (isVisibleTerminal) {
     // Reliable visible CMD: write a .cmd wrapper so `start` quoting cannot break,
     // env vars are explicit, and Playwright logs stream in that window.
     const batPath = path.join(ROOT, "reports", `flow-run-${occurrenceId}.cmd`);
     const logPath = path.join(ROOT, "reports", `flow-run-${occurrenceId}.log`);
-    const rootCmd = ROOT.replace(/\//g, "\\");
+    const projectCmd = projectRoot.replace(/\//g, "\\");
     const batPathCmd = batPath.replace(/\//g, "\\");
     const logPathCmd = logPath.replace(/\//g, "\\");
     const exitFileCmd = exitFile.replace(/\//g, "\\");
-    const metaCmd = META_PATH.replace(/\//g, "\\");
+    const metaCmd = uniqueMetaPath.replace(/\//g, "\\");
     const launcherCmd = launcher.replace(/\//g, "\\");
     const nodeExe = process.execPath;
     const headedLines = opts.headed
       ? ["set PW_HEADED=1", "set HEADLESS=false", "set PW_HEADLESS=0"]
       : ["set PW_HEADLESS=1", "set HEADLESS=true"];
+    const uxAnalysisLines =
+      String(flow.group || "") === "ux-modules" ||
+      String(flow.group || "") === "ui-ux"
+        ? ['set "UI_ANALYSIS=1"']
+        : [];
+    const workerLines = serialWorkers ? ['set "PW_WORKERS=1"'] : [];
     const bat = [
       "@echo off",
       "setlocal EnableExtensions EnableDelayedExpansion",
-      `title ODB Flow ${key} — ${occurrenceId.slice(0, 8)}`,
-      `cd /d "${rootCmd}"`,
+      `title ${project.name} Flow ${key}${useCaseId ? ` ${useCaseId}` : ""} — ${occurrenceId.slice(0, 8)}`,
+      `cd /d "${projectCmd}"`,
       `echo [%DATE% %TIME%] launcher start> "${logPathCmd}"`,
       `set "RUNNING_OCCURRENCE_ID=${occurrenceId}"`,
       `set "STATUS_API_URL=${STATUS_API_URL}"`,
@@ -166,11 +416,16 @@ async function startFlowRun(flowId, opts = {}) {
       'set "CI_SOFT_PASS=0"',
       'set "CI_TESTS_CONFIG=flows.config.json"',
       'set "ODB_PAUSE_ON_EXIT=0"',
+      'set "PLAYWRIGHT_BROWSERS_PATH="',
       ...headedLines,
+      ...uxAnalysisLines,
+      ...workerLines,
       "echo.",
       "echo ============================================",
-      "echo  OneDirectBuy Flow Control Plane — runner",
+      "echo  Flow Control Plane — runner",
+      `echo  Project:    ${project.name}`,
       `echo  Flow:       ${key}`,
+      useCaseId ? `echo  Use case:   ${useCaseId}` : "echo.",
       `echo  Occurrence: ${occurrenceId}`,
       "echo  Dir:        %CD%",
       `echo  API:        ${STATUS_API_URL}`,
@@ -184,24 +439,26 @@ async function startFlowRun(flowId, opts = {}) {
       "echo.",
       "echo Flow finished with exit code !EXITCODE!",
       "echo Full log also saved to reports\\flow-run-*.log",
-      "echo Window stays open so you can read the log.",
-      "pause",
+      'if not "%ODB_PAUSE_ON_EXIT%"=="0" echo Window stays open so you can read the log.',
+      'if not "%ODB_PAUSE_ON_EXIT%"=="0" pause',
       "exit /b !EXITCODE!",
       "",
     ].join("\r\n");
     fs.writeFileSync(batPath, bat, "utf8");
 
     // shell:true + start "title" /D cwd — most reliable new-console spawn on Windows
-    const startCmd = `start "ODB Flow ${key}" /D "${rootCmd}" cmd.exe /c "${batPathCmd}"`;
+    const startCmd = `start "${project.name} Flow ${key}" /D "${projectCmd}" cmd.exe /c "${batPathCmd}"`;
     console.log(`[runFlow] spawning visible terminal: ${startCmd}`);
+    const childEnv = {
+      ...process.env,
+      RUNNING_OCCURRENCE_ID: occurrenceId,
+      STATUS_API_URL,
+      MONGODB_URI,
+    };
+    sanitizePlaywrightBrowsersPath(childEnv);
     const child = spawn(startCmd, {
-      cwd: ROOT,
-      env: {
-        ...process.env,
-        RUNNING_OCCURRENCE_ID: occurrenceId,
-        STATUS_API_URL,
-        MONGODB_URI,
-      },
+      cwd: projectRoot,
+      env: childEnv,
       detached: true,
       stdio: "ignore",
       windowsHide: false,
@@ -214,22 +471,49 @@ async function startFlowRun(flowId, opts = {}) {
       batPath: path.relative(ROOT, batPath).replace(/\\/g, "/"),
       logPath: path.relative(ROOT, logPath).replace(/\\/g, "/"),
       headed: Boolean(opts.headed),
+      useCaseId,
+      grep,
+      projectId,
+      projectRoot,
     };
     await occurrence.save();
     watchExitFile(occurrenceId, exitFile);
   } else {
-    const child = spawn(process.execPath, [launcher, META_PATH], {
-      cwd: ROOT,
-      env: {
-        ...process.env,
-        RUNNING_OCCURRENCE_ID: occurrenceId,
-        STATUS_API_URL,
-        MONGODB_URI,
-        ODB_PAUSE_ON_EXIT: "0",
-      },
+    const child = spawn(process.execPath, [launcher, uniqueMetaPath], {
+      cwd: projectRoot,
+      env: (() => {
+        const childEnv = {
+          ...process.env,
+          RUNNING_OCCURRENCE_ID: occurrenceId,
+          STATUS_API_URL,
+          MONGODB_URI,
+          ODB_PAUSE_ON_EXIT: "0",
+          ...(serialWorkers ? { PW_WORKERS: "1" } : {}),
+          ...(opts.headed
+            ? { PW_HEADED: "1", HEADLESS: "false", PW_HEADLESS: "0" }
+            : { PW_HEADLESS: "1", HEADLESS: "true" }),
+          ...(String(flow.group || "") === "ux-modules" ||
+          String(flow.group || "") === "ui-ux"
+            ? { UI_ANALYSIS: process.env.UI_ANALYSIS === "0" ? "0" : "1" }
+            : {}),
+          ...(Array.isArray(opts.uxPages) && opts.uxPages.length
+            ? { UX_AUDIT_PAGES: JSON.stringify(opts.uxPages) }
+            : {}),
+        };
+        sanitizePlaywrightBrowsersPath(childEnv);
+        return childEnv;
+      })(),
       stdio: ["ignore", "pipe", "pipe"],
     });
     occurrence.workerPid = child.pid;
+    occurrence.envSummary = {
+      ...occurrence.envSummary,
+      headed: Boolean(opts.headed),
+      useCaseId,
+      grep,
+      projectId,
+      projectRoot,
+    };
     await occurrence.save();
     child.stdout?.on("data", (b) => process.stdout.write(b));
     child.stderr?.on("data", (b) => process.stderr.write(b));
@@ -240,6 +524,7 @@ async function startFlowRun(flowId, opts = {}) {
         console.error("[runFlow] finalize failed:", err.message);
       }
     });
+    watchExitFile(occurrenceId, exitFile);
   }
 
   return occurrence.toObject();
@@ -359,7 +644,12 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
     return;
   }
 
-  const latestPath = path.join(ROOT, "reports", "latest.json");
+  const reportsRoot =
+    occurrence.envSummary?.projectRoot &&
+    fs.existsSync(occurrence.envSummary.projectRoot)
+      ? occurrence.envSummary.projectRoot
+      : ROOT;
+  const latestPath = path.join(reportsRoot, "reports", "latest.json");
   let runDir = "";
   let summary = null;
   let issues = null;
@@ -369,7 +659,7 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   if (fs.existsSync(latestPath)) {
     try {
       const latest = JSON.parse(fs.readFileSync(latestPath, "utf8"));
-      if (latest.path) runDir = path.join(ROOT, latest.path);
+      if (latest.path) runDir = path.join(reportsRoot, latest.path);
     } catch {
       // ignore
     }
@@ -418,22 +708,7 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   // Reload steps from DB in case soft()/HTTP updated meanwhile
   const fresh = await RunningOccurrence.findOne({ occurrenceId }).lean();
   if (fresh?.steps?.length) {
-    // Merge: keep whichever side progressed further per step
-    const byId = new Map(occurrence.steps.map((s) => [s.stepId, s]));
-    for (const fsStep of fresh.steps) {
-      const cur = byId.get(fsStep.stepId);
-      if (!cur) {
-        occurrence.steps.push(fsStep);
-        continue;
-      }
-      const rank = (st) =>
-        ({ pending: 0, running: 1, skipped: 2, passed: 3, failed: 3, blocked: 3 })[
-          st
-        ] ?? 0;
-      if (rank(fsStep.status) >= rank(cur.status)) {
-        Object.assign(cur, fsStep);
-      }
-    }
+    occurrence.steps = fresh.steps;
     occurrence.liveIssues = fresh.liveIssues?.length
       ? fresh.liveIssues
       : occurrence.liveIssues;
@@ -443,17 +718,23 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
     occurrence.markModified("liveIssues");
   }
 
-  // Mark remaining pending/running as skipped after run ends
-  for (const step of occurrence.steps) {
-    if (step.status === "pending" || step.status === "running") {
-      step.status = "skipped";
-      step.finishedAt = new Date();
-    }
-  }
-  occurrence.markModified("steps");
-
   const realExit =
     typeof summary?.exitCode === "number" ? summary.exitCode : exitCode;
+  const infraIssue = (issues?.issues || occurrence.liveIssues || []).find(
+    (issue) => issue.marker === "[INFRA]" || /Executable doesn't exist/i.test(issue.evidence || ""),
+  );
+  const infraError = String(
+    infraIssue?.evidence ||
+      (realExit !== 0
+        ? `Playwright exited ${realExit} before reporting live steps`
+        : ""),
+  ).slice(0, 2000);
+
+  skipIncomplete(occurrence.steps, new Date(), {
+    markFailed: realExit !== 0,
+    error: infraError,
+  });
+  occurrence.markModified("steps");
   const failedSteps = occurrence.steps.filter((s) =>
     ["failed", "blocked"].includes(s.status),
   ).length;
@@ -480,13 +761,16 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   occurrence.finishedAt = new Date();
   occurrence.exitCode = realExit;
   occurrence.runDir = runDir
-    ? path.relative(ROOT, runDir).replace(/\\/g, "/")
+    ? path.relative(reportsRoot, runDir).replace(/\\/g, "/")
     : "";
-  occurrence.stepsCompleted = occurrence.steps.filter((s) =>
-    ["passed", "failed", "skipped", "blocked"].includes(s.status),
-  ).length;
+  occurrence.stepsCompleted = countCompleted(occurrence.steps);
+  occurrence.stepsTotal = Math.max(
+    occurrence.stepsTotal || 0,
+    countTotal(occurrence.steps),
+  );
   occurrence.currentStepId = null;
   await occurrence.save();
+  writeOccurrenceArchive(occurrence);
 
   clearMeta(occurrenceId);
 
@@ -513,6 +797,7 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
     { occurrenceId },
     {
       occurrenceId,
+      projectId: occurrence.projectId,
       flowId: occurrence.flowId,
       summary,
       issues: finalIssues,
@@ -537,33 +822,22 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   console.log(
     `[runFlow] finalized ${occurrenceId} status=${occurrence.status} steps=${occurrence.stepsCompleted}/${occurrence.stepsTotal} passed=${passedSteps} failed=${failedSteps} issues=${occurrence.liveIssueCount || issueCount} exit=${realExit}`,
   );
-}
 
-function isCatalogDriven(occurrence) {
-  return (occurrence.steps || []).some((s) => s.useCase || s.module);
-}
+  try {
+    const pruned = await pruneOccurrenceRetention(RunningOccurrence, Report);
+    if (pruned.deleted) {
+      console.log(
+        `[runFlow] pruned ${pruned.deleted} old run(s); keeping last ${pruned.keep} per project (+ running)`,
+      );
+    }
+  } catch (err) {
+    console.warn(
+      "[runFlow] occurrence retention prune failed:",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
 
-/**
- * ODB-UC-005-b → ODB-UC-005 when the parent row exists.
- * @param {object[]} steps
- * @param {string} stepId
- */
-function findCatalogParent(steps, stepId) {
-  const exact = steps.find((s) => s.stepId === stepId);
-  if (exact) return exact;
-  const matches = steps.filter(
-    (s) =>
-      String(stepId).startsWith(`${s.stepId}-`) ||
-      String(stepId).startsWith(`${s.stepId}:`),
-  );
-  if (!matches.length) return null;
-  return matches.sort((a, b) => b.stepId.length - a.stepId.length)[0];
-}
-
-function mergeStepStatus(current, incoming) {
-  if (incoming === "failed" || incoming === "blocked") return incoming;
-  if (current === "failed" || current === "blocked") return current;
-  return incoming;
+  releaseQueueSlot(occurrenceId);
 }
 
 async function updateStep(occurrenceId, payload) {
@@ -585,65 +859,34 @@ async function updateStep(occurrenceId, payload) {
         throw err;
       }
 
-      const catalogFlow = isCatalogDriven(occurrence);
-      let step = occurrence.steps.find((s) => s.stepId === payload.stepId);
-      if (!step) {
-        step = findCatalogParent(occurrence.steps, payload.stepId);
-      }
-      if (!step) {
-        if (catalogFlow) {
-          // Extra probes (e.g. ODB-UC-021, ODB-UC-385) stay off the sheet.
-          return occurrence.toObject();
-        }
-        occurrence.steps.push({
-          stepId: payload.stepId,
-          title: payload.title || payload.stepId,
-          status: "pending",
-          order: occurrence.steps.length + 1,
-        });
-        step = occurrence.steps[occurrence.steps.length - 1];
+      if (["passed", "failed", "cancelled"].includes(occurrence.status)) {
+        return occurrence.toObject();
       }
 
-      if (payload.title && !step.useCase) step.title = payload.title;
-      step.status = mergeStepStatus(step.status, payload.status);
+      const result = applyLiveStep(occurrence.steps, payload, { now });
+      if (result.skipped) {
+        return occurrence.toObject();
+      }
 
       if (payload.status === "running") {
-        if (!step.startedAt) step.startedAt = now;
-        step.finishedAt = null;
-        step.durationMs = null;
-        occurrence.currentStepId = step.stepId;
+        occurrence.currentStepId = result.currentStepId;
       } else if (
-        ["passed", "failed", "skipped", "blocked"].includes(payload.status)
+        ["passed", "failed", "skipped", "blocked"].includes(payload.status) &&
+        occurrence.currentStepId === result.step?.stepId
       ) {
-        if (!step.startedAt) step.startedAt = now;
-        step.finishedAt = now;
-        step.durationMs = Math.max(
-          0,
-          now.getTime() - new Date(step.startedAt).getTime(),
-        );
-        if (payload.error) {
-          const prev = step.error ? `${step.error}\n` : "";
-          step.error = `${prev}${payload.error}`.slice(0, 2000);
-        }
-        if (payload.marker) step.marker = payload.marker;
-        if (payload.severity) step.severity = payload.severity;
-        if (occurrence.currentStepId === step.stepId) {
-          occurrence.currentStepId = null;
-        }
+        occurrence.currentStepId = null;
       }
 
-      occurrence.stepsCompleted = occurrence.steps.filter((s) =>
-        ["passed", "failed", "skipped", "blocked"].includes(s.status),
-      ).length;
+      occurrence.stepsCompleted = countCompleted(occurrence.steps);
       occurrence.stepsTotal = Math.max(
         occurrence.stepsTotal || 0,
-        occurrence.steps.length,
+        countTotal(occurrence.steps),
       );
       occurrence.markModified("steps");
       await occurrence.save();
 
       console.log(
-        `[runFlow] step ${payload.status} ${payload.stepId} → ${step.stepId} (${occurrence.stepsCompleted}/${occurrence.stepsTotal}) occ=${occurrenceId.slice(0, 8)}`,
+        `[runFlow] step ${payload.status} ${payload.stepId} → ${result.step?.stepId || payload.stepId} (${occurrence.stepsCompleted}/${occurrence.stepsTotal}) occ=${occurrenceId.slice(0, 8)}`,
       );
 
       return occurrence.toObject();
@@ -700,6 +943,7 @@ async function upsertReport(occurrenceId, body) {
     { occurrenceId },
     {
       occurrenceId,
+      projectId: occurrence.projectId,
       flowId: occurrence.flowId,
       summary: body.summary ?? undefined,
       issues: body.issues ?? undefined,
@@ -713,10 +957,268 @@ async function upsertReport(occurrenceId, body) {
   return report.toObject();
 }
 
+function killProcessTree(pid) {
+  if (!pid) return;
+  const numPid = Number(pid);
+  if (!Number.isFinite(numPid) || numPid <= 0) return;
+  try {
+    // Fast check: if PID is not running, skip slow taskkill
+    process.kill(numPid, 0);
+  } catch {
+    return;
+  }
+  try {
+    if (process.platform === "win32") {
+      spawnSync("taskkill", ["/F", "/T", "/PID", String(numPid)], {
+        windowsHide: true,
+        stdio: "ignore",
+        timeout: 4000,
+      });
+    } else {
+      try {
+        process.kill(-numPid, "SIGKILL");
+      } catch {
+        process.kill(numPid, "SIGKILL");
+      }
+    }
+  } catch {
+    // Process already exited or permission denied
+  }
+}
+
+/**
+ * Stop/cancel an active occurrence, kill process tree, update steps and status.
+ * @param {string} occurrenceId
+ * @param {string} [reason]
+ */
+async function stopOccurrence(occurrenceId, reason = "Stopped by user") {
+  const occurrence = await RunningOccurrence.findOne({ occurrenceId });
+  if (!occurrence) {
+    const err = new Error(`Occurrence not found: ${occurrenceId}`);
+    err.status = 404;
+    throw err;
+  }
+
+  // Stop background watcher if active
+  if (activeWatchers.has(occurrenceId)) {
+    const w = activeWatchers.get(occurrenceId);
+    if (w?.timer) clearInterval(w.timer);
+    activeWatchers.delete(occurrenceId);
+  }
+
+  // Read runner PID file if present
+  const pidFile = path.join(ROOT, "reports", `.flow-pid-${occurrenceId}.txt`);
+  let runnerPid = null;
+  if (fs.existsSync(pidFile)) {
+    try {
+      const content = fs.readFileSync(pidFile, "utf8").trim();
+      if (content) runnerPid = Number(content);
+      fs.unlinkSync(pidFile);
+    } catch {
+      // ignore
+    }
+  }
+
+  // Kill processes (both worker shell and node runner tree)
+  const pidsToKill = new Set();
+  if (runnerPid) pidsToKill.add(runnerPid);
+  if (occurrence.workerPid) pidsToKill.add(occurrence.workerPid);
+
+  for (const pid of pidsToKill) {
+    killProcessTree(pid);
+  }
+
+  // Ingest any remaining live steps from live feed
+  const liveFile = path.join(ROOT, "reports", "live-steps", `${occurrenceId}.ndjson`);
+  let liveOffset = 0;
+  try {
+    await ingestLiveStepFile(occurrenceId, liveFile, () => liveOffset, (n) => {
+      liveOffset = n;
+    });
+  } catch {
+    // ignore
+  }
+
+  // Clean up run metadata & exit files
+  clearMeta(occurrenceId);
+  try {
+    const exitFile = path.join(ROOT, "reports", `.flow-exit-${occurrenceId}.txt`);
+    if (fs.existsSync(exitFile)) fs.unlinkSync(exitFile);
+  } catch {
+    // ignore
+  }
+  try {
+    const batPath = path.join(ROOT, "reports", `flow-run-${occurrenceId}.cmd`);
+    if (fs.existsSync(batPath)) fs.unlinkSync(batPath);
+  } catch {
+    // ignore
+  }
+  try {
+    const oldBat = path.join(ROOT, "reports", `.run-${occurrenceId}.cmd`);
+    if (fs.existsSync(oldBat)) fs.unlinkSync(oldBat);
+  } catch {
+    // ignore
+  }
+
+  // If already terminal, return
+  if (["passed", "failed", "cancelled"].includes(occurrence.status)) {
+    return occurrence.toObject();
+  }
+
+  // Reload fresh steps from DB in case soft()/HTTP updated meanwhile
+  const fresh =
+    (await RunningOccurrence.findOne({ occurrenceId }).lean()) ||
+    occurrence.toObject();
+  const currentSteps = fresh.steps || occurrence.steps || [];
+
+  // Mark pending/running steps as skipped or failed
+  const now = new Date();
+  for (const step of currentSteps) {
+    if (Array.isArray(step.children) && step.children.length) {
+      for (const child of step.children) {
+        if (child.status === "running") {
+          child.status = "failed";
+          child.error = reason;
+          child.finishedAt = now;
+        } else if (child.status === "pending") {
+          child.status = "skipped";
+          child.finishedAt = now;
+        }
+      }
+      step.status = rollupStatus(step.children);
+      if (step.status === "pending" || step.status === "running") {
+        step.status = "cancelled";
+      }
+      if (!step.finishedAt) step.finishedAt = now;
+    } else {
+      if (step.status === "running") {
+        step.status = "failed";
+        step.error = reason;
+        step.finishedAt = now;
+      } else if (step.status === "pending") {
+        step.status = "skipped";
+        step.finishedAt = now;
+      }
+    }
+  }
+
+  const stepsCompleted = countCompleted(currentSteps);
+  const stepsTotal = Math.max(fresh.stepsTotal || 0, countTotal(currentSteps));
+
+  const updatedOccurrence = await RunningOccurrence.findOneAndUpdate(
+    { occurrenceId },
+    {
+      $set: {
+        steps: currentSteps,
+        status: "cancelled",
+        finishedAt: now,
+        exitCode: 130,
+        currentStepId: null,
+        stepsCompleted,
+        stepsTotal,
+      },
+    },
+    { returnDocument: "after" },
+  );
+
+  // Upsert a report documenting cancellation
+  try {
+    await Report.findOneAndUpdate(
+      { occurrenceId },
+      {
+        occurrenceId,
+        projectId: occurrence.projectId,
+        flowId: occurrence.flowId,
+        summary: { exitCode: 130, cancelled: true, reason },
+        issues: {
+          issues: fresh.liveIssues || occurrence.liveIssues || [],
+          count: fresh.liveIssueCount || occurrence.liveIssueCount || 0,
+        },
+        issueCount: fresh.liveIssueCount || occurrence.liveIssueCount || 0,
+        artifactPaths: { runDir: occurrence.runDir || "" },
+      },
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
+    );
+  } catch (err) {
+    console.warn("[stopOccurrence] report upsert warning:", err.message);
+  }
+
+  console.log(
+    `[runFlow] stopped occurrence ${occurrenceId} flow=${occurrence.flowId} status=cancelled`,
+  );
+  writeOccurrenceArchive(updatedOccurrence || occurrence);
+  releaseQueueSlot(occurrenceId);
+  return (updatedOccurrence || occurrence).toObject();
+}
+
+/**
+ * Stop active run for a specific flow.
+ * @param {string|number} flowId
+ * @param {string} [projectId]
+ * @param {string} [reason]
+ */
+async function stopFlowRun(flowId, projectId, reason = "Stopped by user") {
+  const query = {
+    flowId: String(flowId),
+    status: { $in: ["running", "queued"] },
+  };
+  if (projectId) query.projectId = String(projectId);
+
+  let occ = await RunningOccurrence.findOne(query).sort({ createdAt: -1 });
+  if (!occ) {
+    const activePath = path.join(ROOT, "reports", "odb-active-occurrence.txt");
+    if (fs.existsSync(activePath)) {
+      const activeId = fs.readFileSync(activePath, "utf8").trim();
+      if (activeId) {
+        const byActive = await RunningOccurrence.findOne({ occurrenceId: activeId });
+        if (byActive && String(byActive.flowId) === String(flowId)) {
+          occ = byActive;
+        }
+      }
+    }
+  }
+
+  if (!occ) {
+    const err = new Error(`No active occurrence running for flow ${flowId}`);
+    err.status = 404;
+    throw err;
+  }
+
+  return await stopOccurrence(occ.occurrenceId, reason);
+}
+
+/**
+ * Stop all active occurrences.
+ * @param {string} [projectId]
+ * @param {string} [reason]
+ */
+async function stopAllOccurrences(projectId, reason = "Stopped by user") {
+  clearFlowRunQueue();
+  const query = { status: { $in: ["running", "queued"] } };
+  if (projectId) query.projectId = String(projectId);
+  const running = await RunningOccurrence.find(query);
+  const stopped = [];
+  for (const occ of running) {
+    try {
+      stopped.push(await stopOccurrence(occ.occurrenceId, reason));
+    } catch (err) {
+      console.warn(`[stopAllOccurrences] error stopping ${occ.occurrenceId}:`, err.message);
+    }
+  }
+  return stopped;
+}
+
 module.exports = {
   startFlowRun,
+  enqueueFlowRuns,
+  pumpFlowQueue,
+  clearFlowRunQueue,
+  flowQueueSnapshot,
   finalizeOccurrence,
   updateStep,
   upsertReport,
+  stopOccurrence,
+  stopFlowRun,
+  stopAllOccurrences,
   activeWatchers,
 };

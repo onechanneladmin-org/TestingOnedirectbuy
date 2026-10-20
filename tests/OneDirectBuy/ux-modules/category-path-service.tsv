@@ -1,0 +1,5 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Onedirectbuy Status
+ODB-UX-039	Category Path Service	System	catalogSlugVariants covers hyphen and underscore	catalogSlugVariants covers hyphen and underscore	P1	Yes	Working
+ODB-UX-040	Category Path Service	System	pathSlugSegment is kebab-case	pathSlugSegment is kebab-case	P1	Yes	Working
+ODB-UX-041	Category Path Service	System	buildPathFields emits kebab pathKey from underscore slugs	buildPathFields emits kebab pathKey from underscore slugs	P1	Yes	Working
+ODB-UX-042	Category Path Service	System	normalizePathKey joins segments	normalizePathKey joins segments	P1	Yes	Working

@@ -88,7 +88,7 @@
       },
       {
         "stepId": "ODB-UC-028-b",
-        "title": "Terms of Service → /info/terms-of-service",
+        "title": "Terms of Service → /info/terms-service",
         "specFile": "tests/OneDirectBuy/Navigation.spec.js",
         "order": 14
       },
@@ -130,7 +130,7 @@
       },
       {
         "stepId": "ODB-UC-039-b",
-        "title": "Menu drawer → Shop → /shop",
+        "title": "Menu drawer → All products → /shop",
         "specFile": "tests/OneDirectBuy/Navigation.spec.js",
         "order": 21
       },
@@ -1169,7 +1169,7 @@
       },
       {
         "stepId": "ODB-UC-491b",
-        "title": "Menu → Home / Shop / Vendor / Blogs",
+        "title": "Menu → Home / All products / Vendor / Blogs",
         "specFile": "tests/OneDirectBuy/ResponsiveAccessibility.spec.js",
         "order": 2
       },
@@ -1328,7 +1328,7 @@
       },
       {
         "stepId": "ODB-UC-024",
-        "title": "Repeated bad logins show lock/throttle, not shared account",
+        "title": "Repeated bad logins stay rejected on login",
         "specFile": "tests/OneDirectBuy/BuyerAccountSecurity.spec.js",
         "order": 10
       }
@@ -1424,7 +1424,7 @@
       },
       {
         "stepId": "ODB-UC-028-b",
-        "title": "Terms of Service → /info/terms-of-service",
+        "title": "Terms of Service → /info/terms-service",
         "specFile": "tests/OneDirectBuy/Navigation.spec.js",
         "order": 14
       },
@@ -1466,7 +1466,7 @@
       },
       {
         "stepId": "ODB-UC-039-b",
-        "title": "Menu drawer → Shop → /shop",
+        "title": "Menu drawer → All products → /shop",
         "specFile": "tests/OneDirectBuy/Navigation.spec.js",
         "order": 21
       },
@@ -2997,6 +2997,792 @@
         "title": "Oversell prevention (New Functionality)",
         "specFile": "tests/OneDirectBuy/SellerInventory.spec.js",
         "order": 10
+      }
+    ]
+  },
+  "28": {
+    "flowId": 28,
+    "name": "17. Seller Order Fulfillment and Shipping",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UC-261",
+        "title": "View new orders (no live fulfillment)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UC-262",
+        "title": "Accept order (no live fulfillment)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UC-263",
+        "title": "Print packing slip (no live print)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UC-264",
+        "title": "Create shipping label (no live purchase)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ODB-UC-265",
+        "title": "Add manual tracking (no live update)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "ODB-UC-266",
+        "title": "Mark order shipped (no live status change)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "ODB-UC-267",
+        "title": "Split shipment (no live shipment)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "ODB-UC-268",
+        "title": "Seller cancellation (no live cancel)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "ODB-UC-269",
+        "title": "Late shipment alert (no live notify)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 9
+      },
+      {
+        "stepId": "ODB-UC-270",
+        "title": "Monitor fulfillment SLA (no live admin change)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 10
+      },
+      {
+        "stepId": "ODB-UC-271",
+        "title": "Create shipping template (no live save)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 11
+      },
+      {
+        "stepId": "ODB-UC-272",
+        "title": "Edit shipping template (no live save)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 12
+      },
+      {
+        "stepId": "ODB-UC-273",
+        "title": "Assign shipping template (no live assign)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 13
+      },
+      {
+        "stepId": "ODB-UC-274",
+        "title": "Restricted shipping location on shipping policy",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 14
+      },
+      {
+        "stepId": "ODB-UC-275",
+        "title": "Free shipping threshold on shipping policy",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 15
+      },
+      {
+        "stepId": "ODB-UC-276",
+        "title": "Oversized item shipping on shipping policy",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 16
+      },
+      {
+        "stepId": "ODB-UC-277",
+        "title": "Multi-seller shipping on shipping policy",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 17
+      },
+      {
+        "stepId": "ODB-UC-278",
+        "title": "Carrier rate failure fallback (no live rate call)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 18
+      },
+      {
+        "stepId": "ODB-UC-279",
+        "title": "Void label (no live void)",
+        "specFile": "tests/OneDirectBuy/SellerFulfillmentShipping.spec.js",
+        "order": 19
+      }
+    ]
+  },
+  "29": {
+    "flowId": 29,
+    "name": "18. OneFulfillmentCenter / 3PL Fulfillment",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/OneFulfillment3pl.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UC-280",
+        "title": "Enroll product in 3PL (Later versions to include)",
+        "specFile": "tests/OneDirectBuy/OneFulfillment3pl.spec.js",
+        "order": 1
+      }
+    ]
+  },
+  "30": {
+    "flowId": 30,
+    "name": "Variation Aggregates",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/VariationAggregates.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-001",
+        "title": "summarizeListings picks cheapest listing",
+        "specFile": "tests/OneDirectBuy/ux-modules/VariationAggregates.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-002",
+        "title": "computeVariationAggregates per variant",
+        "specFile": "tests/OneDirectBuy/ux-modules/VariationAggregates.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-003",
+        "title": "listingsForEmbeddedVariant includes parent fallback",
+        "specFile": "tests/OneDirectBuy/ux-modules/VariationAggregates.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UX-004",
+        "title": "listingsForProductAggregate excludes parent row when variant listings exist",
+        "specFile": "tests/OneDirectBuy/ux-modules/VariationAggregates.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ODB-UX-005",
+        "title": "paginateVariantsWithPin keeps deep-linked variant",
+        "specFile": "tests/OneDirectBuy/ux-modules/VariationAggregates.spec.js",
+        "order": 5
+      }
+    ]
+  },
+  "31": {
+    "flowId": 31,
+    "name": "Seller Rating",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/SellerRating.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-006",
+        "title": "seller rating: cancelled order is ineligible",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerRating.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-007",
+        "title": "seller rating: unpaid order is ineligible",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerRating.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-008",
+        "title": "seller rating: shipped paid order is eligible",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerRating.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UX-009",
+        "title": "seller rating: processing with shipped item is eligible",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerRating.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ODB-UX-010",
+        "title": "seller rating: new paid order with no shipped items is ineligible",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerRating.spec.js",
+        "order": 5
+      }
+    ]
+  },
+  "32": {
+    "flowId": 32,
+    "name": "Product Atlas Search",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/ProductAtlasSearch.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-011",
+        "title": "buildFitmentKeysAtlasClause uses equals for a single YMM key",
+        "specFile": "tests/OneDirectBuy/ux-modules/ProductAtlasSearch.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-012",
+        "title": "buildFitmentKeysAtlasClause uses in for multiple keys",
+        "specFile": "tests/OneDirectBuy/ux-modules/ProductAtlasSearch.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-013",
+        "title": "buildVehicleFitAtlasClause includes universal for fitMode all",
+        "specFile": "tests/OneDirectBuy/ux-modules/ProductAtlasSearch.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UX-014",
+        "title": "buildVehicleFitAtlasClause returns null when trim/engine present",
+        "specFile": "tests/OneDirectBuy/ux-modules/ProductAtlasSearch.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ODB-UX-015",
+        "title": "buildAtlasSearchCompound status filter is approved-only",
+        "specFile": "tests/OneDirectBuy/ux-modules/ProductAtlasSearch.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "ODB-UX-016",
+        "title": "buildFallbackMongoFilter uses fitmentKeys for YMM",
+        "specFile": "tests/OneDirectBuy/ux-modules/ProductAtlasSearch.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "ODB-UX-017",
+        "title": "buildFallbackMongoFilter uses fitmentIndex elemMatch for trim",
+        "specFile": "tests/OneDirectBuy/ux-modules/ProductAtlasSearch.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "ODB-UX-018",
+        "title": "Atlas index definition includes filter fields used by search",
+        "specFile": "tests/OneDirectBuy/ux-modules/ProductAtlasSearch.spec.js",
+        "order": 8
+      }
+    ]
+  },
+  "33": {
+    "flowId": 33,
+    "name": "Multi-Seller Order",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/MultiSellerOrder.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-019",
+        "title": "multi-seller: one seller shipped keeps parent processing",
+        "specFile": "tests/OneDirectBuy/ux-modules/MultiSellerOrder.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-020",
+        "title": "multi-seller: all sellers shipped marks parent shipped",
+        "specFile": "tests/OneDirectBuy/ux-modules/MultiSellerOrder.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-021",
+        "title": "multi-seller: parent totals reconcile per seller lines",
+        "specFile": "tests/OneDirectBuy/ux-modules/MultiSellerOrder.spec.js",
+        "order": 3
+      }
+    ]
+  },
+  "34": {
+    "flowId": 34,
+    "name": "Listing Variation Resolver",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/ListingVariationResolver.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-022",
+        "title": "isListingBuyable accepts legacy rows without status",
+        "specFile": "tests/OneDirectBuy/ux-modules/ListingVariationResolver.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-023",
+        "title": "resolveListingProductId returns the catalog product id",
+        "specFile": "tests/OneDirectBuy/ux-modules/ListingVariationResolver.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-024",
+        "title": "resolveActiveListingForCart resolves by productId and variationId",
+        "specFile": "tests/OneDirectBuy/ux-modules/ListingVariationResolver.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UX-025",
+        "title": "resolveActiveListingForCart falls back from inactive listingId when productId is provided",
+        "specFile": "tests/OneDirectBuy/ux-modules/ListingVariationResolver.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ODB-UX-026",
+        "title": "parentListingFallbackForEmbeddedVariant matches parent listing rows",
+        "specFile": "tests/OneDirectBuy/ux-modules/ListingVariationResolver.spec.js",
+        "order": 5
+      }
+    ]
+  },
+  "35": {
+    "flowId": 35,
+    "name": "Listing Pricing",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/ListingPricing.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-027",
+        "title": "normalizeB2bPricingInput sorts and dedupes tiers",
+        "specFile": "tests/OneDirectBuy/ux-modules/ListingPricing.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-028",
+        "title": "resolveB2bUnitPrice picks highest qualifying tier",
+        "specFile": "tests/OneDirectBuy/ux-modules/ListingPricing.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-029",
+        "title": "getListingLineUnitPrice uses min(consumer, b2b)",
+        "specFile": "tests/OneDirectBuy/ux-modules/ListingPricing.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UX-030",
+        "title": "sale price beats b2b when lower",
+        "specFile": "tests/OneDirectBuy/ux-modules/ListingPricing.spec.js",
+        "order": 4
+      }
+    ]
+  },
+  "36": {
+    "flowId": 36,
+    "name": "Fitment Keys",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/FitmentKeys.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-031",
+        "title": "buildProgressiveKeysFromVehicle base and full key",
+        "specFile": "tests/OneDirectBuy/ux-modules/FitmentKeys.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-032",
+        "title": "buildUserFitmentKeys YMM exact",
+        "specFile": "tests/OneDirectBuy/ux-modules/FitmentKeys.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-033",
+        "title": "computeFitmentKeysFromEntries dedupes",
+        "specFile": "tests/OneDirectBuy/ux-modules/FitmentKeys.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UX-034",
+        "title": "extractYearsFromFitmentKeys",
+        "specFile": "tests/OneDirectBuy/ux-modules/FitmentKeys.spec.js",
+        "order": 4
+      }
+    ]
+  },
+  "37": {
+    "flowId": 37,
+    "name": "Fitment Index",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/FitmentIndex.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-035",
+        "title": "fitmentEntryMatchesVehicle honors empty trim wildcard",
+        "specFile": "tests/OneDirectBuy/ux-modules/FitmentIndex.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-036",
+        "title": "computeProductVehicleFitFromIndex",
+        "specFile": "tests/OneDirectBuy/ux-modules/FitmentIndex.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-037",
+        "title": "buildVehicleFitProductFilter all mode includes universal",
+        "specFile": "tests/OneDirectBuy/ux-modules/FitmentIndex.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UX-038",
+        "title": "buildVehicleFitProductFilter YMM-only uses fitmentKeys",
+        "specFile": "tests/OneDirectBuy/ux-modules/FitmentIndex.spec.js",
+        "order": 4
+      }
+    ]
+  },
+  "38": {
+    "flowId": 38,
+    "name": "Category Path Service",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/CategoryPathService.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-039",
+        "title": "catalogSlugVariants covers hyphen and underscore",
+        "specFile": "tests/OneDirectBuy/ux-modules/CategoryPathService.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-040",
+        "title": "pathSlugSegment is kebab-case",
+        "specFile": "tests/OneDirectBuy/ux-modules/CategoryPathService.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-041",
+        "title": "buildPathFields emits kebab pathKey from underscore slugs",
+        "specFile": "tests/OneDirectBuy/ux-modules/CategoryPathService.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UX-042",
+        "title": "normalizePathKey joins segments",
+        "specFile": "tests/OneDirectBuy/ux-modules/CategoryPathService.spec.js",
+        "order": 4
+      }
+    ]
+  },
+  "39": {
+    "flowId": 39,
+    "name": "Catalog Validation",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/CatalogValidation.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-043",
+        "title": "product validation requires title, brand, category, images, mpn, gtin or exemption",
+        "specFile": "tests/OneDirectBuy/ux-modules/CatalogValidation.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-044",
+        "title": "product validation rejects missing images and mpn",
+        "specFile": "tests/OneDirectBuy/ux-modules/CatalogValidation.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-045",
+        "title": "listing validation requires price greater than zero and qty",
+        "specFile": "tests/OneDirectBuy/ux-modules/CatalogValidation.spec.js",
+        "order": 3
+      }
+    ]
+  },
+  "40": {
+    "flowId": 40,
+    "name": "Seller Status",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/SellerStatus.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-046",
+        "title": "resolveSellerStatus keeps pending applications blocked",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerStatus.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-047",
+        "title": "resolveSellerStatus does not treat pending+active as operational",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerStatus.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-048",
+        "title": "active sellers can accept orders when permitted",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerStatus.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UX-049",
+        "title": "resolveSellerStatus honors active=false even when status is active",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerStatus.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ODB-UX-050",
+        "title": "legacy sellers without status use active flag",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerStatus.spec.js",
+        "order": 5
+      }
+    ]
+  },
+  "41": {
+    "flowId": 41,
+    "name": "Seller Onboarding Payload",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/SellerOnboardingPayload.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-051",
+        "title": "buildPublicSellerApplicationBody maps wizard fields and pending lifecycle",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerOnboardingPayload.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-052",
+        "title": "buildPublicSellerApplicationBody preserves minimal storefront pipeline version",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerOnboardingPayload.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-053",
+        "title": "buildSellerPayloadFromWizard keeps admin create defaults",
+        "specFile": "tests/OneDirectBuy/ux-modules/SellerOnboardingPayload.spec.js",
+        "order": 3
+      }
+    ]
+  },
+  "42": {
+    "flowId": 42,
+    "name": "Audit Logs",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/AuditLogs.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-054",
+        "title": "Security event logged — invalid token triggers audit log without sensitive data leakage",
+        "specFile": "tests/OneDirectBuy/ux-modules/AuditLogs.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-055",
+        "title": "Security event logged — forbidden scope triggers audit log without sensitive data leakage",
+        "specFile": "tests/OneDirectBuy/ux-modules/AuditLogs.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-056",
+        "title": "Security event logged — invalid API key triggers audit log without sensitive data leakage",
+        "specFile": "tests/OneDirectBuy/ux-modules/AuditLogs.spec.js",
+        "order": 3
+      }
+    ]
+  },
+  "43": {
+    "flowId": 43,
+    "name": "Verify reCAPTCHA",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/VerifyRecaptcha.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-057",
+        "title": "assertHoneypotClean rejects filled honeypot",
+        "specFile": "tests/OneDirectBuy/ux-modules/VerifyRecaptcha.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-058",
+        "title": "assertHumanTiming rejects too-fast submit",
+        "specFile": "tests/OneDirectBuy/ux-modules/VerifyRecaptcha.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-059",
+        "title": "verifyRecaptchaToken skips when bypass enabled and no secret",
+        "specFile": "tests/OneDirectBuy/ux-modules/VerifyRecaptcha.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UX-060",
+        "title": "isRecaptchaEnforced when secret is set",
+        "specFile": "tests/OneDirectBuy/ux-modules/VerifyRecaptcha.spec.js",
+        "order": 4
+      }
+    ]
+  },
+  "44": {
+    "flowId": 44,
+    "name": "Privacy Request",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/PrivacyRequest.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-061",
+        "title": "Data access export includes allowed records and excludes restricted internal data",
+        "specFile": "tests/OneDirectBuy/ux-modules/PrivacyRequest.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-062",
+        "title": "Deletion respects legal retention — orders retained and personal fields anonymized",
+        "specFile": "tests/OneDirectBuy/ux-modules/PrivacyRequest.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-063",
+        "title": "Privacy request audit log records action, admin, timestamp, reason, and result",
+        "specFile": "tests/OneDirectBuy/ux-modules/PrivacyRequest.spec.js",
+        "order": 3
+      }
+    ]
+  },
+  "45": {
+    "flowId": 45,
+    "name": "Scheduled Jobs",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/ScheduledJobs.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-064",
+        "title": "Scheduled job runs once per period — duplicate trigger records only one logical run",
+        "specFile": "tests/OneDirectBuy/ux-modules/ScheduledJobs.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-065",
+        "title": "Missed job recovery — scheduler restart logs missed critical periods per policy",
+        "specFile": "tests/OneDirectBuy/ux-modules/ScheduledJobs.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-066",
+        "title": "Missed job recovery — run policy executes missed period once on restart",
+        "specFile": "tests/OneDirectBuy/ux-modules/ScheduledJobs.spec.js",
+        "order": 3
+      }
+    ]
+  },
+  "46": {
+    "flowId": 46,
+    "name": "Job Queue",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/JobQueue.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-067",
+        "title": "Failed job retry — worker retries according to retry policy",
+        "specFile": "tests/OneDirectBuy/ux-modules/JobQueue.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-068",
+        "title": "Dead-letter queue handling — repeated failures move job to DLQ with error details",
+        "specFile": "tests/OneDirectBuy/ux-modules/JobQueue.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-069",
+        "title": "Job idempotency — duplicate delivery does not create duplicate side effects",
+        "specFile": "tests/OneDirectBuy/ux-modules/JobQueue.spec.js",
+        "order": 3
+      }
+    ]
+  },
+  "47": {
+    "flowId": 47,
+    "name": "Transaction Integrity",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/TransactionIntegrity.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-070",
+        "title": "Checkout transaction rollback — mid-process failure leaves no partial records",
+        "specFile": "tests/OneDirectBuy/ux-modules/TransactionIntegrity.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-071",
+        "title": "Checkout transaction commit — successful checkout updates inventory and cart atomically",
+        "specFile": "tests/OneDirectBuy/ux-modules/TransactionIntegrity.spec.js",
+        "order": 2
+      }
+    ]
+  },
+  "48": {
+    "flowId": 48,
+    "name": "API Keys",
+    "enabled": true,
+    "tests": [
+      "tests/OneDirectBuy/ux-modules/ApiKey.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ODB-UX-072",
+        "title": "API key generated and shown once — raw key shown once and only hashed value stored",
+        "specFile": "tests/OneDirectBuy/ux-modules/ApiKey.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ODB-UX-073",
+        "title": "Revoked API key blocked — API returns unauthorized",
+        "specFile": "tests/OneDirectBuy/ux-modules/ApiKey.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ODB-UX-074",
+        "title": "API key scope enforcement — endpoint outside scope returns forbidden",
+        "specFile": "tests/OneDirectBuy/ux-modules/ApiKey.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ODB-UX-075",
+        "title": "API key rate limit — exceeding threshold returns 429 and rate limit headers",
+        "specFile": "tests/OneDirectBuy/ux-modules/ApiKey.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ODB-UX-076",
+        "title": "API usage logging — records key ID, endpoint, status, latency, and timestamp",
+        "specFile": "tests/OneDirectBuy/ux-modules/ApiKey.spec.js",
+        "order": 5
       }
     ]
   },

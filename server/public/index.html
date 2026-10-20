@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>OneDirectBuy — Flow Control</title>
-    <link rel="stylesheet" href="/ui/styles.css?v=5" />
+    <title>Flow Control Plane</title>
+    <link rel="stylesheet" href="/ui/styles.css?v=22" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
@@ -12,8 +12,27 @@
     <header class="topbar">
       <div class="brand">
         <span class="brand-mark" aria-hidden="true"></span>
-        <div>
-          <p class="brand-name">OneDirectBuy</p>
+        <div class="brand-copy">
+          <div class="brand-switcher">
+            <button
+              type="button"
+              class="brand-name-btn"
+              id="projectMenuBtn"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              aria-controls="projectMenu"
+              title="Switch project"
+            >
+              <span id="projectLabel">OneDirectBuy</span>
+              <span class="brand-caret" aria-hidden="true"></span>
+            </button>
+            <ul
+              id="projectMenu"
+              class="project-menu hidden"
+              role="listbox"
+              aria-labelledby="projectMenuBtn"
+            ></ul>
+          </div>
           <p class="brand-sub">Flow Control Plane</p>
         </div>
       </div>
@@ -33,16 +52,64 @@
       </div>
     </header>
 
+    <section class="stat-strip" id="statStrip" aria-label="Project totals">
+      <article class="stat-card">
+        <p class="stat-label">Flows</p>
+        <p class="stat-value" id="statFlows">0</p>
+        <p class="stat-hint" id="statFlowsHint">Enabled 0</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Use cases</p>
+        <p class="stat-value" id="statUseCases">0</p>
+        <p class="stat-hint" id="statUseCasesHint">Sheet / catalog rows</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Steps</p>
+        <p class="stat-value" id="statSteps">0</p>
+        <p class="stat-hint">Nested automation steps</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Spec files</p>
+        <p class="stat-value" id="statSpecs">0</p>
+        <p class="stat-hint" id="statSpecsHint">Playwright tests</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Recent runs</p>
+        <p class="stat-value" id="statRuns">0</p>
+        <p class="stat-hint" id="statRunsHint">No runs yet</p>
+      </article>
+    </section>
+
     <main class="shell">
       <aside class="rail">
         <div class="rail-head">
           <h2>Flows</h2>
           <p id="flowCount" class="muted">Loading…</p>
+          <div class="rail-queue">
+            <label class="check rail-select-all">
+              <input type="checkbox" id="flowSelectAll" />
+              <span>Select all</span>
+            </label>
+            <button type="button" class="btn primary sm" id="btnRunSelected" disabled>
+              Run selected
+            </button>
+          </div>
         </div>
         <div class="rail-filters">
           <button type="button" class="chip active" data-filter="all">All</button>
           <button type="button" class="chip" data-filter="enabled">Enabled</button>
           <button type="button" class="chip" data-filter="disabled">Off</button>
+        </div>
+        <div class="rail-groups" role="tablist" aria-label="Flow groups">
+          <button type="button" class="chip active" data-group="sheet" role="tab" aria-selected="true">
+            Sheet modules
+          </button>
+          <button type="button" class="chip" data-group="ux-modules" role="tab" aria-selected="false">
+            UX Modules
+          </button>
+          <button type="button" class="chip" data-group="other" role="tab" aria-selected="false">
+            Other
+          </button>
         </div>
         <label class="rail-search">
           <span class="visually-hidden">Search flows</span>
@@ -57,6 +124,13 @@
       </aside>
 
       <section class="stage">
+        <div id="coveredPages" class="panel covered-pages hidden">
+          <div class="panel-head">
+            <h3>Pages covered <span id="coveredPagesCount" class="badge">0</span></h3>
+            <button type="button" class="btn ghost sm" id="btnCopyPages">Copy list</button>
+          </div>
+          <div id="coveredPagesBody" class="covered-pages-body"></div>
+        </div>
         <div id="emptyState" class="empty">
           <h1>Pick a flow</h1>
           <p>Select a journey on the left to inspect steps, trigger a run, and watch live progress.</p>
@@ -75,9 +149,22 @@
                 Headed browser
               </label>
               <span id="runBadge" class="status-pill idle">idle</span>
+              <button
+                type="button"
+                class="btn ghost"
+                id="btnLastRun"
+                disabled
+                title="No previous run for this flow"
+              >
+                Last run
+              </button>
               <button type="button" class="btn primary" id="btnRun">
                 <span class="btn-pulse" aria-hidden="true"></span>
-                Run flow
+                <span id="btnRunLabel">Run flow</span>
+              </button>
+              <button type="button" class="btn danger hidden" id="btnStop" title="Stop running process">
+                <span class="btn-stop-icon" aria-hidden="true">■</span>
+                <span id="btnStopLabel">Stop</span>
               </button>
             </div>
           </header>
@@ -107,7 +194,7 @@
                 <h3>Live run</h3>
               </div>
               <div id="liveEmpty" class="live-empty">
-                No active occurrence. Hit <strong>Run flow</strong> to start.
+                No active occurrence. Hit <strong id="liveEmptyAction">Run flow</strong> to start.
                 A new terminal window will open for Playwright; step status streams into MongoDB for this panel.
               </div>
               <div id="liveBody" class="live-body hidden">
@@ -122,12 +209,13 @@
               <span id="sheetRowCount" class="badge">0</span>
             </div>
             <p id="sheetIdleHint" class="muted sheet-hint">
-              Catalog from the sheet. Hit <strong>Run flow</strong> to fill Test Status and Issues.
+              Catalog from the sheet. Click a row to expand its steps. Hit <strong>Run flow</strong> for the module, or <strong>Run</strong> on a row for one use case.
             </p>
             <div class="sheet-scroll">
               <table class="use-case-sheet" id="useCaseSheet">
                 <thead>
                   <tr>
+                    <th class="expand-cell" aria-hidden="true"></th>
                     <th>Use Case ID</th>
                     <th>Module</th>
                     <th>Actor</th>
@@ -136,9 +224,11 @@
                     <th>Priority</th>
                     <th>Automation</th>
                     <th>Current Onedirectbuy Status</th>
+                    <th>Added / Updated</th>
                     <th>testedby</th>
                     <th class="issues">Issues</th>
                     <th class="status-cell">Test Status</th>
+                    <th class="run-cell">Run</th>
                   </tr>
                 </thead>
                 <tbody id="useCaseSheetBody"></tbody>
@@ -146,12 +236,39 @@
             </div>
           </div>
 
-          <div class="panel report-panel">
-            <div class="panel-head">
+          <div class="panel report-panel" id="reportPanel">
+            <div class="panel-head report-panel-head">
               <h3>Report &amp; issues</h3>
-              <button type="button" class="btn ghost sm" id="btnLoadReport" disabled>
-                Load report
-              </button>
+              <div class="report-panel-actions">
+                <button
+                  type="button"
+                  class="btn ghost sm hidden"
+                  id="btnReportExitFullscreen"
+                  title="Exit full screen"
+                >
+                  Exit full screen
+                </button>
+                <button
+                  type="button"
+                  class="btn ghost sm"
+                  id="btnReportFullscreen"
+                  title="Full screen report"
+                >
+                  Full screen
+                </button>
+                <button
+                  type="button"
+                  class="btn ghost sm"
+                  id="btnReportDocx"
+                  disabled
+                  title="Download report as Word document"
+                >
+                  Download DOCX
+                </button>
+                <button type="button" class="btn ghost sm" id="btnLoadReport" disabled>
+                  Load report
+                </button>
+              </div>
             </div>
             <div id="reportBody" class="report-body">
               <p class="muted">Report appears when the occurrence finishes.</p>
@@ -163,13 +280,13 @@
       <aside class="history">
         <div class="rail-head">
           <h2>Recent runs</h2>
-          <p class="muted">Latest occurrences</p>
+          <p class="muted">Passed · failed · skipped</p>
         </div>
         <ul id="runHistory" class="run-history"></ul>
       </aside>
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="/ui/app.js?v=5" type="module"></script>
+    <script src="/ui/app.js?v=25" type="module"></script>
   </body>
 </html>

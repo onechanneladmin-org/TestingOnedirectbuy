@@ -18,10 +18,10 @@ const { ROOT } = require("../config");
  *   currentStatus: string;
  * }[]}
  */
-function loadUseCaseCatalog(relativeOrAbsolute) {
+function loadUseCaseCatalog(relativeOrAbsolute, projectRoot = ROOT) {
   const filePath = path.isAbsolute(relativeOrAbsolute)
     ? relativeOrAbsolute
-    : path.join(ROOT, relativeOrAbsolute);
+    : path.join(projectRoot, relativeOrAbsolute);
   if (!fs.existsSync(filePath)) {
     throw new Error(`Use-case catalog not found: ${filePath}`);
   }
@@ -39,6 +39,8 @@ function loadUseCaseCatalog(relativeOrAbsolute) {
     priority: cols.indexOf("Priority"),
     automation: cols.indexOf("Automation"),
     currentStatus: cols.indexOf("Current Onedirectbuy Status"),
+    currentStatusAlt: cols.indexOf("Current Status"),
+    status: cols.indexOf("Status"),
   };
 
   return lines.slice(1).map((line) => {
@@ -52,7 +54,10 @@ function loadUseCaseCatalog(relativeOrAbsolute) {
       priority: idx.priority >= 0 ? parts[idx.priority] || "" : "",
       automation: idx.automation >= 0 ? parts[idx.automation] || "" : "",
       currentStatus:
-        idx.currentStatus >= 0 ? parts[idx.currentStatus] || "" : "",
+        (idx.currentStatus >= 0 ? parts[idx.currentStatus] : "") ||
+        (idx.currentStatusAlt >= 0 ? parts[idx.currentStatusAlt] : "") ||
+        (idx.status >= 0 ? parts[idx.status] : "") ||
+        "",
     };
   });
 }
@@ -71,4 +76,17 @@ function matchingExtractedSteps(catalogId, extracted) {
   );
 }
 
-module.exports = { loadUseCaseCatalog, matchingExtractedSteps };
+/**
+ * Playwright --grep pattern for a catalog id (does not match ODB-UC-0010).
+ * @param {string} catalogId
+ */
+function grepUseCasePattern(catalogId) {
+  const escaped = String(catalogId).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return `${escaped}(?:[:\\s-]|$)`;
+}
+
+module.exports = {
+  loadUseCaseCatalog,
+  matchingExtractedSteps,
+  grepUseCasePattern,
+};
