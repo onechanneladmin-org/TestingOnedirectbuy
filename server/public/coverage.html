@@ -36,6 +36,10 @@
         </div>
       </div>
       <div class="topbar-actions bar">
+        <label class="token-field">
+          <span>API token</span>
+          <input id="apiToken" type="password" placeholder="API_TOKEN from .env" autocomplete="off" />
+        </label>
         <a class="btn ghost" href="/">Flows</a>
         <button type="button" class="btn ghost" id="btnSync" title="Pull the Google Sheet now">Sync sheet</button>
         <a class="btn ghost" id="btnExport" href="/api/usecases/export.csv">Export results CSV</a>

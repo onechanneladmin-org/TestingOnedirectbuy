@@ -1,6 +1,15 @@
 // Coverage dashboard: GET /api/usecases/summary (definitions from the Google Sheet, results from runs).
 const $ = (id) => document.getElementById(id);
-const token = () => localStorage.getItem("odb_api_token") || "";
+// Same storage key as the Flows page (app.js), so the token is entered once for both.
+const token = () => {
+  const typed = document.getElementById("apiToken")?.value.trim();
+  if (typed) return typed;
+  try {
+    return localStorage.getItem("odb_api_token") || "";
+  } catch {
+    return "";
+  }
+};
 
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -26,6 +35,8 @@ async function api(path, opts = {}) {
   } catch {
     data = { raw: text };
   }
+  if (res.status === 503) throw new Error("The server's API is off: set API_TOKEN in TestingOnedirectbuy/.env and restart the server.");
+  if (res.status === 401) throw new Error("Wrong or missing API token: paste API_TOKEN from .env into the field above.");
   if (!res.ok) throw new Error((data && (data.error || data.raw)) || res.statusText);
   return data;
 }
@@ -88,6 +99,15 @@ async function load() {
   }
 }
 
+$("apiToken").value = token();
+$("apiToken").addEventListener("change", () => {
+  try {
+    localStorage.setItem("odb_api_token", $("apiToken").value.trim());
+  } catch {
+    // private window: the token lives only for this page
+  }
+  load();
+});
 $("btnRefresh").addEventListener("click", load);
 $("btnSync").addEventListener("click", async () => {
   $("btnSync").disabled = true;
