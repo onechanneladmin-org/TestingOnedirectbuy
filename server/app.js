@@ -6,6 +6,7 @@ const { CORS_ORIGINS } = require("./config");
 const flowsRouter = require("./routes/flows");
 const occurrencesRouter = require("./routes/occurrences");
 const projectsRouter = require("./routes/projects");
+const usecasesRouter = require("./routes/usecases");
 const { seedFlows } = require("./services/seedFlows");
 
 const PUBLIC_DIR = path.join(__dirname, "public");
@@ -30,6 +31,9 @@ function createApp() {
   app.use("/ui", express.static(PUBLIC_DIR));
   app.get("/", (_req, res) => {
     res.sendFile(path.join(PUBLIC_DIR, "index.html"));
+  });
+  app.get("/coverage", (_req, res) => {
+    res.sendFile(path.join(PUBLIC_DIR, "coverage.html"));
   });
 
   // API routes: bearer token required; refused (503) while API_TOKEN is unset
@@ -63,6 +67,7 @@ function createApp() {
   api.use("/projects", projectsRouter);
   api.use("/flows", flowsRouter);
   api.use("/occurrences", occurrencesRouter);
+  api.use("/usecases", usecasesRouter);
 
   app.use("/api", api);
 

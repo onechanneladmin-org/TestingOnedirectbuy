@@ -41,6 +41,10 @@ module.exports = {
     process.env.STATUS_API_URL || `http://127.0.0.1:${PORT}`,
   /** Public DNS for Atlas SRV (comma-separated). */
   DNS_SERVERS: process.env.DNS_SERVERS || "8.8.8.8,8.8.4.4",
+  /** Use-case Google Sheet (definitions). Keep the ID in .env only — this repo is public. */
+  USECASE_SHEET_ID: String(process.env.USECASE_SHEET_ID || "").trim(),
+  /** Comma list of name:gid, e.g. "Main:602444940,Backend:1823207124". */
+  USECASE_SHEET_TABS: String(process.env.USECASE_SHEET_TABS || "").trim(),
   FLOWS_CONFIG: path.join(ROOT, "flows.config.json"),
   FLOW_STEPS_DATA: path.join(ROOT, "server", "data", "flow-steps.json"),
 };
