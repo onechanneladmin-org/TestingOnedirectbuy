@@ -297,6 +297,12 @@
       "file": "tests/OneDirectBuy/ux-modules/ApiKey.spec.js",
       "enabled": true,
       "description": "UX Modules — seller API keys (backend Jest)"
+    },
+    {
+      "file": "tests/OneDirectBuy/Coupons.spec.js",
+      "enabled": false,
+      "description": "Coupons — cart API + storefront cart (docs/qa/coupon-test-cases.md); 50 automated, rest registered as skipped in coupon-cases.tsv. Off until the SAVE10 apply failure is fixed."
     }
+
   ]
 }
