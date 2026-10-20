@@ -3,11 +3,7 @@ import {
   gotoOneDirectBuy,
   openCheckoutWithCart,
 } from "../helpers/oneDirectBuyNav.js";
-import {
-  hasBuyerCredentials,
-  loginBuyer,
-  ONE_DIRECT_BUY_BUYER_CREDENTIALS,
-} from "../helpers/oneDirectBuyAuth.js";
+import { ensureLoggedInBuyer } from "../helpers/oneDirectBuyAuth.js";
 import { fillCheckoutShipping } from "../helpers/buyerPurchaseJourney.js";
 import { sellerPortalNotOnStorefrontError } from "../helpers/oneDirectBuySeller.js";
 
@@ -27,16 +23,7 @@ function payNowButton(page) {
 }
 
 async function requireBuyerLogin(page) {
-  if (!hasBuyerCredentials()) {
-    throw new Error(
-      "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD to verify this buyer payment case.",
-    );
-  }
-  await loginBuyer(
-    page,
-    ONE_DIRECT_BUY_BUYER_CREDENTIALS.email,
-    ONE_DIRECT_BUY_BUYER_CREDENTIALS.password,
-  );
+  await ensureLoggedInBuyer(page);
 }
 
 async function openPaidCheckout(page) {

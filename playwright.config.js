@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { config as loadDotenv } from "dotenv";
 import { defineConfig, devices } from "@playwright/test";
+import targetEnv from "./lib/targetEnv.cjs";
 
 /**
  * Environment variables are loaded from `.env` here and again in global-setup.cjs.
@@ -58,6 +59,17 @@ if (process.env.API_TOKEN && !process.env.REPORT_UPLOAD_AUTH_TOKEN) {
 }
 if (process.env.API_URL && !process.env.REPORT_API_URL) {
   process.env.REPORT_API_URL = process.env.API_URL;
+}
+
+// Target gate: dev by default; production only with ALLOW_PROD=1 and read-only specs.
+const target = targetEnv.checkTarget(process.env, process.cwd());
+if (!target.ok) {
+  throw new Error(`[config] ${target.reason}`);
+}
+if (target.prod) {
+  console.warn(
+    `[config] ALLOW_PROD=1 — production run limited to: ${target.readOnlySpecs.join(", ")}`,
+  );
 }
 
 const ci = Boolean(process.env.CI);
@@ -194,11 +206,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL when tests use relative goto(); product helpers still use their own URLs. */
-    baseURL:
-      process.env.BASE_URL ||
-      process.env.ONEDIRECTBUY_BASE_URL ||
-      process.env.PLAYWRIGHT_BASE_URL ||
-      undefined,
+    baseURL: targetEnv.resolveBaseUrl(),
 
     headless: useHeadless,
 
@@ -226,6 +234,9 @@ export default defineConfig({
     {
       name: "chromium",
       testDir: "./tests/OneDirectBuy",
+      ...(target.prod
+        ? { testMatch: target.readOnlySpecs.map((f) => `**/${f}`) }
+        : {}),
       use: {
         ...devices["Desktop Chrome"],
         ...(useBundledChromium ? {} : { channel: "chrome" }),

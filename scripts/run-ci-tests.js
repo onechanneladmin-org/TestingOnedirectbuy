@@ -10,12 +10,20 @@
  *   CI_TESTS_CONFIG=flows.config.json node scripts/run-ci-tests.js
  *   CI_TEST_SUITE=smoke node scripts/run-ci-tests.js
  *
- * Soft pass (CI green): set CI_SOFT_PASS=1 (default when CI=1).
- * UI issues are written to reports/<run>/ISSUES.md with markers — they do not fail the job.
+ * Exit code is Playwright's exit code, so failing tests fail CI.
+ * Soft pass (force exit 0) is opt-in only: CI_SOFT_PASS=1. Default off, including under CI.
+ * UI issues are written to reports/<run>/ISSUES.md with markers.
+ *
+ * Target: BASE_URL defaults to https://dev.onedirectbuy.com. Production is refused unless
+ * ALLOW_PROD=1, and then only ci-tests.config.json → productionReadOnly specs run.
  */
 const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const {
+  sanitizePlaywrightBrowsersPath,
+} = require("../lib/playwrightBrowsers.cjs");
+const targetEnv = require("../lib/targetEnv.cjs");
 
 const ROOT = path.resolve(__dirname, "..");
 const CONFIG_PATH = path.join(
@@ -69,6 +77,12 @@ function resolveFlowTestFiles(config, suite) {
 
   if (suiteKey === "all") {
     selected = flows;
+  } else if (suiteKey === "ux" || suiteKey === "ux-modules") {
+    selected = flows.filter((f) => String(f.group || "") === "ux-modules");
+    if (selected.length === 0) {
+      console.error('No flows with group "ux-modules".');
+      process.exit(1);
+    }
   } else if (suiteKey.startsWith("flow:")) {
     const token = suite.slice(5).trim();
     const byId = Number(token);
@@ -99,6 +113,16 @@ function resolveFlowTestFiles(config, suite) {
 }
 
 function resolveTestFiles(config, suite) {
+  if (suite && suite.toLowerCase().startsWith("flow:") && !Array.isArray(config.flows)) {
+    const flowsConfigPath = path.join(ROOT, "flows.config.json");
+    if (fs.existsSync(flowsConfigPath)) {
+      const flowsConfig = JSON.parse(fs.readFileSync(flowsConfigPath, "utf8"));
+      if (Array.isArray(flowsConfig.flows)) {
+        return resolveFlowTestFiles(flowsConfig, suite);
+      }
+    }
+  }
+
   // Local flows control file
   if (Array.isArray(config.flows) && config.flows.length > 0) {
     const { testFiles, selectedFlows } = resolveFlowTestFiles(config, suite);
@@ -138,15 +162,9 @@ function resolveTestFiles(config, suite) {
   };
 }
 
+/** Opt-in only — never on by default, so a red run fails CI. */
 function isSoftPassEnabled() {
-  if (process.env.CI_SOFT_PASS === "0" || process.env.CI_SOFT_PASS === "false") {
-    return false;
-  }
-  if (process.env.CI_SOFT_PASS === "1" || process.env.CI_SOFT_PASS === "true") {
-    return true;
-  }
-  // Default on when running under CI
-  return Boolean(process.env.CI);
+  return process.env.CI_SOFT_PASS === "1" || process.env.CI_SOFT_PASS === "true";
 }
 
 function appendGithubSummary(runDir, softPass, playwrightExit, issueCount) {
@@ -278,8 +296,25 @@ function writeSummary(runDir, runId, { suite, testFiles, exitCode, softPass, con
 function main() {
   const suite = process.argv[2] || process.env.CI_TEST_SUITE || "regression";
   const config = loadConfig();
-  const { testFiles, selectedFlows } = resolveTestFiles(config, suite);
+  const resolved = resolveTestFiles(config, suite);
+  const { selectedFlows } = resolved;
+  let { testFiles } = resolved;
   const softPass = isSoftPassEnabled();
+
+  const target = targetEnv.checkTarget(process.env, ROOT);
+  if (!target.ok) {
+    console.error(target.reason);
+    process.exit(1);
+  }
+  console.log(`Target: ${targetEnv.resolveBaseUrl()}${target.prod ? " (PRODUCTION, read-only specs)" : ""}`);
+  if (target.prod) {
+    const allowed = new Set(target.readOnlySpecs);
+    const dropped = testFiles.filter((f) => !allowed.has(path.basename(f)));
+    testFiles = testFiles.filter((f) => allowed.has(path.basename(f)));
+    if (dropped.length) {
+      console.log(`Skipping ${dropped.length} non-read-only spec(s) on production.`);
+    }
+  }
 
   if (testFiles.length === 0) {
     console.error(
@@ -291,7 +326,7 @@ function main() {
   console.log(`Config: ${path.relative(ROOT, CONFIG_PATH).replace(/\\/g, "/")}`);
   console.log(`Suite: ${suite}`);
   console.log(`Browser: chromium`);
-  console.log(`Soft pass (CI green on UI issues): ${softPass ? "ON" : "OFF"}`);
+  console.log(`Soft pass (exit 0 even on failures; opt-in CI_SOFT_PASS=1): ${softPass ? "ON" : "OFF"}`);
   if (selectedFlows && selectedFlows.length > 0) {
     console.log(`Flows (${selectedFlows.length}):`);
     for (const flow of selectedFlows) {
@@ -309,12 +344,17 @@ function main() {
       ? process.env.PW_WORKERS
       : String(config.workers ?? 4);
   // Shared buyer account cannot login from two browsers at once.
+  // Sheet-module / use-case runs stay serial so cases do not overlap.
   if (
     (process.env.PW_WORKERS === undefined || process.env.PW_WORKERS === "") &&
     String(suite).startsWith("flow:") &&
-    selectedFlows?.[0]?.workers
+    selectedFlows?.[0]
   ) {
-    workers = String(selectedFlows[0].workers);
+    if (selectedFlows[0].workers) {
+      workers = String(selectedFlows[0].workers);
+    } else if (selectedFlows[0].catalog) {
+      workers = "1";
+    }
   }
   const retries =
     process.env.PW_RETRIES !== undefined && process.env.PW_RETRIES !== ""
@@ -336,6 +376,7 @@ function main() {
     PW_JSON_REPORT_PATH: path.join("reports", runId, "results.json"),
     PW_JUNIT_REPORT_PATH: path.join("reports", runId, "junit.xml"),
   };
+  sanitizePlaywrightBrowsersPath(env);
 
   // Preserve control-plane telemetry env for Playwright workers
   if (process.env.RUNNING_OCCURRENCE_ID) {
@@ -397,6 +438,11 @@ function main() {
   ) {
     args.push("--headed");
   }
+  const grep = String(process.env.PW_GREP || "").trim();
+  if (grep) {
+    args.push("--grep", grep);
+    console.log(`Grep: ${grep}`);
+  }
 
   // Invoke Playwright CLI via node (no npx / no shell) so env vars survive on Windows
   const pwCli = path.join(
@@ -428,11 +474,13 @@ function main() {
     configPath: CONFIG_PATH,
   });
 
-  // Control-plane runs always surface the real Playwright exit code
-  if (process.env.RUNNING_OCCURRENCE_ID) {
-    process.exit(playwrightExit);
+  // Control-plane runs always surface the real Playwright exit code; soft pass
+  // only applies when explicitly opted in with CI_SOFT_PASS=1.
+  if (softPass && !process.env.RUNNING_OCCURRENCE_ID) {
+    console.warn("CI_SOFT_PASS=1 → forcing exit 0 (opt-in). Playwright exit was " + playwrightExit);
+    process.exit(0);
   }
-  process.exit(softPass ? 0 : playwrightExit);
+  process.exit(playwrightExit);
 }
 
 main();

@@ -1,5 +1,10 @@
 import { expect } from "@playwright/test";
-import { gotoOneDirectBuy, dismissCookieBanner } from "./oneDirectBuyNav.js";
+import {
+  gotoOneDirectBuy,
+  dismissCookieBanner,
+  dismissAssistantOverlay,
+  recoverAccountLoadError,
+} from "./oneDirectBuyNav.js";
 
 export const ONE_DIRECT_BUY_BUYER_CREDENTIALS = {
   email: process.env.ONEDIRECTBUY_BUYER_EMAIL || "",
@@ -40,31 +45,34 @@ const DEFAULT_PASSWORD = "TestPass123!";
 
 /** Reliably type into Ant Design / React controlled inputs. */
 export async function fillInputField(locator, value) {
-  await expect(locator).toBeVisible({ timeout: 15_000 });
-  await locator.scrollIntoViewIfNeeded();
-  await locator.click();
-  await locator.fill("");
-  await locator.pressSequentially(value, { delay: 30 });
-  await expect(locator).toHaveValue(value, { timeout: 10_000 });
+  await expect(async () => {
+    await expect(locator).toBeVisible({ timeout: 10_000 });
+    await locator.scrollIntoViewIfNeeded().catch(() => {});
+    await locator.click({ timeout: 5_000 });
+    await locator.fill("");
+    await locator.pressSequentially(value, { delay: 20 });
+    await expect(locator).toHaveValue(value, { timeout: 5_000 });
+  }).toPass({ intervals: [500, 1000, 1500], timeout: 25_000 });
 }
 
 /** Fill the OneDirectBuy login form (email + password). */
 export async function fillLoginForm(page, email, password) {
   await dismissCookieBanner(page);
+  await dismissAssistantOverlay(page);
   await expect(
     page.getByRole("heading", { name: /Welcome back/i }),
   ).toBeVisible({ timeout: 30_000 });
 
   const emailInput = page
-    .getByRole("textbox", { name: /^Email address$/i })
+    .locator("#username")
+    .or(page.getByRole("textbox", { name: /^Email address$/i }))
     .or(page.getByPlaceholder("you@example.com"))
-    .or(page.locator("#sign-in input[type='text']"))
     .first();
 
   const passwordInput = page
-    .getByPlaceholder("Enter your password")
+    .locator("#login-password")
+    .or(page.getByPlaceholder("Enter your password"))
     .or(page.getByRole("textbox", { name: /^Password$/i }))
-    .or(page.locator("#sign-in input[type='password']"))
     .or(page.locator("input[type='password']"))
     .first();
 
@@ -125,7 +133,12 @@ export async function expectLoggedIn(page) {
     hasText: /Login successful|Registration successful/i,
   });
   if (await successNotice.isVisible({ timeout: 8_000 }).catch(() => false)) {
-    await page.waitForLoadState("networkidle").catch(() => {});
+    await page
+      .waitForURL((url) => !url.pathname.includes("/account/login"), {
+        timeout: 12_000,
+      })
+      .catch(() => {});
+    await page.waitForTimeout(1000);
   }
 
   await gotoOneDirectBuy(page, "/account/orders");
@@ -171,6 +184,7 @@ export async function gotoAuthenticatedPage(page, path, credentials) {
         .then(() => true)
         .catch(() => false);
       if (landed && !page.url().includes("/account/login")) {
+        await recoverAccountLoadError(page);
         return;
       }
     }
@@ -239,7 +253,16 @@ export async function registerBuyer(page, overrides = {}) {
   await gotoOneDirectBuy(page, "/account/register");
   await fillRegisterForm(page, { name, email, password });
   await page.getByRole("button", { name: /Create your account/i }).click();
-  await expectLoggedIn(page);
+  await expect(
+    page.locator(".ant-notification-notice").filter({
+      hasText: /Registration successful/i,
+    }),
+  ).toBeVisible({ timeout: 45_000 });
+  try {
+    await expectLoggedIn(page);
+  } catch {
+    await loginBuyer(page, email, password);
+  }
   return { email, password, name };
 }
 
@@ -247,11 +270,12 @@ export async function registerBuyer(page, overrides = {}) {
 export async function loginBuyer(page, email, password) {
   await gotoOneDirectBuy(page, "/account/login");
   await fillLoginForm(page, email, password);
-  await page
+  const submitBtn = page
     .getByRole("button", { name: /^Sign in$/i })
+    .or(page.locator("button.account-auth__submit"))
     .or(page.getByRole("button", { name: /^Login$/i }))
-    .first()
-    .click();
+    .first();
+  await submitBtn.click();
   await expect(
     page.locator(".ant-notification-notice").filter({
       hasText: /Login successful/i,
@@ -271,25 +295,59 @@ async function sessionIsAuthenticated(page) {
   return !page.url().includes("/account/login");
 }
 
-/** Ensure a logged-in buyer using configured credentials. */
-export async function ensureLoggedInBuyer(page) {
-  if (!hasBuyerCredentials()) {
-    throw new Error(
-      "Set ONEDIRECTBUY_BUYER_EMAIL and ONEDIRECTBUY_BUYER_PASSWORD in .env"
-    );
-  }
-  if (await sessionIsAuthenticated(page)) {
+/**
+ * Resolve buyer credentials: env secrets first, otherwise a throwaway
+ * storefront registration so authenticated cases can run without .env.
+ */
+export async function resolveBuyerCredentials(page) {
+  if (hasBuyerCredentials()) {
     return ONE_DIRECT_BUY_BUYER_CREDENTIALS;
   }
-  await loginBuyer(
-    page,
-    ONE_DIRECT_BUY_BUYER_CREDENTIALS.email,
-    ONE_DIRECT_BUY_BUYER_CREDENTIALS.password
-  );
+  const created = await registerBuyer(page);
+  ONE_DIRECT_BUY_BUYER_CREDENTIALS.email = created.email;
+  ONE_DIRECT_BUY_BUYER_CREDENTIALS.password = created.password;
   return ONE_DIRECT_BUY_BUYER_CREDENTIALS;
 }
 
-/** Logged-out visit to a protected account route → Welcome back login. */
+/** Ensure a logged-in buyer using env secrets or a provisioned account. */
+export async function ensureLoggedInBuyer(page) {
+  const creds = await resolveBuyerCredentials(page);
+  if (await sessionIsAuthenticated(page)) {
+    return creds;
+  }
+  await loginBuyer(page, creds.email, creds.password);
+  return creds;
+}
+
+/** Wipe Firebase/session storage so the next visit is a true guest. */
+export async function wipeBuyerSession(page) {
+  await page.context().clearCookies();
+  await page.evaluate(async () => {
+    try {
+      localStorage.clear();
+    } catch {
+      /* ignore */
+    }
+    try {
+      sessionStorage.clear();
+    } catch {
+      /* ignore */
+    }
+    if (!indexedDB.databases) return;
+    const dbs = await indexedDB.databases();
+    await Promise.all(
+      (dbs || []).map(
+        (db) =>
+          new Promise((resolve) => {
+            if (!db.name) return resolve();
+            const req = indexedDB.deleteDatabase(db.name);
+            req.onsuccess = req.onerror = req.onblocked = () => resolve();
+          }),
+      ),
+    );
+  });
+  await page.goto("about:blank");
+}
 export async function expectGuestRedirectToLogin(page, path) {
   await page.context().clearCookies();
   await gotoOneDirectBuy(page, path);

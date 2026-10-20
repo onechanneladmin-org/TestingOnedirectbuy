@@ -1,0 +1,608 @@
+[
+  {
+    "role": "Brand",
+    "pages": [
+      {
+        "nav": "(landing)",
+        "url": "https://oneproducthub.com/#/dashboard",
+        "hash": "#/dashboard",
+        "headings": [
+          "ProductHub",
+          "Workspace Overview",
+          "Recent Products",
+          "Selected brand"
+        ],
+        "buttons": [
+          "Dashboard Overview & workspace",
+          "AI Product Studio Generate & enrich products",
+          "Distributions Sync & manage channels",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "Open activity and notifications",
+          "Open settings",
+          "Add Product",
+          "Upgrade now",
+          "View all",
+          "View all products"
+        ],
+        "fields": [],
+        "tabs": []
+      },
+      {
+        "nav": "DashboardOverview & workspace",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /DashboardOverview & workspace/i }).first()\n"
+      },
+      {
+        "nav": "AI Product StudioGenerate & enrich products",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /AI Product StudioGenerate & enrich products/i }).first()\n"
+      },
+      {
+        "nav": "DistributionsSync & manage channels",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /DistributionsSync & manage channels/i }).first()\n"
+      },
+      {
+        "nav": "Client AccessManage client requests",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Client AccessManage client requests/i }).first()\n"
+      },
+      {
+        "nav": "Data Quality DashboardCatalog completeness & health",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Data Quality DashboardCatalog completeness & health/i }).first()\n"
+      },
+      {
+        "nav": "Export CenterExport catalog for the selected brand (granted access)",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Export CenterExport catalog for the selected brand \\(granted access\\)/i }).first()\n"
+      },
+      {
+        "nav": "Import CenterBrand catalog import",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Import CenterBrand catalog import/i }).first()\n"
+      },
+      {
+        "nav": "Product Change LogTrack all changes",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Product Change LogTrack all changes/i }).first()\n"
+      },
+      {
+        "nav": "Blog & GuidesArticles and insights",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Blog & GuidesArticles and insights/i }).first()\n"
+      },
+      {
+        "nav": "Settings",
+        "url": "https://oneproducthub.com/#/settings",
+        "hash": "#/settings",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Profile & onboarding",
+          "Contact & company",
+          "Business address",
+          "Authorized signatory"
+        ],
+        "buttons": [
+          "Dashboard Overview & workspace",
+          "AI Product Studio Generate & enrich products",
+          "Distributions Sync & manage channels",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Save profile"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "text",
+          "email",
+          "+1 (555) 000-0000",
+          "textarea"
+        ],
+        "tabs": []
+      },
+      {
+        "nav": "Subscription",
+        "url": "https://oneproducthub.com/#/subscription",
+        "hash": "#/subscription",
+        "headings": [
+          "ProductHub",
+          "Subscription",
+          "Choose Your Plan",
+          "Launch",
+          "Accelerate",
+          "Turbo",
+          "Mach"
+        ],
+        "buttons": [
+          "Dashboard Overview & workspace",
+          "AI Product Studio Generate & enrich products",
+          "Distributions Sync & manage channels",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "50 / 50 AI credits",
+          "1",
+          "Open settings",
+          "Back to Settings",
+          "Clear local plan",
+          "Show 2 more",
+          "Active plan",
+          "Show 6 more",
+          "Choose Plan",
+          "Show 12 more",
+          "Show 17 more",
+          "Contact Sales"
+        ],
+        "fields": [],
+        "tabs": []
+      }
+    ],
+    "sidebar": [
+      "DashboardOverview & workspace",
+      "AI Product StudioGenerate & enrich products",
+      "DistributionsSync & manage channels",
+      "Client AccessManage client requests",
+      "Data Quality DashboardCatalog completeness & health",
+      "Export CenterExport catalog for the selected brand (granted access)",
+      "Import CenterBrand catalog import",
+      "Product Change LogTrack all changes",
+      "Blog & GuidesArticles and insights",
+      "Settings",
+      "Subscription"
+    ]
+  },
+  {
+    "role": "Client",
+    "pages": [
+      {
+        "nav": "(landing)",
+        "url": "https://oneproducthub.com/#/dashboard",
+        "hash": "#/dashboard",
+        "headings": [
+          "ProductHub",
+          "Welcome back, Anurag Singh!",
+          "Brands you can access",
+          "Subscription & billing",
+          "Your account"
+        ],
+        "buttons": [
+          "Dashboard Overview & workspace",
+          "Brand Directory Browse brands",
+          "Product Catalog View Products",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "Open activity and notifications",
+          "Open settings",
+          "Brands you can access Open the directory to request access or manage approved ca",
+          "View brands",
+          "Subscription & billing View plans, start a free trial, or upgrade for more brand",
+          "Manage plan"
+        ],
+        "fields": [],
+        "tabs": []
+      },
+      {
+        "nav": "DashboardOverview & workspace",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /DashboardOverview & workspace/i }).first()\n"
+      },
+      {
+        "nav": "Brand DirectoryBrowse brands",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Brand DirectoryBrowse brands/i }).first()\n"
+      },
+      {
+        "nav": "Product CatalogView Products",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Product CatalogView Products/i }).first()\n"
+      },
+      {
+        "nav": "Export CenterExport catalog for the selected brand (granted access)",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Export CenterExport catalog for the selected brand \\(granted access\\)/i }).first()\n"
+      },
+      {
+        "nav": "Product Change LogTrack all changes",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Product Change LogTrack all changes/i }).first()\n"
+      },
+      {
+        "nav": "Blog & GuidesArticles and insights",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Blog & GuidesArticles and insights/i }).first()\n"
+      },
+      {
+        "nav": "Settings",
+        "url": "https://oneproducthub.com/#/settings",
+        "hash": "#/settings",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Profile & onboarding",
+          "Contact & company",
+          "Business address",
+          "Authorized signatory"
+        ],
+        "buttons": [
+          "Dashboard Overview & workspace",
+          "Brand Directory Browse brands",
+          "Product Catalog View Products",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "Open activity and notifications",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Security",
+          "Account",
+          "Save profile"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "text",
+          "email",
+          "+1 (555) 000-0000",
+          "textarea"
+        ],
+        "tabs": []
+      },
+      {
+        "nav": "Subscription",
+        "url": "https://oneproducthub.com/#/subscription",
+        "hash": "#/subscription",
+        "headings": [
+          "ProductHub",
+          "Client Subscription",
+          "Free Plan",
+          "Growth Plan",
+          "Scale Plan"
+        ],
+        "buttons": [
+          "Dashboard Overview & workspace",
+          "Brand Directory Browse brands",
+          "Product Catalog View Products",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "Open activity and notifications",
+          "Open settings",
+          "Back to Settings",
+          "Active plan",
+          "Choose Plan"
+        ],
+        "fields": [],
+        "tabs": []
+      }
+    ],
+    "sidebar": [
+      "DashboardOverview & workspace",
+      "Brand DirectoryBrowse brands",
+      "Product CatalogView Products",
+      "Export CenterExport catalog for the selected brand (granted access)",
+      "Product Change LogTrack all changes",
+      "Blog & GuidesArticles and insights",
+      "Settings",
+      "Subscription"
+    ]
+  },
+  {
+    "role": "Admin",
+    "pages": [
+      {
+        "nav": "(landing)",
+        "url": "https://oneproducthub.com/",
+        "hash": "",
+        "headings": [
+          "ProductHub",
+          "Admin Dashboard",
+          "Pending Client Approvals",
+          "Pending Brand Requests"
+        ],
+        "buttons": [
+          "Platform Overview & workspace",
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "AI Product Studio Generate & enrich products",
+          "Distributions Sync & manage channels",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "Open settings",
+          "View All"
+        ],
+        "fields": [],
+        "tabs": []
+      },
+      {
+        "nav": "PlatformOverview & workspace",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /PlatformOverview & workspace/i }).first()\n"
+      },
+      {
+        "nav": "WorkspaceBrand overview",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /WorkspaceBrand overview/i }).first()\n"
+      },
+      {
+        "nav": "Brand DirectoryBrowse brands",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Brand DirectoryBrowse brands/i }).first()\n"
+      },
+      {
+        "nav": "ClientsReview client signups",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /ClientsReview client signups/i }).first()\n"
+      },
+      {
+        "nav": "Brand RegistryReview brand signups",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Brand RegistryReview brand signups/i }).first()\n"
+      },
+      {
+        "nav": "Product CatalogView Products",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Product CatalogView Products/i }).first()\n"
+      },
+      {
+        "nav": "AI Product StudioGenerate & enrich products",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /AI Product StudioGenerate & enrich products/i }).first()\n"
+      },
+      {
+        "nav": "DistributionsSync & manage channels",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /DistributionsSync & manage channels/i }).first()\n"
+      },
+      {
+        "nav": "Client AccessManage client requests",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Client AccessManage client requests/i }).first()\n"
+      },
+      {
+        "nav": "Data Quality DashboardCatalog completeness & health",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Data Quality DashboardCatalog completeness & health/i }).first()\n"
+      },
+      {
+        "nav": "Export CenterExport catalog for the selected brand (granted access)",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Export CenterExport catalog for the selected brand \\(granted access\\)/i }).first()\n"
+      },
+      {
+        "nav": "Import CenterBrand catalog import",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Import CenterBrand catalog import/i }).first()\n"
+      },
+      {
+        "nav": "Product Change LogTrack all changes",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Product Change LogTrack all changes/i }).first()\n"
+      },
+      {
+        "nav": "Blog & GuidesArticles and insights",
+        "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('nav').getByRole('button', { name: /Blog & GuidesArticles and insights/i }).first()\n"
+      },
+      {
+        "nav": "RBAC Access",
+        "url": "https://oneproducthub.com/#/rbac-admin",
+        "hash": "#/rbac-admin",
+        "headings": [
+          "ProductHub",
+          "RBAC Administration"
+        ],
+        "buttons": [
+          "Platform Overview & workspace",
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "AI Product Studio Generate & enrich products",
+          "Distributions Sync & manage channels",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Refresh",
+          "Permissions",
+          "Roles",
+          "Users",
+          "Create permission",
+          "Bulk create",
+          "Apply filter"
+        ],
+        "fields": [
+          "Search permissions..."
+        ],
+        "tabs": [
+          "Permissions",
+          "Roles",
+          "Users"
+        ]
+      },
+      {
+        "nav": "Settings",
+        "url": "https://oneproducthub.com/#/settings",
+        "hash": "#/settings",
+        "headings": [
+          "ProductHub",
+          "Settings",
+          "Profile & onboarding",
+          "Contact & company",
+          "Business address",
+          "Authorized signatory"
+        ],
+        "buttons": [
+          "Platform Overview & workspace",
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "AI Product Studio Generate & enrich products",
+          "Distributions Sync & manage channels",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Dashboard",
+          "Profile",
+          "General",
+          "Notifications",
+          "Email",
+          "Security",
+          "Branding",
+          "Brand registry",
+          "Categories",
+          "Product feeds",
+          "Feed & export",
+          "Data & export",
+          "API & integrations",
+          "Account",
+          "Audit",
+          "Request form",
+          "Save profile"
+        ],
+        "fields": [
+          "settings-section-mobile",
+          "text",
+          "email",
+          "+1 (555) 000-0000",
+          "textarea"
+        ],
+        "tabs": []
+      },
+      {
+        "nav": "Subscription",
+        "url": "https://oneproducthub.com/#/subscription",
+        "hash": "#/subscription",
+        "headings": [
+          "ProductHub",
+          "Subscription",
+          "Choose Your Plan",
+          "Launch",
+          "Accelerate",
+          "Turbo",
+          "Mach"
+        ],
+        "buttons": [
+          "Platform Overview & workspace",
+          "Workspace Brand overview",
+          "Brand Directory Browse brands",
+          "Clients Review client signups",
+          "Brand Registry Review brand signups",
+          "Product Catalog View Products",
+          "AI Product Studio Generate & enrich products",
+          "Distributions Sync & manage channels",
+          "Client Access Manage client requests",
+          "Data Quality Dashboard Catalog completeness & health",
+          "Export Center Export catalog for the selected brand (granted access)",
+          "Import Center Brand catalog import",
+          "Product Change Log Track all changes",
+          "Blog & Guides Articles and insights",
+          "RBAC Access",
+          "Settings",
+          "Subscription",
+          "Sign Out",
+          "H Brand",
+          "1",
+          "Open settings",
+          "Back to Settings",
+          "Reset draft",
+          "Save to API",
+          "Preview",
+          "Edit plans",
+          "Stripe settings",
+          "Clear local plan",
+          "Show 2 more",
+          "Trial expired",
+          "Show 6 more",
+          "Choose Plan",
+          "Show 12 more",
+          "Show 17 more",
+          "Contact Sales"
+        ],
+        "fields": [],
+        "tabs": [
+          "Preview",
+          "Edit plans",
+          "Stripe settings"
+        ]
+      }
+    ],
+    "sidebar": [
+      "PlatformOverview & workspace",
+      "WorkspaceBrand overview",
+      "Brand DirectoryBrowse brands",
+      "ClientsReview client signups",
+      "Brand RegistryReview brand signups",
+      "Product CatalogView Products",
+      "AI Product StudioGenerate & enrich products",
+      "DistributionsSync & manage channels",
+      "Client AccessManage client requests",
+      "Data Quality DashboardCatalog completeness & health",
+      "Export CenterExport catalog for the selected brand (granted access)",
+      "Import CenterBrand catalog import",
+      "Product Change LogTrack all changes",
+      "Blog & GuidesArticles and insights",
+      "RBAC Access",
+      "Settings",
+      "Subscription"
+    ]
+  }
+]

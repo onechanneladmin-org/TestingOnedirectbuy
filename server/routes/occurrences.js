@@ -1,7 +1,16 @@
 const express = require("express");
+const path = require("path");
 const RunningOccurrence = require("../models/RunningOccurrence");
 const Report = require("../models/Report");
-const { updateStep, upsertReport } = require("../services/runFlow");
+const {
+  updateStep,
+  upsertReport,
+  stopOccurrence,
+  stopAllOccurrences,
+} = require("../services/runFlow");
+const { countByStatus } = require("../../lib/applyLiveStep");
+const { resolveScreenshotFile } = require("../lib/issueScreenshots");
+const { buildReportDocx } = require("../lib/reportDocx");
 
 const router = express.Router();
 
@@ -9,6 +18,7 @@ const router = express.Router();
 router.get("/", async (req, res, next) => {
   try {
     const filter = {};
+    if (req.query.projectId) filter.projectId = String(req.query.projectId);
     if (req.query.flowId) filter.flowId = String(req.query.flowId);
     if (req.query.status) filter.status = String(req.query.status);
 
@@ -17,15 +27,62 @@ router.get("/", async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(limit)
       .select(
-        "occurrenceId flowId flowName status startedAt finishedAt stepsCompleted stepsTotal currentStepId exitCode createdAt",
+        "occurrenceId projectId flowId flowName status startedAt finishedAt stepsCompleted stepsTotal currentStepId exitCode createdAt steps",
       )
       .lean();
 
-    res.json({ count: occurrences.length, occurrences });
+    res.json({
+      count: occurrences.length,
+      occurrences: occurrences.map((o) => {
+        const counts = countByStatus(o.steps);
+        return {
+          occurrenceId: o.occurrenceId,
+          projectId: o.projectId || "",
+          flowId: o.flowId,
+          flowName: o.flowName,
+          status: o.status,
+          startedAt: o.startedAt,
+          finishedAt: o.finishedAt,
+          currentStepId: o.currentStepId,
+          exitCode: o.exitCode,
+          createdAt: o.createdAt,
+          stepsCompleted: counts.passed + counts.failed + counts.skipped,
+          stepsTotal: counts.total || o.stepsTotal || 0,
+          passed: counts.passed,
+          failed: counts.failed,
+          skipped: counts.skipped,
+        };
+      }),
+    });
   } catch (err) {
     next(err);
   }
 });
+
+/** GET /api/occurrences/:occurrenceId/screenshot/:file — issue screenshot PNG */
+router.get(
+  ["/:occurrenceId/screenshot/:file", "/:occurrenceId/screenshot"],
+  async (req, res, next) => {
+    try {
+      const occurrenceId = req.params.occurrenceId;
+      const occurrence = await RunningOccurrence.findOne({ occurrenceId }).lean();
+      if (!occurrence) {
+        return res
+          .status(404)
+          .json({ error: `Occurrence not found: ${occurrenceId}` });
+      }
+      const key = req.params.file || req.query.step || req.query.file || "";
+      const filePath = resolveScreenshotFile(occurrenceId, key);
+      if (!filePath) {
+        return res.status(404).json({ error: "Screenshot not found" });
+      }
+      res.setHeader("Cache-Control", "no-store");
+      return res.sendFile(path.resolve(filePath));
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
 /** GET /api/occurrences/:occurrenceId — live status */
 router.get("/:occurrenceId", async (req, res, next) => {
@@ -39,45 +96,38 @@ router.get("/:occurrenceId", async (req, res, next) => {
         .json({ error: `Occurrence not found: ${req.params.occurrenceId}` });
     }
 
-    const pending = (occurrence.steps || []).filter(
-      (s) => s.status === "pending",
-    ).length;
-    const running = (occurrence.steps || []).filter(
-      (s) => s.status === "running",
-    ).length;
-    const passed = (occurrence.steps || []).filter(
-      (s) => s.status === "passed",
-    ).length;
-    const failed = (occurrence.steps || []).filter(
-      (s) => s.status === "failed" || s.status === "blocked",
-    ).length;
+    const counts = countByStatus(occurrence.steps);
+    const stepsTotal = counts.total || occurrence.stepsTotal || 0;
+    const stepsCompleted = counts.passed + counts.failed + counts.skipped;
 
     res.json({
       occurrenceId: occurrence.occurrenceId,
+      projectId: occurrence.projectId || "",
       flowId: occurrence.flowId,
       flowName: occurrence.flowName,
       status: occurrence.status,
       startedAt: occurrence.startedAt,
       finishedAt: occurrence.finishedAt,
       currentStepId: occurrence.currentStepId,
-      stepsCompleted: occurrence.stepsCompleted,
-      stepsTotal: occurrence.stepsTotal,
+      stepsCompleted,
+      stepsTotal,
+      passed: counts.passed,
+      failed: counts.failed,
+      skipped: counts.skipped,
       workerPid: occurrence.workerPid,
       exitCode: occurrence.exitCode,
       runDir: occurrence.runDir,
       liveIssueCount: occurrence.liveIssueCount || 0,
       liveIssues: occurrence.liveIssues || [],
+      useCaseId: occurrence.envSummary?.useCaseId || "",
       progress: {
-        pending,
-        running,
-        passed,
-        failed,
+        pending: counts.pending,
+        running: counts.running,
+        passed: counts.passed,
+        failed: counts.failed,
+        skipped: counts.skipped,
         percent:
-          occurrence.stepsTotal > 0
-            ? Math.round(
-                (occurrence.stepsCompleted / occurrence.stepsTotal) * 100,
-              )
-            : 0,
+          stepsTotal > 0 ? Math.round((stepsCompleted / stepsTotal) * 100) : 0,
       },
       steps: occurrence.steps,
     });
@@ -101,6 +151,33 @@ router.post("/:occurrenceId/steps", async (req, res, next) => {
     if (err.status) {
       return res.status(err.status).json({ error: err.message });
     }
+    next(err);
+  }
+});
+
+/** GET /api/occurrences/:occurrenceId/report/docx — UX report download */
+router.get("/:occurrenceId/report/docx", async (req, res, next) => {
+  try {
+    const occurrenceId = req.params.occurrenceId;
+    const occurrence = await RunningOccurrence.findOne({ occurrenceId }).lean();
+    if (!occurrence) {
+      return res
+        .status(404)
+        .json({ error: `Occurrence not found: ${occurrenceId}` });
+    }
+    const report = await Report.findOne({ occurrenceId }).lean();
+    const buffer = await buildReportDocx({ occurrence, report });
+    const safeName = `${(occurrence.flowName || "ux-report")
+      .replace(/[^a-z0-9._-]+/gi, "-")
+      .slice(0, 60)}-${occurrenceId.slice(0, 8)}.docx`;
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);
+    res.setHeader("Cache-Control", "no-store");
+    return res.send(buffer);
+  } catch (err) {
     next(err);
   }
 });
@@ -136,6 +213,39 @@ router.post("/:occurrenceId/report", async (req, res, next) => {
   try {
     const report = await upsertReport(req.params.occurrenceId, req.body || {});
     res.status(201).json(report);
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({ error: err.message });
+    }
+    next(err);
+  }
+});
+
+/** POST /api/occurrences/stop-all — stop all running occurrences */
+router.post("/stop-all", async (req, res, next) => {
+  try {
+    const reason = req.body?.reason || "Stopped all from API";
+    const stopped = await stopAllOccurrences(
+      req.query.projectId || req.body?.projectId,
+      reason,
+    );
+    res.json({ ok: true, count: stopped.length, occurrences: stopped });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /api/occurrences/:occurrenceId/stop (or /cancel) — stop a specific occurrence */
+router.post(["/:occurrenceId/stop", "/:occurrenceId/cancel"], async (req, res, next) => {
+  try {
+    const reason = req.body?.reason || "Stopped by user";
+    const occurrence = await stopOccurrence(req.params.occurrenceId, reason);
+    res.json({
+      ok: true,
+      occurrenceId: occurrence.occurrenceId,
+      status: occurrence.status,
+      occurrence,
+    });
   } catch (err) {
     if (err.status) {
       return res.status(err.status).json({ error: err.message });

@@ -1,0 +1,189 @@
+ID	Section	Subsection	Priority	Title	Surfaces	Description
+QA-001	Before you start (env & deploy)		P0	Storefront deployed		from current `cicd-prod` / prod pipeline (not stale image).
+QA-002	Before you start (env & deploy)		P0	Buyer API deployed		(`apps/api`) — storefront cancel/refund uses this path.
+QA-003	Before you start (env & deploy)		P0	Marketplace-core deployed		— admin refunds, claims, 1CA internal refund routes.
+QA-004	Before you start (env & deploy)		P0	Admin deployed		— tax certs, **Users → Fund wallet**, B2B owner-wallet shortcut, order tender panel.
+QA-005	Before you start (env & deploy)		P0	1CA Fulfill deployed		— `onedirectbuyRefundPaidOrderViaCore` on `cicd-prod`.
+QA-006	Before you start (env & deploy)		P1	Stripe keys		— prod vs test mode matches environment you are testing.
+QA-007	Before you start (env & deploy)		P1	GCS tax certs		— `GCS_MEDIA_BUCKET` set if testing cert file upload/download.
+QA-008	Before you start (env & deploy)		P1	ODB ↔ 1CA secrets		— internal refund/sync webhook secrets valid in prod.
+QA-009	Before you start (env & deploy)		P1	Buyer email deliverability		SMTP / provider live; test buyer inbox receives ODB mail (not spam-only).
+QA-010	Before you start (env & deploy)		P1	Mobile push credentials		APNs (iOS) + FCM (Android) linked in Expo; API can deliver Expo push (see `apps/storefront/apps/mobile/docs/`).
+QA-011	Before you start (env & deploy)		P1	ONECA admin notify		`ONECA_NOTIFY_URL` or `ONECA_INTERNAL_URL` (+ secret) set so admin/seller **My alerts** / 1CA bell get `marketplace_*` events (see `docs/SECRETS.md`). Without it, buyer email/push still work; admin bridge stubs.
+QA-012	Before you start (env & deploy)		P2	Playwright smoke (optional)		`pnpm run ux:audit:marketplace-features` with `MARKETPLACE_E2E_EMAIL` / `PASSWORD` (see `ux-audit/docs/marketplace-wallet-tax-refund-test-cases.md`).
+QA-013	Before you start (env & deploy)		P2	Unit smoke (optional)		`pnpm --dir apps/marketplace-core test checkoutTender.test.js marketplaceRefundHandlers.test.js tax.shipping.test.js` · `notifications.test.js`
+QA-014	ODB storefront — wallet & checkout (P0 / P1)		P0	Guest checkout	Web	Cart → checkout → **no** “Apply wallet balance” checkbox; card/Stripe only.
+QA-015	ODB storefront — wallet & checkout (P0 / P1)		P0	Logged-in wallet UI	Web+Mobile	Buyer with wallet balance sees “Apply wallet balance first, then charge the card for the rest.”
+QA-016	ODB storefront — wallet & checkout (P0 / P1)		P0	Wallet-only pay	Web+Mobile	Wallet ≥ order total + checkbox on → success; **no** card charge; copy “Your wallet covers this order” (or equivalent).
+QA-017	ODB storefront — wallet & checkout (P0 / P1)		P0	Split pay	Web+Mobile	Wallet &lt; total + checkbox on → wallet debited + Stripe charged **remainder only** (verify Stripe Dashboard PI amount).
+QA-018	ODB storefront — wallet & checkout (P0 / P1)		P0	Order payment total	Web	Paid order `payment.amountCents` = **full order total** (not card slice only on split orders).
+QA-019	ODB storefront — wallet & checkout (P0 / P1)		P1	Card-only with balance	Web+Mobile	Wallet exists but checkbox **off** → full amount on card; wallet balance unchanged.
+QA-020	ODB storefront — wallet & checkout (P0 / P1)		P1	Insufficient wallet + card	Web	e.g. $5 wallet, $50 order → $5 wallet + $45 card; order paid.
+QA-021	ODB storefront — wallet & checkout (P0 / P1)		P1	Order detail split line	Web+Mobile	Account order page shows “$X wallet + $Y card” (or wallet-only).
+QA-022	ODB storefront — wallet & checkout (P0 / P1)		P1	Header wallet	Web	Logged-in buyer sees **Wallet** in header with balance; link goes to `/account/wallet`.
+QA-023	ODB storefront — wallet & checkout (P0 / P1)		P1	Account menu	Web+Mobile	Sidebar **Wallet** → `/account/wallet`; **Business team** → `/account/b2b-team` (200 with `hasB2BAccount: false` for personal buyers, not 404).
+QA-024	ODB storefront — wallet & checkout (P0 / P1)		P2	Guest checkout UX	Web	Proceed to checkout, address validation, no wallet leak in API responses for guest.
+QA-025	ODB storefront — wallet history & API (P0 / P1)		P0	Wallet history UI	Web+Mobile	`/account/wallet` (or mobile Wallet) shows **Your wallet** balance + **Wallet activity** ledger (debits, refunds, credits).
+QA-026	ODB storefront — wallet history & API (P0 / P1)		P0	GET /user/wallet	Web+Mobile	Logged-in buyer (Bearer or storefront) → **200** with `balanceCents` + `ledger` — **not** `403 Forbidden` (profile catch-all).
+QA-027	ODB storefront — wallet history & API (P0 / P1)		P1	GET /user/wallet/balance		Lightweight balance endpoint returns `balanceCents` only.
+QA-028	ODB storefront — wallet history & API (P0 / P1)		P1	Ledger after checkout	Web+Mobile	Wallet debit appears in activity after split/wallet-only purchase.
+QA-029	ODB storefront — wallet history & API (P0 / P1)		P1	Ledger after cancel/refund	Web+Mobile	Cancel/refund credits wallet → new **Refund** line with updated balance.
+QA-030	ODB storefront — wallet history & API (P0 / P1)		P1	Admin top-up visible	Web+Mobile	After admin **Fund owner wallet** (B2B Accounts) → owner sees credit in `/account/wallet` + header.
+QA-031	ODB storefront — wallet history & API (P0 / P1)		P1	Legacy B2B credit migration	Web	Buyer with old org `creditLeft` (if any prod data) → first wallet load migrates once into personal wallet; org `creditLeft` cleared.
+QA-032	ODB storefront — wallet history & API (P0 / P1)		P2	GET /user/b2b-account/ledger		Same personal wallet ledger (compat path; prefer `/user/wallet`).
+QA-033	ODB storefront — cancel, refund, partial lines (P0 / P1)		P0	API cancel split refund	Web+Mobile	Cancel **wallet+card** order from storefront → Stripe refunds **card portion only**; wallet portion in ledger + admin tender panel.
+QA-034	ODB storefront — cancel, refund, partial lines (P0 / P1)		P0	API wallet-only cancel	Web+Mobile	Cancel wallet-only paid order → **no** Stripe refund; full amount back in wallet ledger.
+QA-035	ODB storefront — cancel, refund, partial lines (P0 / P1)		P1	Cancel whole order (buyer)	Web+Mobile	Unshipped order cancel → stock restored; refund per policy; **then** verify cancel notification (see Notifications seq).
+QA-036	ODB storefront — cancel, refund, partial lines (P0 / P1)		P0	Cancel single line (buyer)	Web+Mobile	Multi-line order → cancel one pending line → **proportional** refund (line subtotal + share of shipping/tax); order totals show **remaining** lines only.
+QA-037	ODB storefront — cancel, refund, partial lines (P0 / P1)		P0	Cancel last line (buyer)	Web+Mobile	Cancel final pending line → order **cancelled**, totals **$0**, **full remaining** capture refunded (split wallet + card OK).
+QA-038	ODB storefront — cancel, refund, partial lines (P0 / P1)		P1	Sequential line cancels	Web	Cancel 2+ lines one-by-one → sum of refunds ≈ original paid total; no leftover shipping/tax on doc when all lines cancelled.
+QA-039	ODB storefront — cancel, refund, partial lines (P0 / P1)		P1	Order detail refund UI	Web+Mobile	Buyer order page shows **Refunded** amount (from `GET /user/orders/:id` `refunds` + payment strip); mobile order detail matches.
+QA-040	ODB storefront — cancel, refund, partial lines (P0 / P1)		P1	Refund hints (shipped)	Web+Mobile	After refund on shipped/completed order, buyer payment panel hint mentions wallet and/or card correctly.
+QA-041	ODB storefront — cancel, refund, partial lines (P0 / P1)		P1	Partial refund (admin/core)	Admin	$50 refund on $100 split ($25/$75) → ~$12.50 wallet + ~$37.50 card (admin tender + wallet activity).
+QA-042	ODB storefront — cancel, refund, partial lines (P0 / P1)		P1	Second partial refund	Admin	Remaining refundable cap enforced; second partial still splits proportionally.
+QA-043	ODB storefront — cancel, refund, partial lines (P0 / P1)		P1	Card-only refund	Admin	Card-only paid order → Stripe refund only; `walletRefundedCents` = 0 in admin tender.
+QA-044	ODB storefront — cancel, refund, partial lines (P0 / P1)		P2	Refund idempotency	Admin	Retry same refund with same **Idempotency-Key** → no double wallet credit or double Stripe refund.
+QA-045	ODB storefront — cancel, refund, partial lines (P0 / P1)		P2	Failed refund retry	Admin	Admin retry failed refund (if UI exists) → succeeds without duplicate.
+QA-046	ODB storefront — US tax certificates (P0 / P1)		P0	Tax cert upload	Web+Mobile	Account → User information → Tax certificates → upload US state PDF → **pending**.
+QA-047	ODB storefront — US tax certificates (P0 / P1)		P0	Tax exempt checkout	Web+Mobile	**Approved** cert for **ship-to state** → tax $0 / EXEMPT; can pay.
+QA-048	ODB storefront — US tax certificates (P0 / P1)		P1	Admin approve cert	Admin	Compliance → Buyer tax certificates → approve → buyer sees approved on Web+Mobile.
+QA-049	ODB storefront — US tax certificates (P0 / P1)		P1	Admin reject cert	Admin	Reject with reason → buyer sees rejected; tax still applies.
+QA-050	ODB storefront — US tax certificates (P0 / P1)		P1	Pending cert	Web	Pending only → tax **still calculated**; not wrongly exempt.
+QA-051	ODB storefront — US tax certificates (P0 / P1)		P1	No cert	Web	No cert for ship-to → normal tax; copy distinguishes wholesale vs tax exempt.
+QA-052	ODB storefront — US tax certificates (P0 / P1)		P1	County / jurisdiction	Web+Mobile	Split-ZIP or county-required address → county picker or clear message; tax cert notice when applicable.
+QA-053	ODB storefront — US tax certificates (P0 / P1)		P1	EXEMPT does not block pay	Web+Mobile	Approved exempt → Pay button enabled when shipping ready.
+QA-054	ODB storefront — US tax certificates (P0 / P1)		P2	Cert file download	Web	Buyer/admin can open uploaded cert when GCS configured.
+QA-055	ODB storefront — US tax certificates (P0 / P1)		P2	Wrong state cert	Web	Approved cert for TX does **not** exempt ship-to CA.
+QA-056	ODB storefront — shipping & checkout UX (P1 / P2)		P1	Missing ship-from		Bad listing (no ship-from) → checkout alert; pay blocked until fixed or item removed.
+QA-057	ODB storefront — shipping & checkout UX (P1 / P2)		P1	Shipping quote errors		EasyPost/shipping failure → visible error (no silent $0 shipping).
+QA-058	ODB storefront — shipping & checkout UX (P1 / P2)		P1	Multi-seller cart		Checkout shows per-seller shipping/tax behavior sensibly.
+QA-059	ODB storefront — shipping & checkout UX (P1 / P2)		P2	Change county after tax calc		County change on split-ZIP address recalculates tax (no stale wrong tax).
+QA-060	ODB storefront — shipping & checkout UX (P1 / P2)		P2	Guest vs logged-in checkout		Guest path unchanged; logged-in gets wallet + tax cert hints.
+QA-061	ODB B2B / business buyers (P0 / P1)		P0	No org credit at checkout		ODB checkout = **wallet checkbox + Stripe only** — no “pay with org credits” button.
+QA-062	ODB B2B / business buyers (P0 / P1)		P1	Register business		Business signup → B2B account type; US profile **EIN** (no GSTIN on US buyer profile).
+QA-063	ODB B2B / business buyers (P0 / P1)		P1	B2B wholesale pricing		B2B buyer sees volume/B2B price on eligible SKUs; cart/checkout uses B2B line prices.
+QA-064	ODB B2B / business buyers (P0 / P1)		P1	Wholesale ≠ tax exempt		B2B prices still taxed unless **approved** cert for ship-to state.
+QA-065	ODB B2B / business buyers (P0 / P1)		P1	Team page copy		`/account/b2b-team` — wallet **per person**; team for org attribution (not shared credit pool).
+QA-066	ODB B2B / business buyers (P0 / P1)		P1	B2B member checkout		Member (non-owner) checks out with **own wallet** + card; order attributed to org where configured.
+QA-067	ODB B2B / business buyers (P0 / P1)		P1	Invite member		Owner/admin adds email → invitee accepts → active member.
+QA-068	ODB B2B / business buyers (P0 / P1)		P1	Remove member		Remove member → loses org team access as before.
+QA-069	ODB B2B / business buyers (P0 / P1)		P1	Personal buyer		No B2B team (empty state OK); wallet still works if funded.
+QA-070	ODB B2B / business buyers (P0 / P1)		P1	Tax vs B2B at pay		Payment section links to `#tax-certificates` and explains wallet vs sales tax exemption.
+QA-071	ODB B2B / business buyers (P0 / P1)		P2	No legacy b2b-credits URL		`/account/b2b-credits` removed or redirects; no broken nav.
+QA-072	ODB notifications — full E2E (do in this sequence)	N0 — Setup (before triggering events)	P0	Prefs page loads	Web+Mobile	`/account/communication-preferences` and mobile **Profile → Communication preferences** list transactional + marketing events.
+QA-073	ODB notifications — full E2E (do in this sequence)	N0 — Setup (before triggering events)	P0	Defaults match catalog	Web+Mobile	In-app/email/push/SMS defaults match communication-preferences CSV (e.g. `review_received` email off; `order_placed` push on).
+QA-074	ODB notifications — full E2E (do in this sequence)	N0 — Setup (before triggering events)	P0	Enable push on device	Mobile	Sign in → allow OS notifications → Expo token registers; Profile push toggles usable.
+QA-075	ODB notifications — full E2E (do in this sequence)	N0 — Setup (before triggering events)	P0	Admin My alerts filter	Admin	Marketplace → Notifications → **My alerts** shows only ODB `marketplace_*` / OneDirectBuy types — **no** eBay/Amazon/Walmart/POS channel rows (those stay under Settings → Notifications).
+QA-076	ODB notifications — full E2E (do in this sequence)	N0 — Setup (before triggering events)	P1	Admin enable ODB alerts	Admin	Turn **In-app + Email** on for `marketplace_order_new`, `marketplace_order_shipped`, `marketplace_order_cancelled`, `marketplace_return_requested`, `marketplace_claim_opened`, `marketplace_buyer_message` (if listed; empty state = types not registered yet).
+QA-077	ODB notifications — full E2E (do in this sequence)	N0 — Setup (before triggering events)	P1	Seller contact email	Seller, Admin	Seller `contactEmail` valid and not suppressed.
+QA-078	ODB notifications — full E2E (do in this sequence)	N0 — Setup (before triggering events)	P2	Empty My alerts OK	Admin	If no `marketplace_*` types registered, empty copy explains hide of channel alerts (not a red error).
+QA-079	ODB notifications — full E2E (do in this sequence)	N1 — Preferences respect (toggle proof)	P0	Email off blocks mail [Web → Email]		Turn **email off** for `order_placed` → place order → **no** confirmation email; in-app/push still follow their toggles.
+QA-080	ODB notifications — full E2E (do in this sequence)	N1 — Preferences respect (toggle proof)	P0	Email on restores mail [Web → Email]		Turn **email on** for `order_placed` → place another order → confirmation email arrives with correct total.
+QA-081	ODB notifications — full E2E (do in this sequence)	N1 — Preferences respect (toggle proof)	P0	Push off blocks push [Mobile → Push]		Turn **push off** for `order_placed` → place order → **no** device push; email/in-app still OK if on.
+QA-082	ODB notifications — full E2E (do in this sequence)	N1 — Preferences respect (toggle proof)	P0	Push on delivers [Mobile → Push]		Turn **push on** → place order → push received; tap opens order (or product) screen.
+QA-083	ODB notifications — full E2E (do in this sequence)	N1 — Preferences respect (toggle proof)	P1	Prefs sync Web↔Mobile	Web+Mobile	Change a toggle on Web → refresh Mobile (and reverse) → same preference persisted.
+QA-084	ODB notifications — full E2E (do in this sequence)	N1 — Preferences respect (toggle proof)	P1	Marketing email opt-out	Web+Mobile	Marketing email off → abandoned-cart / promo jobs do **not** email (when you run N7).
+QA-085	ODB notifications — full E2E (do in this sequence)	N1 — Preferences respect (toggle proof)	P2	SMS verify + toggle	Web+Mobile	Add/verify phone; transactional SMS toggle respected on shipped/payment_failed where SMS default on.
+QA-086	ODB notifications — full E2E (do in this sequence)	N2 — Order lifecycle (one paid order — Web first, then Mobile spot-check)	P0	order_placed	Web+Mobile, Email, In-app, Push	Paid checkout → confirmation email + in-app + push (if on); total matches order (split wallet+card OK).
+QA-087	ODB notifications — full E2E (do in this sequence)	N2 — Order lifecycle (one paid order — Web first, then Mobile spot-check)	P0	marketplace_order_new	Admin, Seller, Email, In-app	Seller/admin gets new-order alert (1CA bridge / My alerts) — not a channel ebay/amazon row.
+QA-088	ODB notifications — full E2E (do in this sequence)	N2 — Order lifecycle (one paid order — Web first, then Mobile spot-check)	P1	payment_succeeded	Web+Mobile, Email, In-app	After Stripe success (card/split) → payment succeeded notice; wallet-only may skip card-specific copy.
+QA-089	ODB notifications — full E2E (do in this sequence)	N2 — Order lifecycle (one paid order — Web first, then Mobile spot-check)	P1	order_processing	Web+Mobile, Email, In-app, Push	Move to processing → buyer notified.
+QA-090	ODB notifications — full E2E (do in this sequence)	N2 — Order lifecycle (one paid order — Web first, then Mobile spot-check)	P0	order_shipped	Web+Mobile, Email, In-app, Push, SMS?	Ship with tracking → email has tracking; push tap → order; **marketplace_order_shipped** to admin/seller.
+QA-091	ODB notifications — full E2E (do in this sequence)	N2 — Order lifecycle (one paid order — Web first, then Mobile spot-check)	P1	Partial ship email	Email	Multi-line partial ship → email lists **affected lines only**.
+QA-092	ODB notifications — full E2E (do in this sequence)	N2 — Order lifecycle (one paid order — Web first, then Mobile spot-check)	P1	order_completed	Web+Mobile, Email, In-app	Delivered / auto-complete → completed notice.
+QA-093	ODB notifications — full E2E (do in this sequence)	N2 — Order lifecycle (one paid order — Web first, then Mobile spot-check)	P2	payment_failed	Web+Mobile, Email, In-app, Push, SMS	Force fail in test mode → failure notice all enabled channels.
+QA-094	ODB notifications — full E2E (do in this sequence)	N2 — Order lifecycle (one paid order — Web first, then Mobile spot-check)	P2	payment_expired	Email, In-app, SMS	Expire pending PI / job → expired notice.
+QA-095	ODB notifications — full E2E (do in this sequence)	N3 — Cancel & refund notifications	P0	order_cancelled	Web+Mobile, Email, In-app	Cancel whole unshipped order → branded cancel email; **marketplace_order_cancelled** admin/seller.
+QA-096	ODB notifications — full E2E (do in this sequence)	N3 — Cancel & refund notifications	P1	Partial cancel email	Email	Cancel one line → email scoped to cancelled line(s) only.
+QA-097	ODB notifications — full E2E (do in this sequence)	N3 — Cancel & refund notifications	P0	refund_completed — split	Web+Mobile, Email	Split tender refund → email mentions **wallet immediate** + **card 5–10 days**.
+QA-098	ODB notifications — full E2E (do in this sequence)	N3 — Cancel & refund notifications	P0	refund_completed — wallet-only	Web+Mobile, Email	Wallet-only refund → email says credited to OneDirectBuy wallet.
+QA-099	ODB notifications — full E2E (do in this sequence)	N3 — Cancel & refund notifications	P1	refund_completed — card-only	Email	Card-only → bank timing copy only (no wallet line).
+QA-100	ODB notifications — full E2E (do in this sequence)	N3 — Cancel & refund notifications	P1	refund_requested	Web+Mobile, Email, In-app	Buyer opens refund request → notice.
+QA-101	ODB notifications — full E2E (do in this sequence)	N3 — Cancel & refund notifications	P2	refund_failed	Web+Mobile, Email, In-app, Push	Simulate failed refund → failure notice.
+QA-102	ODB notifications — full E2E (do in this sequence)	N4 — Returns, claims, messages	P1	return_submitted	Web+Mobile, Email, In-app	Buyer submits return → notice; **marketplace_return_requested** admin/seller.
+QA-103	ODB notifications — full E2E (do in this sequence)	N4 — Returns, claims, messages	P1	return_approved / rejected / refunded	Web+Mobile, Email, In-app, Push	Admin/seller return actions → matching buyer events.
+QA-104	ODB notifications — full E2E (do in this sequence)	N4 — Returns, claims, messages	P2	return_expiring	Email, In-app	Return-window job → reminder (staging job or wait).
+QA-105	ODB notifications — full E2E (do in this sequence)	N4 — Returns, claims, messages	P1	claim_opened	Web+Mobile, Email, In-app, Push	Open buyer-protection claim → notice; **marketplace_claim_opened** admin.
+QA-106	ODB notifications — full E2E (do in this sequence)	N4 — Returns, claims, messages	P1	claim_updated / claim_resolved	Web+Mobile, Email, In-app, Push	Update/resolve claim → buyer notices.
+QA-107	ODB notifications — full E2E (do in this sequence)	N4 — Returns, claims, messages	P1	seller_message / buyer_message	Web+Mobile, Email, In-app, Push	Order thread both directions; **marketplace_buyer_message** admin/seller.
+QA-108	ODB notifications — full E2E (do in this sequence)	N4 — Returns, claims, messages	P2	question_asked / answered	Web+Mobile, Email, In-app	Product Q&A → buyer + seller (**marketplace_product_question**).
+QA-109	ODB notifications — full E2E (do in this sequence)	N4 — Returns, claims, messages	P2	review_received	Seller, In-app	Leave review → seller in-app (email off by default).
+QA-110	ODB notifications — full E2E (do in this sequence)	N5 — Seller / platform admin alerts (1CA My alerts)	P1	Seller application received/approved/rejected	Email, Admin	Apply → approve/reject → applicant emails + `marketplace_seller_application_*` alerts.
+QA-111	ODB notifications — full E2E (do in this sequence)	N5 — Seller / platform admin alerts (1CA My alerts)	P2	seller_suspended / reactivated	Email, Admin	Suspend/reactivate → seller email + `marketplace_seller_*` alerts.
+QA-112	ODB notifications — full E2E (do in this sequence)	N5 — Seller / platform admin alerts (1CA My alerts)	P2	payout_released / held	Email, Admin	Payout actions → seller + `marketplace_payout_*`.
+QA-113	ODB notifications — full E2E (do in this sequence)	N5 — Seller / platform admin alerts (1CA My alerts)	P2	listing_status	Email, Admin	Listing moderation → seller + `marketplace_listing_status`.
+QA-114	ODB notifications — full E2E (do in this sequence)	N5 — Seller / platform admin alerts (1CA My alerts)	P1	Channel noise absent	Admin	After order/ship/cancel events, My alerts still has **no** ebay/amazon/walmart/POS preference rows.
+QA-115	ODB notifications — full E2E (do in this sequence)	N6 — Admin ops & deliverability	P1	Storefront metrics panel	Admin	Notifications → **Storefront metrics** loads; legacy `?panel=stripe|analytics|…` redirects to Platform.
+QA-116	ODB notifications — full E2E (do in this sequence)	N6 — Admin ops & deliverability	P1	Suppression blocks send	Admin	Mark test email suppressed → send blocked (no mail).
+QA-117	ODB notifications — full E2E (do in this sequence)	N6 — Admin ops & deliverability	P2	Bounce webhook	Admin	Bounce event → contact deliverability bounced; subsequent send suppressed.
+QA-118	ODB notifications — full E2E (do in this sequence)	N6 — Admin ops & deliverability	P2	Contact deliverability read	Admin	GET deliverability for test email returns expected status.
+QA-119	ODB notifications — full E2E (do in this sequence)	N7 — Account & marketing (if time)	P1	account_created	Web+Mobile, Email, In-app	New signup → welcome / account created notice.
+QA-120	ODB notifications — full E2E (do in this sequence)	N7 — Account & marketing (if time)	P2	abandoned_cart	Email	Guest saves cart email → job (or wait) → branded cart email; marketing opt-out respected.
+QA-121	ODB notifications — full E2E (do in this sequence)	N7 — Account & marketing (if time)	P2	price_drop / back_in_stock / promotion	Web+Mobile, Email, In-app, Push	Trigger watchlist/promo → channels per prefs.
+QA-122	ODB notifications — full E2E (do in this sequence)	N7 — Account & marketing (if time)	P2	contact_form	Email	Public contact → confirmation email.
+QA-123	ODB notifications — full E2E (do in this sequence)	N8 — Mobile-only notification regression (after N2–N4)	P0	In-app list	Mobile	Notifications inbox shows order_placed, shipped, cancel, refund with readable titles.
+QA-124	ODB notifications — full E2E (do in this sequence)	N8 — Mobile-only notification regression (after N2–N4)	P0	Push deep link	Mobile	Tap order push → correct Order detail (not home).
+QA-125	ODB notifications — full E2E (do in this sequence)	N8 — Mobile-only notification regression (after N2–N4)	P1	Background vs foreground	Mobile	Receive push while app backgrounded and while open.
+QA-126	ODB notifications — full E2E (do in this sequence)	N8 — Mobile-only notification regression (after N2–N4)	P1	Prefs survive relaunch	Mobile	Kill app → reopen → prefs + push registration intact.
+QA-127	ODB notifications — full E2E (do in this sequence)	N8 — Mobile-only notification regression (after N2–N4)	P2	iOS + Android both	Mobile	Spot-check one transactional push on **both** platforms before prod store builds.
+QA-128	ODB storefront — returns, claims, post-purchase (P1 / P2)		P1	Returns timeline	Web+Mobile	Order with return → Returns tab shows **returnTimeline** steps.
+QA-129	ODB storefront — returns, claims, post-purchase (P1 / P2)		P1	Return refund	Admin	Admin/seller issue return refund → marketplace refund path; split tender respected (**then** N4 return_refunded).
+QA-130	ODB storefront — returns, claims, post-purchase (P1 / P2)		P1	Buyer protection claim refund [Web+Admin]		Resolve claim with refund on **paid** order (not cancelled-only) → ODB refund brain; split OK.
+QA-131	ODB storefront — returns, claims, post-purchase (P1 / P2)		P2	Post-purchase messages	Web+Mobile	Buyer/seller message thread on order still works after wallet checkout (**then** N4 messages).
+QA-132	ODB storefront — returns, claims, post-purchase (P1 / P2)		P2	Cancel line after partial ship	Web	Partial shipment → cancel remaining lines only; refund for cancelled lines only.
+QA-133	ODB admin — orders, refunds, compliance (P0 / P1)		P0	Payment tender panel		Split, wallet, or **card-only paid** order → Order details → **Payment tender** (captured total + Stripe PI id when present).
+QA-134	ODB admin — orders, refunds, compliance (P0 / P1)		P0	Refund breakdown admin		After refund → **Refunds** table + wallet/card refunded lines + **remaining per tender** if partial.
+QA-135	ODB admin — orders, refunds, compliance (P0 / P1)		P1	Admin partial-cancel totals		After admin **cancel-items** → subtotal/shipping/tax reflect **non-cancelled** lines; note under totals explains proportional fees.
+QA-136	ODB admin — orders, refunds, compliance (P0 / P1)		P1	Admin batch cancel-items		Cancel **two+ pending lines in one action** → single fee shrink (totals math matches sequential cancels); auto-refund per line or full remainder if order fully cancelled.
+QA-137	ODB admin — orders, refunds, compliance (P0 / P1)		P1	Order history		Line cancel → `item_status` history rows; totals change → `totals` history row with `by` set (buyer/admin).
+QA-138	ODB admin — orders, refunds, compliance (P0 / P1)		P1	Approve/reject tax cert		Compliance → Buyer tax certificates.
+QA-139	ODB admin — orders, refunds, compliance (P0 / P1)		P1	Cancel unshipped		Cancel → stock restored; auto-refund per platform policy.
+QA-140	ODB admin — orders, refunds, compliance (P0 / P1)		P1	Cancel shipped (admin)		Admin cancel shipped → policy message + refund behavior correct.
+QA-141	ODB admin — orders, refunds, compliance (P0 / P1)		P1	Refund cancelled order		“Refund order” on cancelled order when refundable balance remains.
+QA-142	ODB admin — orders, refunds, compliance (P0 / P1)		P1	Order refunds queue		Refunds review panel → issue/retry refunds; links to order detail.
+QA-143	ODB admin — orders, refunds, compliance (P0 / P1)		P1	Returns review		Return approve → refund path works with idempotency.
+QA-144	ODB admin — orders, refunds, compliance (P0 / P1)		P2	Admin cancel refund mode		Platform setting auto vs manual refund queue matches UI copy.
+QA-145	ODB admin — B2B & wallet ops (P1 / P2)		P0	Fund any buyer wallet		Users tab → **Fund wallet** (add or set) on personal or B2B user → balance on `/account/wallet` + header updates. Admin-only; no self-serve top-up.
+QA-146	ODB admin — B2B & wallet ops (P1 / P2)		P1	Users list wallet column		List shows live personal wallet balance.
+QA-147	ODB admin — B2B & wallet ops (P1 / P2)		P1	Fund owner wallet (B2B tab)		B2B accounts → **Fund owner wallet** still works (owner personal wallet); prefer Users for any buyer.
+QA-148	ODB admin — B2B & wallet ops (P1 / P2)		P1	Set wallet balance		Allot/set exact → **BuyerWallet** balance matches.
+QA-149	ODB admin — B2B & wallet ops (P1 / P2)		P1	B2B list columns		List shows **Owner wallet** from live wallet balance.
+QA-150	ODB admin — B2B & wallet ops (P1 / P2)		P1	B2B detail ledger		Detail shows **Recent wallet activity (owner)** from BuyerWallet ledger.
+QA-151	ODB admin — B2B & wallet ops (P1 / P2)		P2	Create B2B account		Create with initial wallet funds → owner can spend at checkout.
+QA-152	ODB admin — B2B & wallet ops (P1 / P2)		P2	Marketing promo note		Optional note on fund (e.g. promo) appears in buyer wallet ledger.
+QA-153	ODB seller portal (P2 — optional)		P2	Seller order view		Seller sees order totals; no broken payment display for marketplace orders.
+QA-154	ODB seller portal (P2 — optional)		P2	Seller fulfill / ship		Ship line → buyer ship email; 1CA sync if used.
+QA-155	ODB seller portal (P2 — optional)		P2	Seller return/refund		Seller-initiated return refund routes through core (not direct Stripe on marketplace order).
+QA-156	ODB seller portal (P2 — optional)		P2	Payment tender on seller view		Seller order detail does **not** require tender panel (admin-only feature) — confirm no regression/errors.
+QA-157	ODB mobile app (run every [Web+Mobile] / [Mobile] mark above)		P0	Mobile login & orders	Mobile	Sign in → orders list + order detail load (same buyer as Web).
+QA-158	ODB mobile app (run every [Web+Mobile] / [Mobile] mark above)		P0	Mobile wallet checkout	Mobile	Wallet toggle + split/wallet-only pay on native (and Expo Web if used).
+QA-159	ODB mobile app (run every [Web+Mobile] / [Mobile] mark above)		P0	Mobile cancel order	Mobile	Cancel triggers same API refund brain (split tender if wallet order) → then **N3** cancel/refund notices.
+QA-160	ODB mobile app (run every [Web+Mobile] / [Mobile] mark above)		P0	Mobile cancel line	Mobile	Line cancel partial refund OK.
+QA-161	ODB mobile app (run every [Web+Mobile] / [Mobile] mark above)		P0	Mobile notifications E2E	Mobile	Complete **N0–N1**, **N2** spot-check, **N8** (push deep link + inbox).
+QA-162	ODB mobile app (run every [Web+Mobile] / [Mobile] mark above)		P1	Mobile tax certs	Mobile	Profile → Tax certificates — upload + list; checkout still taxable until approved.
+QA-163	ODB mobile app (run every [Web+Mobile] / [Mobile] mark above)		P1	Mobile wallet history	Mobile	Balance + ledger after checkout and after refund.
+QA-164	ODB mobile app (run every [Web+Mobile] / [Mobile] mark above)		P1	Mobile returns/claims	Mobile	Open return or claim if UI exposed → **N4** notices.
+QA-165	ODB mobile app (run every [Web+Mobile] / [Mobile] mark above)		P2	Mobile B2B team	Mobile	`/account/b2b-team` equivalent loads; no shared credit pool copy.
+QA-166	ODB mobile app (run every [Web+Mobile] / [Mobile] mark above)		P2	Push credentials regression	Mobile	Fresh install → allow notifications → token registered before first order.
+QA-167	ODB marketplace-core / API (smoke via UI or one order)		P0	Proportional refund (core)		Partial refund on split order → wallet + card ratio correct (admin tender + Stripe).
+QA-168	ODB marketplace-core / API (smoke via UI or one order)		P0	Full refund split (core)		Full refund split order → wallet + card portions both restored.
+QA-169	ODB marketplace-core / API (smoke via UI or one order)		P1	Wallet-only refund (core)		Full refund wallet-only → wallet only.
+QA-170	ODB marketplace-core / API (smoke via UI or one order)		P1	API cart parity		`create-payment-intent` + `checkout` with `walletApplyCents` → PI amount = card portion only.
+QA-171	ODB marketplace-core / API (smoke via UI or one order)		P1	Marketplace-core vs API cancel		Storefront cancel uses **API** `requestRefund` with split logic + `orderPaymentRefundable` on last-line cancel.
+QA-172	ODB marketplace-core / API (smoke via UI or one order)		P1	Buyer order GET enrichment		`GET /user/orders/:id` includes `refunds` + `paymentTransactions` (read-only synth if no ledger rows); no extra DB backfill on every view.
+QA-173	ODB marketplace-core / API (smoke via UI or one order)		P2	1CA internal refund API		POST internal onedirectbuy refund route with idempotency → same split behavior.
+QA-174	ODB marketplace-core / API (smoke via UI or one order)		P2	Claim refund endpoint		Buyer protection claim refund uses `executeDirectOrderRefund`.
+QA-175	1CA (Fulfill / onechanneladmin) (P0 / P1)		P0	Marketplace refund bridge		Refund ODB **marketplace** paid order from 1CA → **ODB core** (`onedirectbuyRefundPaidOrderViaCore`); **no** direct Stripe refund in 1CA for that order.
+QA-176	1CA (Fulfill / onechanneladmin) (P0 / P1)		P0	Split order from 1CA		Refund wallet+card ODB order from Fulfill → proportional wallet + card (verify ODB admin + buyer wallet).
+QA-177	1CA (Fulfill / onechanneladmin) (P0 / P1)		P1	1CA vs ODB boundary		ODB-created marketplace order always ODB refund brain; not treated as native 1CA credit order.
+QA-178	1CA (Fulfill / onechanneladmin) (P0 / P1)		P1	1CA native B2B unchanged		Checkout/orders **inside 1CA** (non-ODB marketplace) still use **1CA B2B credits** as before.
+QA-179	1CA (Fulfill / onechanneladmin) (P0 / P1)		P1	Order sync after refund		1CA order sync reflects refund status after ODB processes refund.
+QA-180	1CA (Fulfill / onechanneladmin) (P0 / P1)		P2	Return flow in 1CA UI		Approve/complete return on ODB order → refund via bridge.
+QA-181	1CA (Fulfill / onechanneladmin) (P0 / P1)		P2	Fulfill cancel		Cancel from Fulfill on marketplace order → refund via ODB not Stripe-only.
+QA-182	Regression & platform (P2 — optional, run if time)		P2	Branded line-item emails		Cancel/ship emails show correct line subset (not whole order when partial).
+QA-183	Regression & platform (P2 — optional, run if time)		P2	Search / fitment		MPN/SKU search and fitment tab still load (catalog regression).
+QA-184	Regression & platform (P2 — optional, run if time)		P2	Sitemap		Public sitemap/pages routes OK; no duplicate product URL explosion.
+QA-185	Regression & platform (P2 — optional, run if time)		P2	Brand logos		Brand logos render (including SVG-as-PNG edge cases).
+QA-186	Regression & platform (P2 — optional, run if time)		P2	Cart persist on login		Same shopper login mid-session → cart not wiped incorrectly.
+QA-187	Regression & platform (P2 — optional, run if time)		P2	Guest order lookup		Track order by email + order id still works.
+QA-188	Regression & platform (P2 — optional, run if time)		P2	Multi-seller order admin		Admin order view scoped totals for seller vs full order.

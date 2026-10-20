@@ -1,0 +1,13 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-BRAND-DASHBOARD	Brand	Brand	Open workspace overview metrics	Open workspace overview metrics	P0	Yes	Working
+OPH-BRAND-ADD-	Brand	Brand	Create product with required fields	Create product with required fields	P0	Yes	Working
+OPH-BRAND-PRODUCT-DETAIL	Brand	Brand	Open product detail from studio	Open product detail from studio	P0	Yes	Working
+OPH-BRAND-AI-STUDIO	Brand	Brand	Open AI Product Studio with filters	Open AI Product Studio with filters	P0	Yes	Working
+OPH-BRAND-DISTRIBUTION	Brand	Brand	Open distributions / channel sync	Open distributions / channel sync	P0	Yes	Working
+OPH-BRAND-CLIENT-ACCESS	Brand	Brand	Open client access hub	Open client access hub	P0	Yes	Working
+OPH-BRAND-DATA-QUALITY	Brand	Brand	Open data quality dashboard	Open data quality dashboard	P0	Yes	Working
+OPH-BRAND-EXPORT	Brand	Brand	Open export center	Open export center	P0	Yes	Working
+OPH-BRAND-IMPORT	Brand	Brand	Open import center	Open import center	P0	Yes	Working
+OPH-BRAND-CHANGELOG	Brand	Brand	Open product change log	Open product change log	P0	Yes	Working
+OPH-BRAND-SETTINGS	Brand	Brand	Open settings and profile deep-link	Open settings and profile deep-link	P0	Yes	Working
+OPH-BRAND-SUBSCRIPTION	Brand	Brand	View subscription plans without checkout	View subscription plans without checkout	P0	Yes	Working

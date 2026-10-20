@@ -1,0 +1,1052 @@
+{
+  "1": {
+    "flowId": 1,
+    "name": "Smoke — sign-in for every role",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/functional/Auth.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ZUKA-AUTH-01",
+        "title": "Customer signs in and sees Home / Orders / Cart / Profile tabs",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-AUTH-02",
+        "title": "Profile shows the signed-in customer",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ZUKA-AUTH-03",
+        "title": "Customer logs out from Profile and returns to sign-in",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ZUKA-AUTH-04",
+        "title": "Customer 2 signs in on zukaongo.com",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ZUKA-AUTH-05",
+        "title": "Wrong password → ",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "ZUKA-AUTH-06",
+        "title": "Sign-in page shows Google, guest and create-account options",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "ZUKA-AUTH-07",
+        "title": "Forgot password opens the reset-link form",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "ZUKA-AUTH-08",
+        "title": "Create account form asks for name, email and a 6+ character password",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "ZUKA-AUTH-09",
+        "title": "Continue as guest opens the app without an account",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 9
+      },
+      {
+        "stepId": "ZUKA-AUTH-10",
+        "title": "Superadmin signs in and sees the full admin console",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 10
+      },
+      {
+        "stepId": "ZUKA-AUTH-11",
+        "title": "Superadmin signs out back to ",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 11
+      },
+      {
+        "stepId": "ZUKA-AUTH-12-${key}",
+        "title": "${account.label} signs in with the reception role",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 12
+      },
+      {
+        "stepId": "ZUKA-AUTH-13",
+        "title": "Admin wrong password shows an error and no console",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 13
+      },
+      {
+        "stepId": "ZUKA-AUTH-14-${key}",
+        "title": "${account.label} signs in and lands on Deliveries",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 14
+      },
+      {
+        "stepId": "ZUKA-AUTH-15-${key}",
+        "title": "${account.label} signs out to the partner sign-in",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 15
+      },
+      {
+        "stepId": "ZUKA-AUTH-16",
+        "title": "Partner app wrong password → ",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 16
+      },
+      {
+        "stepId": "ZUKA-AUTH-17-${i + 1}",
+        "title": "${new URL(url).host} shows the ZukaOngo Partner sign-in",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 17
+      },
+      {
+        "stepId": "ZUKA-AUTH-18",
+        "title": "Driver signs in on the partners.zukaongo.com alias",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 18
+      },
+      {
+        "stepId": "ZUKA-AUTH-19",
+        "title": "admin.zukaongo.com/orders without a session shows sign-in",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 19
+      },
+      {
+        "stepId": "ZUKA-AUTH-20",
+        "title": "drivers.zukaongo.com/settings without a session shows sign-in",
+        "specFile": "tests/Zukaongo/functional/Auth.spec.js",
+        "order": 20
+      }
+    ]
+  },
+  "2": {
+    "flowId": 2,
+    "name": "Public site & legal pages",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/functional/PublicSite.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ZUKA-PUB-01",
+        "title": "Landing page title and Grand Cayman hero headline",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-PUB-02",
+        "title": "Header links: What you can order, For restaurants, Drive with us, Order now",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ZUKA-PUB-03",
+        "title": "Skip-to-content link is present for keyboard users",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ZUKA-PUB-04",
+        "title": "Fees are shown in CI$: delivery from CI$1.99, free over CI$40, pickup no fees",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ZUKA-PUB-05",
+        "title": "Delivery areas list George Town, Seven Mile Beach, Camana Bay, West Bay",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "ZUKA-PUB-06",
+        "title": "App Store and Google Play links point to the ZukaOngo apps",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "ZUKA-PUB-07",
+        "title": "Partner CTAs link to /partner and the partner web app",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "ZUKA-PUB-08",
+        "title": "Typing KY1-1201 and pressing Find food opens the ordering app",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "ZUKA-PUB-15",
+        "title": "Terms and Privacy show a ",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 9
+      },
+      {
+        "stepId": "ZUKA-PUB-16",
+        "title": "Delete-account page explains the 30-day deletion path",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 10
+      },
+      {
+        "stepId": "ZUKA-PUB-17",
+        "title": "Contact form has Name, Email and Message",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 11
+      },
+      {
+        "stepId": "ZUKA-PUB-18",
+        "title": "Send message with empty fields is blocked with a validation message",
+        "specFile": "tests/Zukaongo/functional/PublicSite.spec.js",
+        "order": 12
+      }
+    ]
+  },
+  "3": {
+    "flowId": 3,
+    "name": "Partner onboarding (restaurant & driver applications)",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/functional/PartnerOnboarding.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ZUKA-PA-01",
+        "title": "Restaurant path is selected by default with its fields",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-PA-02",
+        "title": "Switching to driver shows the vehicle choice and hides restaurant fields",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ZUKA-PA-03",
+        "title": "?type=driver preselects the driver path",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ZUKA-PA-04",
+        "title": "Privacy policy link is shown under the form",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ZUKA-PA-05",
+        "title": "Empty form → ",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "ZUKA-PA-06",
+        "title": "Restaurant without an address is refused",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "ZUKA-PA-07",
+        "title": "Bad email is refused",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "ZUKA-PA-08",
+        "title": "Phone with fewer than 7 digits is refused",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "ZUKA-PA-09",
+        "title": "Apply to deliver with an empty form → ",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 9
+      },
+      {
+        "stepId": "ZUKA-PA-10",
+        "title": "Valid application shows a par-… reference",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 10
+      },
+      {
+        "stepId": "ZUKA-PA-11",
+        "title": "Same email again → ",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 11
+      },
+      {
+        "stepId": "ZUKA-PA-12",
+        "title": "Partners page explains approval and shows the three tabs",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 12
+      },
+      {
+        "stepId": "ZUKA-PA-13",
+        "title": "Each review tab opens without errors",
+        "specFile": "tests/Zukaongo/functional/PartnerOnboarding.spec.js",
+        "order": 13
+      }
+    ]
+  },
+  "4": {
+    "flowId": 4,
+    "name": "Customer browse, cart & checkout",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/functional/CustomerShopping.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ZUKA-SHOP-01",
+        "title": "Postal code KY1-1201 sets the delivery pin",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-SHOP-02",
+        "title": "Popular restaurants shows Burger House as open with ETA and fee",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ZUKA-SHOP-03",
+        "title": "Closed restaurants are labelled Closed",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ZUKA-SHOP-04",
+        "title": "Cuisine chip ",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ZUKA-SHOP-05",
+        "title": "See all opens the Restaurants directory",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "ZUKA-SHOP-06",
+        "title": "Grocery is marked ",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "ZUKA-SHOP-07",
+        "title": "US zip 10001 → ",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "ZUKA-SHOP-08",
+        "title": "Switching the pin back to KY1-1201 lists restaurants again",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "ZUKA-SHOP-09",
+        "title": "Burger House shows Open now, hours and menu sections",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 9
+      },
+      {
+        "stepId": "ZUKA-SHOP-10",
+        "title": "Items show CI$ prices; burgers need Customize, sides have Add",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 10
+      },
+      {
+        "stepId": "ZUKA-SHOP-11",
+        "title": "Product page: instructions limit 200, quantity updates the total",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 11
+      },
+      {
+        "stepId": "ZUKA-SHOP-12",
+        "title": "Add to cart from the product page updates the cart badge",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 12
+      },
+      {
+        "stepId": "ZUKA-SHOP-13",
+        "title": "Cart with Fries from Burger House shows subtotal CI$6.00",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 13
+      },
+      {
+        "stepId": "ZUKA-SHOP-14",
+        "title": "Increasing quantity updates the subtotal to CI$12.00",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 14
+      },
+      {
+        "stepId": "ZUKA-SHOP-15",
+        "title": "CO-12: Pickup shows no delivery fee",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 15
+      },
+      {
+        "stepId": "ZUKA-SHOP-16",
+        "title": "CO-07: an unknown promo code is refused",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 16
+      },
+      {
+        "stepId": "ZUKA-SHOP-17",
+        "title": "Tip 10% adds a tip line",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 17
+      },
+      {
+        "stepId": "ZUKA-SHOP-18",
+        "title": "CO-05: adding a second restaurant keeps both carts, one checkout each",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 18
+      },
+      {
+        "stepId": "ZUKA-SHOP-19",
+        "title": "CO-02: a closed restaurant",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 19
+      },
+      {
+        "stepId": "ZUKA-SHOP-20",
+        "title": "Checkout Burger House → Delivery address → Payment Method with Zuka Wallet",
+        "specFile": "tests/Zukaongo/functional/CustomerShopping.spec.js",
+        "order": 20
+      }
+    ]
+  },
+  "5": {
+    "flowId": 5,
+    "name": "E2E order lifecycle (customer → kitchen → driver → delivered)",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/functional/OrderLifecycle.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "${prefix}-01",
+        "title": "Customer sets a Grand Cayman pin, empties the cart and opens Burger House",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "${prefix}-02",
+        "title": "Customer adds Loaded fries and Iced coffee to the cart",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 2,
+        "dependsOn": "${prefix}-01"
+      },
+      {
+        "stepId": "${prefix}-03",
+        "title": "Cart shows Burger House with ${pickup ? ",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 3,
+        "dependsOn": "${prefix}-02"
+      },
+      {
+        "stepId": "${prefix}-04",
+        "title": "Checkout → choose address → Payment Method",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 4,
+        "dependsOn": "${prefix}-03"
+      },
+      {
+        "stepId": "${prefix}-05",
+        "title": "Customer pays with Zuka Wallet and places the order (CO-08)",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 5,
+        "dependsOn": "${prefix}-04"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-07",
+        "title": "Zuka Credit is charged for the order total",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 6,
+        "dependsOn": "${prefix}-05"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-08",
+        "title": "Kitchen (Burger House) sees the paid order on the kitchen board",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 7,
+        "dependsOn": "ZUKA-E2E-D-07"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-09",
+        "title": "Driver goes online in the partner app",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 8,
+        "dependsOn": "ZUKA-E2E-D-08"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-10",
+        "title": "KI-01: kitchen accepts with 15 min → Preparing, readyBy ≈ now + 15m",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 9,
+        "dependsOn": "ZUKA-E2E-D-09"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-11",
+        "title": "Customer tracking shows Preparing after the kitchen accepts",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 10,
+        "dependsOn": "ZUKA-E2E-D-10"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-12",
+        "title": "Kitchen marks the order ready → Ready",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 11,
+        "dependsOn": "ZUKA-E2E-D-11"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-13",
+        "title": "Driver sees the ready order and claims / accepts it",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 12,
+        "dependsOn": "ZUKA-E2E-D-12"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-14",
+        "title": "DR-03: a second driver claiming the same order gets a conflict",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 13,
+        "dependsOn": "ZUKA-E2E-D-13"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-15",
+        "title": "DR-04: driver picks up → Out for delivery",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 14,
+        "dependsOn": "ZUKA-E2E-D-14"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-16",
+        "title": "Customer tracking shows On the way with the driver",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 15,
+        "dependsOn": "ZUKA-E2E-D-15"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-17",
+        "title": "DR-05: tapping Delivered without a photo asks for proof of delivery",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 16,
+        "dependsOn": "ZUKA-E2E-D-16"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-18",
+        "title": "DR-06: driver uploads the PoD photo → order becomes Delivered automatically",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 17,
+        "dependsOn": "ZUKA-E2E-D-17"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-19",
+        "title": "Customer sees Delivered with the delivery photo",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 18,
+        "dependsOn": "ZUKA-E2E-D-18"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-20",
+        "title": "Delivered is final: a further status change returns 409",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 19,
+        "dependsOn": "ZUKA-E2E-D-19"
+      },
+      {
+        "stepId": "ZUKA-E2E-D-21",
+        "title": "Driver goes back offline",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 20,
+        "dependsOn": "ZUKA-E2E-D-20"
+      },
+      {
+        "stepId": "ZUKA-E2E-X-07",
+        "title": "Kitchen declines with ",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 21,
+        "dependsOn": "ZUKA-E2E-D-21"
+      },
+      {
+        "stepId": "ZUKA-E2E-X-08",
+        "title": "Paid order is refunded automatically to Zuka Credit",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 22,
+        "dependsOn": "ZUKA-E2E-X-07"
+      },
+      {
+        "stepId": "ZUKA-E2E-X-09",
+        "title": "Customer sees the order under Cancelled",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 23,
+        "dependsOn": "ZUKA-E2E-X-08"
+      },
+      {
+        "stepId": "ZUKA-E2E-X-10",
+        "title": "Kitchen cannot accept a cancelled order (409)",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 24,
+        "dependsOn": "ZUKA-E2E-X-09"
+      },
+      {
+        "stepId": "ZUKA-E2E-P-07",
+        "title": "Pickup order has delivery fee 0 and fulfillment mode pickup",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 25,
+        "dependsOn": "ZUKA-E2E-X-10"
+      },
+      {
+        "stepId": "ZUKA-E2E-P-08",
+        "title": "Kitchen accepts (10 min) and marks ready",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 26,
+        "dependsOn": "ZUKA-E2E-P-07"
+      },
+      {
+        "stepId": "ZUKA-E2E-P-09",
+        "title": "Pickup never goes to the driver pool",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 27,
+        "dependsOn": "ZUKA-E2E-P-08"
+      },
+      {
+        "stepId": "ZUKA-E2E-P-10",
+        "title": "Kitchen marks the pickup order handed over → Delivered",
+        "specFile": "tests/Zukaongo/functional/OrderLifecycle.spec.js",
+        "order": 28,
+        "dependsOn": "ZUKA-E2E-P-09"
+      }
+    ]
+  },
+  "6": {
+    "flowId": 6,
+    "name": "Customer account & after delivery",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/functional/CustomerAccount.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ZUKA-ACC-01",
+        "title": "Profile shows the customer and order counters",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-ACC-03",
+        "title": "Wallet: CI$ balance matches the wallet API, activity listed",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ZUKA-ACC-04",
+        "title": "Orders has Active / Completed / Cancelled tabs",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ZUKA-ACC-05",
+        "title": "Completed lists delivered orders with Reorder",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ZUKA-ACC-06",
+        "title": "Tracking a delivered order shows progress, delivery photo and driver",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "ZUKA-ACC-07",
+        "title": "Rating form has 1–5 stars for restaurant, delivery and each item",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "ZUKA-ACC-08",
+        "title": "Problem with order offers the five issue types; Next needs a choice",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "ZUKA-ACC-09",
+        "title": "AF-06: cancelling a paid order returns 403",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "ZUKA-ACC-10",
+        "title": "AF-03: reporting an issue more than 48 h after delivery is refused",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 9
+      },
+      {
+        "stepId": "ZUKA-ACC-11",
+        "title": "Assistant opens with Zuka greeting",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 10
+      },
+      {
+        "stepId": "ZUKA-ACC-12",
+        "title": "Asking ",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 11
+      },
+      {
+        "stepId": "ZUKA-ACC-13",
+        "title": "Help shows FAQs, contact form and partner link",
+        "specFile": "tests/Zukaongo/functional/CustomerAccount.spec.js",
+        "order": 12
+      }
+    ]
+  },
+  "7": {
+    "flowId": 7,
+    "name": "Admin console (superadmin)",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/functional/AdminConsole.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ZUKA-ADM-01",
+        "title": "Vendor stats and Add vendor are shown",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-ADM-02",
+        "title": "Searching ",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ZUKA-ADM-03",
+        "title": "Type filter ",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ZUKA-ADM-04",
+        "title": "Pagination moves to page 2 and back",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ZUKA-ADM-05",
+        "title": "Burger House detail shows Menu / Add-ons / Shop / Orders and menu tools",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "ZUKA-ADM-06",
+        "title": "Vendor tabs Add-ons, Shop and Orders open",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "ZUKA-ADM-07",
+        "title": "Orders shows status and payment filter tabs from doc §2",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "ZUKA-ADM-08",
+        "title": "Delivered + Paid filter lists delivered orders with refund actions",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 8
+      },
+      {
+        "stepId": "ZUKA-ADM-09",
+        "title": "Search by customer email filters orders",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 9
+      },
+      {
+        "stepId": "ZUKA-ADM-10",
+        "title": "Settings sections: General, Fees & cart, Payments, Channels, Notifications, Operations",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 10
+      },
+      {
+        "stepId": "ZUKA-ADM-11",
+        "title": "Order accept timeouts: escalate 5 min, auto-cancel 20 min (config defaults)",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 11
+      },
+      {
+        "stepId": "ZUKA-ADM-12",
+        "title": "Delivery and pickup are enabled; guest checkout is off",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 12
+      },
+      {
+        "stepId": "ZUKA-ADM-13",
+        "title": "People lists every test account with its role",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 13
+      },
+      {
+        "stepId": "ZUKA-ADM-14",
+        "title": "Customers search finds the test customer with wallet controls",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 14
+      },
+      {
+        "stepId": "ZUKA-ADM-15",
+        "title": "Coupons lists SAVE10 and FREESHIP with analytics",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 15
+      },
+      {
+        "stepId": "ZUKA-ADM-16",
+        "title": "Meal pass lists plans with Edit / Pause",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 16
+      },
+      {
+        "stepId": "ZUKA-ADM-17",
+        "title": "Kitchen board explains the flow and has New / Preparing / Ready lanes",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 17
+      },
+      {
+        "stepId": "ZUKA-ADM-18",
+        "title": "Drive shows the live drivers map and delivery filters",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 18
+      },
+      {
+        "stepId": "ZUKA-ADM-19",
+        "title": "Analytics date ranges switch and show orders and money",
+        "specFile": "tests/Zukaongo/functional/AdminConsole.spec.js",
+        "order": 19
+      }
+    ]
+  },
+  "8": {
+    "flowId": 8,
+    "name": "Restaurant login scope (reception)",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/functional/StaffAccess.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ZUKA-STAFF-01-${key}",
+        "title": "Reception nav shows only restaurant sections",
+        "specFile": "tests/Zukaongo/functional/StaffAccess.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-STAFF-02-${key}",
+        "title": "Vendors list only ${account.vendors.join(",
+        "specFile": "tests/Zukaongo/functional/StaffAccess.spec.js",
+        "order": 2,
+        "dependsOn": "ZUKA-STAFF-01-${key}"
+      },
+      {
+        "stepId": "ZUKA-STAFF-03-${key}",
+        "title": "KI-08: the order list only has paid tickets, from own restaurants",
+        "specFile": "tests/Zukaongo/functional/StaffAccess.spec.js",
+        "order": 3,
+        "dependsOn": "ZUKA-STAFF-02-${key}"
+      },
+      {
+        "stepId": "ZUKA-STAFF-04-${key}",
+        "title": "Kitchen board only shows own-restaurant tickets",
+        "specFile": "tests/Zukaongo/functional/StaffAccess.spec.js",
+        "order": 4,
+        "dependsOn": "ZUKA-STAFF-03-${key}"
+      },
+      {
+        "stepId": "ZUKA-STAFF-06",
+        "title": "Grocery (Fresh Mart) has an order id to probe with",
+        "specFile": "tests/Zukaongo/functional/StaffAccess.spec.js",
+        "order": 5,
+        "dependsOn": "ZUKA-STAFF-04-${key}"
+      },
+      {
+        "stepId": "ZUKA-STAFF-07",
+        "title": "Burger House kitchen accepting a Fresh Mart order is refused (403)",
+        "specFile": "tests/Zukaongo/functional/StaffAccess.spec.js",
+        "order": 6,
+        "dependsOn": "ZUKA-STAFF-06"
+      }
+    ]
+  },
+  "9": {
+    "flowId": 9,
+    "name": "Driver partner app",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/functional/DriverApp.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ZUKA-DRV-01",
+        "title": "Deliveries shows the driver, location status and Open route",
+        "specFile": "tests/Zukaongo/functional/DriverApp.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-DRV-02",
+        "title": "Filters All / Ready / Out for delivery / Delivered all render",
+        "specFile": "tests/Zukaongo/functional/DriverApp.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ZUKA-DRV-03",
+        "title": "Go online → ",
+        "specFile": "tests/Zukaongo/functional/DriverApp.spec.js",
+        "order": 3
+      },
+      {
+        "stepId": "ZUKA-DRV-04",
+        "title": "Go offline → offline banner returns",
+        "specFile": "tests/Zukaongo/functional/DriverApp.spec.js",
+        "order": 4
+      },
+      {
+        "stepId": "ZUKA-DRV-05",
+        "title": "Settings shows earnings: balance, tips, base pay, paid out",
+        "specFile": "tests/Zukaongo/functional/DriverApp.spec.js",
+        "order": 5
+      },
+      {
+        "stepId": "ZUKA-DRV-06",
+        "title": "Cayman drivers are paid by PayPal in US$ at CI$1 = US$1.20",
+        "specFile": "tests/Zukaongo/functional/DriverApp.spec.js",
+        "order": 6
+      },
+      {
+        "stepId": "ZUKA-DRV-07",
+        "title": "Save PayPal email stays disabled for an invalid email",
+        "specFile": "tests/Zukaongo/functional/DriverApp.spec.js",
+        "order": 7
+      },
+      {
+        "stepId": "ZUKA-DRV-08",
+        "title": "Legal links and Back to deliveries",
+        "specFile": "tests/Zukaongo/functional/DriverApp.spec.js",
+        "order": 8
+      }
+    ]
+  },
+  "10": {
+    "flowId": 10,
+    "name": "UI/UX audit — public site & sign-in",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/ui-audit/PublicSiteUiAudit.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "${s.id}-${label}",
+        "title": "Audit ${s.name} (${label})",
+        "specFile": "tests/Zukaongo/ui-audit/PublicSiteUiAudit.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-UI-PUB-11",
+        "title": "Tabbing through the header shows a visible focus indicator",
+        "specFile": "tests/Zukaongo/ui-audit/PublicSiteUiAudit.spec.js",
+        "order": 2
+      }
+    ]
+  },
+  "11": {
+    "flowId": 11,
+    "name": "UI/UX audit — customer app",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/ui-audit/CustomerAppUiAudit.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ZUKA-UI-CUS-${s.id}-${label}",
+        "title": "Audit ${s.name} (${label})",
+        "specFile": "tests/Zukaongo/ui-audit/CustomerAppUiAudit.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-UI-CUS-11-${label}",
+        "title": "Audit location picker dialog (${label})",
+        "specFile": "tests/Zukaongo/ui-audit/CustomerAppUiAudit.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ZUKA-UI-CUS-12-${label}",
+        "title": "Audit assistant chat panel (${label})",
+        "specFile": "tests/Zukaongo/ui-audit/CustomerAppUiAudit.spec.js",
+        "order": 3
+      }
+    ]
+  },
+  "12": {
+    "flowId": 12,
+    "name": "UI/UX audit — admin console",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/ui-audit/AdminUiAudit.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ZUKA-UI-ADM-00",
+        "title": "Audit admin sign in",
+        "specFile": "tests/Zukaongo/ui-audit/AdminUiAudit.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-UI-ADM-15",
+        "title": "Audit vendor detail (Burger House)",
+        "specFile": "tests/Zukaongo/ui-audit/AdminUiAudit.spec.js",
+        "order": 2
+      }
+    ]
+  },
+  "13": {
+    "flowId": 13,
+    "name": "UI/UX audit — partner app",
+    "enabled": true,
+    "tests": [
+      "tests/Zukaongo/ui-audit/PartnerAppUiAudit.spec.js"
+    ],
+    "steps": [
+      {
+        "stepId": "ZUKA-UI-PRT-01-${label}",
+        "title": "Audit partner sign in (${label})",
+        "specFile": "tests/Zukaongo/ui-audit/PartnerAppUiAudit.spec.js",
+        "order": 1
+      },
+      {
+        "stepId": "ZUKA-UI-PRT-02-${label}",
+        "title": "Audit Deliveries (${label})",
+        "specFile": "tests/Zukaongo/ui-audit/PartnerAppUiAudit.spec.js",
+        "order": 2
+      },
+      {
+        "stepId": "ZUKA-UI-PRT-03-${label}",
+        "title": "Audit Partner settings (${label})",
+        "specFile": "tests/Zukaongo/ui-audit/PartnerAppUiAudit.spec.js",
+        "order": 3
+      }
+    ]
+  }
+}

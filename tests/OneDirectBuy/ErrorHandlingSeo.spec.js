@@ -1,5 +1,6 @@
 import { test, expect } from "../helpers/softTest.js";
 import {
+  ONE_DIRECT_BUY_BASE_URL,
   gotoOneDirectBuy,
   openKnownProductDetail,
 } from "../helpers/oneDirectBuyNav.js";
@@ -59,7 +60,7 @@ test.describe("OneDirectBuy — Error Handling & SEO", () => {
 
   test("ODB-UC-460: sitemap XML is reachable", async ({ request, soft }) => {
     await soft("ODB-UC-460", "GET /sitemap.xml (or index) < 500", async () => {
-      const response = await request.get("https://onedirectbuy.com/sitemap.xml");
+      const response = await request.get(`${ONE_DIRECT_BUY_BASE_URL}/sitemap.xml`);
       expect(response.status()).toBeLessThan(500);
       expect([200, 301, 302, 307, 308]).toContain(response.status());
     });

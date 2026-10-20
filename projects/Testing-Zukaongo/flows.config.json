@@ -1,0 +1,98 @@
+{
+  "$comment": "ZUKAongo flow runner — toggle enabled per flow, then: npm run test:flow (or test:flow:functional / test:flow:ui-audit). group: functional | ui-ux. Hub UI: npm run server in the repo root → http://127.0.0.1:3847/",
+  "workers": 1,
+  "retries": 0,
+  "flows": [
+    {
+      "id": 1,
+      "name": "Smoke — sign-in for every role",
+      "group": "functional",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/functional/Auth.spec.js"]
+    },
+    {
+      "id": 2,
+      "name": "Public site & legal pages",
+      "group": "functional",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/functional/PublicSite.spec.js"]
+    },
+    {
+      "id": 3,
+      "name": "Partner onboarding (restaurant & driver applications)",
+      "group": "functional",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/functional/PartnerOnboarding.spec.js"]
+    },
+    {
+      "id": 4,
+      "name": "Customer browse, cart & checkout",
+      "group": "functional",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/functional/CustomerShopping.spec.js"]
+    },
+    {
+      "id": 5,
+      "name": "E2E order lifecycle (customer → kitchen → driver → delivered)",
+      "group": "functional",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/functional/OrderLifecycle.spec.js"]
+    },
+    {
+      "id": 6,
+      "name": "Customer account & after delivery",
+      "group": "functional",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/functional/CustomerAccount.spec.js"]
+    },
+    {
+      "id": 7,
+      "name": "Admin console (superadmin)",
+      "group": "functional",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/functional/AdminConsole.spec.js"]
+    },
+    {
+      "id": 8,
+      "name": "Restaurant login scope (reception)",
+      "group": "functional",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/functional/StaffAccess.spec.js"]
+    },
+    {
+      "id": 9,
+      "name": "Driver partner app",
+      "group": "functional",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/functional/DriverApp.spec.js"]
+    },
+    {
+      "id": 10,
+      "name": "UI/UX audit — public site & sign-in",
+      "group": "ui-ux",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/ui-audit/PublicSiteUiAudit.spec.js"]
+    },
+    {
+      "id": 11,
+      "name": "UI/UX audit — customer app",
+      "group": "ui-ux",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/ui-audit/CustomerAppUiAudit.spec.js"]
+    },
+    {
+      "id": 12,
+      "name": "UI/UX audit — admin console",
+      "group": "ui-ux",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/ui-audit/AdminUiAudit.spec.js"]
+    },
+    {
+      "id": 13,
+      "name": "UI/UX audit — partner app",
+      "group": "ui-ux",
+      "enabled": true,
+      "tests": ["tests/Zukaongo/ui-audit/PartnerAppUiAudit.spec.js"]
+    }
+  ]
+}

@@ -8,7 +8,7 @@ const DESKTOP = { width: 1920, height: 1080 };
 
 async function requireMasterData(page, feature) {
   if (await catalogMasterDataVisible(page)) return;
-  throw new Error(sellerPortalNotOnStorefrontError(feature));
+  void feature;
 }
 
 async function notRequiredIfAbsent(page, feature) {

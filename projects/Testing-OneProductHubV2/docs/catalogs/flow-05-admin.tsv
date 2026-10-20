@@ -1,0 +1,10 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-ADMIN-DASHBOARD	Admin	Admin	Open Admin Dashboard platform overview	Open Admin Dashboard platform overview	P0	Yes	Working
+OPH-ADMIN-BRAND-REGISTRY	Admin	Admin	Open Brand Registry review controls	Open Brand Registry review controls	P0	Yes	Working
+OPH-ADMIN-BRAND-DIRECTORY	Admin	Admin	Open Brand Directory and inspect a brand	Open Brand Directory and inspect a brand	P0	Yes	Working
+OPH-ADMIN-CLIENTS	Admin	Admin	Open Clients management	Open Clients management	P0	Yes	Working
+OPH-ADMIN-PRODUCT-CATALOG	Admin	Admin	Browse admin product catalog	Browse admin product catalog	P0	Yes	Working
+OPH-ADMIN-IMPORT-EXPORT	Admin	Admin	Open import and export centers	Open import and export centers	P0	Yes	Working
+OPH-ADMIN-AI-STUDIO	Admin	Admin	Open AI studio without add-product for admin	Open AI studio without add-product for admin	P0	Yes	Working
+OPH-ADMIN-RBAC	Admin	Admin	Open RBAC access page	Open RBAC access page	P0	Yes	Working
+OPH-ADMIN-SETTINGS	Admin	Admin	Open admin settings	Open admin settings	P0	Yes	Working

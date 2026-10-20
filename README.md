@@ -56,9 +56,10 @@ GitHub Actions (`.github/workflows/playwright.yml`) runs on push/PR to `main`, `
 
 - **Browser:** Chromium only (no Firefox/WebKit)
 - **Speed:** `CI_FAST=1` — 4 workers, 1 retry, no video, traces only on retry, lean reporters
-- **Soft pass:** `CI_SOFT_PASS=1` — UI mismatches are recorded in `ISSUES.md` with markers (`[MISSING-ELEMENT]`, `[STRICT-MODE]`, …); the Actions check stays **green**
+- **Failures fail the job:** the runner exits with Playwright's exit code. UI mismatches are still recorded in `ISSUES.md` with markers (`[MISSING-ELEMENT]`, `[STRICT-MODE]`, …)
 - **Reports:** `reports/<timestamp>/` (HTML + `ISSUES.md` + summary) uploaded as one artifact
-- Set `CI_SOFT_PASS=0` if you want hard failures to fail the job
+- **Soft pass (opt-in, default off):** `CI_SOFT_PASS=1` forces exit 0 even when tests fail — use only for exploratory runs, never as the gating check
+- **Target:** `BASE_URL` defaults to `https://dev.onedirectbuy.com`. Production is refused unless `ALLOW_PROD=1`, and then only the read-only specs in `ci-tests.config.json → productionReadOnly` run
 
 **Control which specs run:** edit `ci-tests.config.json` — set `"enabled": false` to skip a file in the default `regression` suite.
 

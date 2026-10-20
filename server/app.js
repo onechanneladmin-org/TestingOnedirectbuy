@@ -1,9 +1,11 @@
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
-const { optionalAuth } = require("./middleware/auth");
+const { requireAuth } = require("./middleware/auth");
+const { CORS_ORIGINS } = require("./config");
 const flowsRouter = require("./routes/flows");
 const occurrencesRouter = require("./routes/occurrences");
+const projectsRouter = require("./routes/projects");
 const usecasesRouter = require("./routes/usecases");
 const { seedFlows } = require("./services/seedFlows");
 
@@ -12,7 +14,13 @@ const PUBLIC_DIR = path.join(__dirname, "public");
 function createApp() {
   const app = express();
 
-  app.use(cors());
+  // Cross-origin access only for origins listed in CORS_ORIGINS (comma-separated).
+  // The bundled UI is same-origin and needs no entry.
+  app.use(
+    cors({
+      origin: (origin, cb) => cb(null, Boolean(origin) && CORS_ORIGINS.includes(origin)),
+    }),
+  );
   app.use(express.json({ limit: "10mb" }));
 
   app.get("/health", (_req, res) => {
@@ -28,16 +36,24 @@ function createApp() {
     res.sendFile(path.join(PUBLIC_DIR, "coverage.html"));
   });
 
-  // API routes (optional bearer token when API_TOKEN is set)
+  // API routes: bearer token required; refused (503) while API_TOKEN is unset
   const api = express.Router();
-  api.use(optionalAuth);
+  api.use(requireAuth);
 
-  api.post("/seed", async (_req, res, next) => {
+  api.get("/health", (_req, res) => {
+    res.json({ ok: true, service: "onedirectbuy-flow-control" });
+  });
+
+  api.post("/seed", async (req, res, next) => {
     try {
-      const result = await seedFlows();
+      const projectId = req.body?.projectId
+        ? String(req.body.projectId).trim()
+        : undefined;
+      const result = await seedFlows(projectId);
       res.json({
         upserted: result.upserted,
         flows: result.flows.map((f) => ({
+          projectId: f.projectId,
           flowId: f.flowId,
           name: f.name,
           steps: (f.steps || []).length,
@@ -48,6 +64,7 @@ function createApp() {
     }
   });
 
+  api.use("/projects", projectsRouter);
   api.use("/flows", flowsRouter);
   api.use("/occurrences", occurrencesRouter);
   api.use("/usecases", usecasesRouter);

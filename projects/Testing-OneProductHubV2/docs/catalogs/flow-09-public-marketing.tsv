@@ -1,0 +1,35 @@
+Use Case ID	Module	Actor	Use Case	Description	Priority	Automation	Current Status
+OPH-PUBLIC-START-FREE-1	Public marketing	Guest	Start Free opens client B2B registration	Verified on live site: Start Free -> Create Client Account	P0	Yes	Automated
+OPH-PUBLIC-BOOK-DEMO-1	Public marketing	Guest	Book a Demo CTA opens demo request surface	Book a Demo CTA opens demo request surface	P0	Yes	Automated
+OPH-PUBLIC-PRICING-1	Public marketing	Guest	Open public pricing plans (Starter/Growth/Scale)	Open public pricing plans (Starter/Growth/Scale)	P0	Yes	Automated
+OPH-PUBLIC-FAQ-1	Public marketing	Guest	Expand home FAQ What is OneProductHub	Expand home FAQ What is OneProductHub	P0	Yes	Automated
+OPH-PUBLIC-DATA-HUB-1	Public marketing	Guest	Open Product Data Hub footer page	Open Product Data Hub footer page	P0	Yes	Automated
+OPH-PUBLIC-CATALOG-MGMT-1	Public marketing	Guest	Open Product Catalog Management footer page	Open Product Catalog Management footer page	P0	Yes	Automated
+OPH-PUBLIC-AI-ENRICHMENT-1	Public marketing	Guest	Open AI Enrichment footer page	Open AI Enrichment footer page	P0	Yes	Automated
+OPH-PUBLIC-BRAND-SHARING-1	Public marketing	Guest	Open Brand Data Sharing footer page	Open Brand Data Sharing footer page	P0	Yes	Automated
+OPH-PUBLIC-CLIENT-ACCESS-REQ-1	Public marketing	Guest	Open Client Access Requests footer page	Open Client Access Requests footer page	P0	Yes	Automated
+OPH-PUBLIC-MULTICHANNEL-1	Public marketing	Guest	Open Multichannel Sync footer page	Open Multichannel Sync footer page	P0	Yes	Automated
+OPH-PUBLIC-WEBSITE-SYNC-1	Public marketing	Guest	Open Website Sync footer page	Open Website Sync footer page	P0	Yes	Automated
+OPH-PUBLIC-SOLUTION-BRANDS-1	Public marketing	Guest	Open Solutions Brands footer page	Open Solutions Brands footer page	P0	Yes	Automated
+OPH-PUBLIC-SOLUTION-RETAIL-1	Public marketing	Guest	Open Solutions Retailers footer page	Open Solutions Retailers footer page	P0	Yes	Automated
+OPH-PUBLIC-VARIANTS-1	Public marketing	Guest	Open product-data Variants page	Open product-data Variants page	P0	Yes	Automated
+OPH-PUBLIC-FITMENT-1	Public marketing	Guest	Open product-data Fitment page	Open product-data Fitment page	P0	Yes	Automated
+OPH-PUBLIC-BLOG-1	Public marketing	Guest	Open Blog from footer	Open Blog from footer	P0	Yes	Automated
+OPH-PUBLIC-RESOURCES-1	Public marketing	Guest	Open Resources from footer	Open Resources from footer	P0	Yes	Automated
+OPH-PUBLIC-CONTACT-1	Public marketing	Guest	Open Contact from footer	Open Contact from footer	P0	Yes	Automated
+OPH-PUBLIC-SOLUTION-MFG-1	Public marketing	Guest	Open Solutions Manufacturers page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-SOLUTION-DIST-1	Public marketing	Guest	Open Solutions Distributors page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-SOLUTION-DEALER-1	Public marketing	Guest	Open Solutions Dealers page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-SOLUTION-ECOM-1	Public marketing	Guest	Open Solutions Ecommerce Teams page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-SOLUTION-AUTO-1	Public marketing	Guest	Open Solutions Automotive page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-SOLUTION-RENTAL-1	Public marketing	Guest	Open Solutions Rental page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-SOLUTION-MEDICAL-1	Public marketing	Guest	Open Solutions Medical page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-CATEGORIES-1	Public marketing	Guest	Open product-data Categories page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-BUNDLES-1	Public marketing	Guest	Open product-data Bundles page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-DIGITAL-ASSETS-1	Public marketing	Guest	Open product-data Digital Assets page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-DOCUMENTS-1	Public marketing	Guest	Open product-data Documents page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-COMPLIANCE-1	Public marketing	Guest	Open product-data Compliance page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-MULTILINGUAL-1	Public marketing	Guest	Open product-data Multilingual page	Live footer	P0	Yes	Automated
+OPH-PUBLIC-HERO-CAROUSEL-1	Public marketing	Guest	Hero carousel previous/next cards	Previous card / Next card	P0	Yes	Automated
+OPH-PUBLIC-CAPABILITIES-1	Public marketing	Guest	See full brand / client capabilities	Create control share / Request receive sell	P0	Yes	Automated
+OPH-PUBLIC-COOKIE-1	Public marketing	Guest	Accept cookie banner	Pass if banner absent	P0	Yes	Automated
