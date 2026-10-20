@@ -31,7 +31,7 @@
     "production-qa:generate": "node scripts/generate-production-qa.mjs",
     "production-qa:test": "playwright test tests/OneDirectBuy/ProductionQaCoverage.spec.js tests/OneDirectBuy/ProductionQaLive.spec.js",
     "production-qa:report": "node scripts/update-production-qa-results.mjs",
-    "posttest": "node -e \"console.log('Reports: reports/<run>/ \u2014 toggle flows in flows.config.json (npm test) or files in ci-tests.config.json (npm run test:ci)')\"",
+    "posttest": "node -e \"console.log('Reports: reports/<run>/ — toggle flows in flows.config.json (npm test) or files in ci-tests.config.json (npm run test:ci)')\"",
     "test:coupons": "playwright test tests/OneDirectBuy/Coupons.spec.js --project=chromium",
     "test:integration": "node --test --test-timeout=300000 server/routes/usecases.integration.test.js"
   },
@@ -44,6 +44,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "1.62.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
