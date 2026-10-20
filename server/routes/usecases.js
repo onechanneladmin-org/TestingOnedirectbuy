@@ -1,6 +1,7 @@
 const express = require("express");
 const UseCase = require("../models/UseCase");
-const { syncFromSheet, sheetConfigured } = require("../services/useCaseStore");
+const { syncFromSheet, sheetConfigured, recordResults } = require("../services/useCaseStore");
+const { resultsFromTests, testsFromPlaywrightJson } = require("../../lib/useCaseReport");
 const { summarize, resultsCsv } = require("../lib/useCaseResults");
 
 const router = express.Router();
@@ -58,6 +59,27 @@ router.post("/sync", async (_req, res, next) => {
     res.json(await syncFromSheet());
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message });
+    next(err);
+  }
+});
+
+/**
+ * POST /api/usecases/results — record results from any runner (this app's reporter, the 1CA e2e
+ * suite, a manual tester). Body: { source, runId, results:[{useCaseId,status,error}] }
+ * or { source, runId, playwrightReport: <Playwright JSON reporter output> }.
+ */
+router.post("/results", async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    let results = Array.isArray(body.results) ? body.results : null;
+    if (!results && body.playwrightReport) results = resultsFromTests(testsFromPlaywrightJson(body.playwrightReport));
+    if (!results) return res.status(400).json({ error: "Send results:[{useCaseId,status,error}] or playwrightReport." });
+    if (results.length > 5000) return res.status(413).json({ error: "At most 5000 results per call." });
+    const source = String(body.source || "api").slice(0, 60);
+    const runId = String(body.runId || `${source}-${new Date().toISOString()}`).slice(0, 120);
+    const out = await recordResults(results, { source, runId, flowId: String(body.flowId || "").slice(0, 120) });
+    res.status(201).json({ ...out, runId, received: results.length });
+  } catch (err) {
     next(err);
   }
 });
