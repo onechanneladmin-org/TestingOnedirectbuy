@@ -1,10 +1,8 @@
 name: Playwright Tests
 
+# Manual only (owner decision 2026-10-21): the suite drives live sites with real test accounts, so it
+# never starts on push or pull_request. Run it from Actions → Playwright Tests → Run workflow.
 on:
-  push:
-    branches: [main, master, develop]
-  pull_request:
-    branches: [main, master, develop]
   workflow_dispatch:
     inputs:
       suite:
