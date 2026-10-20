@@ -1,9 +1,7 @@
 name: Deploy OneTest (GKE)
 
+# Manual only (owner 2026-10-21): the testing app runs locally; nothing deploys on push to cicd-prod.
 on:
-  push:
-    branches:
-      - cicd-prod
   workflow_dispatch:
 
 concurrency:
