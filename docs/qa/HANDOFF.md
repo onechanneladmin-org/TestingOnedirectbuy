@@ -1,6 +1,6 @@
 # E2E UI/UX testing: hand-over (start here)
 
-Written 2026-10-22. You are taking over the end-to-end UI/UX test work for the 1CA admin and the ODB storefront. Read in this order:
+Written 2026-10-22. **Full reference (audit of every existing spec, validation points per flow, templates): [`E2E-TEST-GUIDE.md`](./E2E-TEST-GUIDE.md).** You are taking over the end-to-end UI/UX test work for the 1CA admin and the ODB storefront. Read in this order:
 1. **This file:** what exists, what's missing, and what to do first.
 2. [`RUNBOOK.md`](./RUNBOOK.md): setup, env files, run commands, adding a flow, troubleshooting.
 3. [`E2E-UI-UX-PLAN.md`](./E2E-UI-UX-PLAN.md): the reasoning (test layers, per-step checks, stability rules).

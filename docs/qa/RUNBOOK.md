@@ -1,6 +1,6 @@
 # E2E UI/UX testing: runbook (1CA admin + ODB storefront)
 
-**New here? Start with [`HANDOFF.md`](./HANDOFF.md):** what exists, the 15 missing flows and the first week.
+**Full reference: [`E2E-TEST-GUIDE.md`](./E2E-TEST-GUIDE.md).** **New here? Start with [`HANDOFF.md`](./HANDOFF.md):** what exists, the 15 missing flows and the first week.
 
 How to set up, run, read results and add new flows. Why it's built this way: [`E2E-UI-UX-PLAN.md`](./E2E-UI-UX-PLAN.md).
 
