@@ -2,6 +2,7 @@
 import path from "path";
 import { config as loadDotenv } from "dotenv";
 import { defineConfig, devices } from "@playwright/test";
+import e2eEnv from "./tests/support/env.js";
 
 /**
  * Environment variables are loaded from `.env` here and again in global-setup.cjs.
@@ -14,7 +15,8 @@ loadDotenv({ path: path.resolve(process.cwd(), ".env") });
 if (process.env.BASE_URL && !process.env.PLAYWRIGHT_BASE_URL) {
   process.env.PLAYWRIGHT_BASE_URL = process.env.BASE_URL;
 }
-if (process.env.USERNAME && !process.env.TEST_LOGIN_EMAIL) {
+// Windows always sets USERNAME to the OS user ("Anurag singh"): alias it only when it is an email.
+if (/@/.test(process.env.USERNAME || "") && !process.env.TEST_LOGIN_EMAIL) {
   process.env.TEST_LOGIN_EMAIL = process.env.USERNAME;
 }
 if (process.env.PASSWORD && !process.env.TEST_LOGIN_PASSWORD) {
@@ -26,6 +28,11 @@ if (process.env.API_TOKEN && !process.env.REPORT_UPLOAD_AUTH_TOKEN) {
 if (process.env.API_URL && !process.env.REPORT_API_URL) {
   process.env.REPORT_API_URL = process.env.API_URL;
 }
+
+// E2E flow settings (E2E_* vars from this project's .env or the hub .env).
+const e2eBaseURL = e2eEnv.e2eSettings().baseURL;
+const E2E_AUTH_FILE = e2eEnv.AUTH_FILE;
+const localChrome = process.env.CI || process.env.PW_USE_CHROME === "0" ? {} : { channel: "chrome" };
 
 const ci = Boolean(process.env.CI);
 const testEnv = (
@@ -154,7 +161,7 @@ export default defineConfig({
     {
       name: "setup",
       testDir: "./tests",
-      testMatch: /auth\.setup\.js/,
+      testMatch: /(^|[\\/])auth\.setup\.js$/,
       use: {
         ...devices["Desktop Chrome"],
         ...(ci || process.env.PW_USE_CHROME === "0"
@@ -162,10 +169,41 @@ export default defineConfig({
           : { channel: "chrome" }),
       },
     },
+    /*
+     * E2E guide flows (docs/qa/E2E-TEST-GUIDE.md): plain test/expect + checkStep, test-org guard,
+     * read-only unless E2E_ALLOW_PROD_WRITES=1 on the test org. One worker, at most 1 retry.
+     *   npm run test:flows            (desktop 1440×900)
+     *   npm run test:flows:readonly   (E2E_READ_ONLY=1: A1, A2, A8 and the read parts of the rest)
+     */
+    {
+      name: "flows-setup",
+      testDir: "./tests",
+      testMatch: /flows\.auth\.setup\.js/,
+      retries: 0,
+      use: { ...devices["Desktop Chrome"], ...localChrome, baseURL: e2eBaseURL },
+    },
+    {
+      name: "flows",
+      testDir: "./tests/Onechanneladmin/flows",
+      testMatch: /.*\.spec\.js/,
+      dependencies: ["flows-setup"],
+      fullyParallel: false,
+      retries: Math.min(retries, 1),
+      timeout: 10 * 60_000,
+      use: {
+        ...devices["Desktop Chrome"],
+        ...localChrome,
+        baseURL: e2eBaseURL,
+        storageState: E2E_AUTH_FILE,
+        viewport: { width: 1440, height: 900 },
+        screenshot: "only-on-failure",
+        trace: "retain-on-failure",
+      },
+    },
     {
       name: "onechanneladmin",
       testDir: "./tests/Onechanneladmin",
-      testIgnore: [/ux-flows\//, /HomeDashboardUxAudit\.spec\.js/],
+      testIgnore: [/ux-flows\//, /flows\//, /HomeDashboardUxAudit\.spec\.js/],
       use: {
         ...devices["Desktop Chrome"],
         ...(ci || process.env.PW_USE_CHROME === "0"
@@ -180,14 +218,12 @@ export default defineConfig({
       // Batch scans 100+ pages; default 5m timeout closes the browser mid-run.
       timeout: Number(process.env.UX_BATCH_TIMEOUT_MS) || 3 * 60 * 60 * 1000,
       // Optional warm session: run setup project first when UX_USE_STORAGE_STATE=1.
-      ...(process.env.UX_USE_STORAGE_STATE === "1"
-        ? { dependencies: ["setup"] }
-        : {}),
+      // Warm session: the E2E flows' login (flows-setup → test org pinned) is reused by default, so each
+      // page skips a ~40 s login. UX_USE_STORAGE_STATE=0 forces a fresh login per spec.
+      ...(process.env.UX_USE_STORAGE_STATE === "0" ? {} : { dependencies: ["flows-setup"] }),
       use: {
         ...devices["Desktop Chrome"],
-        ...(process.env.UX_USE_STORAGE_STATE === "1"
-          ? { storageState: "playwright/.auth/admin.json" }
-          : {}),
+        ...(process.env.UX_USE_STORAGE_STATE === "0" ? {} : { storageState: E2E_AUTH_FILE }),
         ...(ci || process.env.PW_USE_CHROME === "0"
           ? {}
           : { channel: "chrome" }),

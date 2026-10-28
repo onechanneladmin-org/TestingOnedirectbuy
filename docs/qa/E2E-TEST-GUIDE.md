@@ -604,24 +604,24 @@ Severity:  P0 money / P1 / P2
 
 | Flow | Status | Spec | Notes |
 |---|---|---|---|
-| A1 | ✅ exists | 1CA `menu-smoke.spec.js` | verify on first run |
-| A2 | ⚠️ not run | 1CA `flows/a2-order-details-ux.spec.js` | fix selectors on first run |
+| A1 | ✅ passes read-only (live, test org) | 1CA `menu-smoke.spec.js` · hub `flows/a1-login-menu.spec.js` | needs QA user creds (see `1CA-E2E-AUDIT.md`) |
+| A2 | ✅ passes read-only (live, test org) | hub `flows/a2-order-details-ux.spec.js` | new-UI order details; read-only |
 | B3 | ⚠️ off | `Coupons.spec.js` | SAVE10 bug |
 | E1 | ❌ | | |
-| A3 | ❌ | | needs `data-testid`s |
-| A5 | ❌ | | needs `data-testid`s |
-| A6 | ❌ | | needs `data-testid`s |
+| A3 | ⚠️ writes run; WMS steps being fixed | hub `flows/a3-pick-pack-ship.spec.js` | needs `data-testid`s for stability |
+| A5 | ⚠️ writes run; refund passes, payment status stays PAID (finding) | hub `flows/a5-refund.spec.js` | |
+| A6 | ⚠️ writes run; shipping step being fixed | hub `flows/a6-return-rma.spec.js` | |
 | B2 | ❌ | | convert Checkout + Payments |
-| A4 | ❌ | | |
-| A7 | ❌ | | |
-| B4 | ❌ | | convert BuyerOrders |
-| B0 | ❌ | | convert 6 account specs |
-| B1 | ❌ | | convert 12 browse specs |
-| B5 | ❌ | | |
-| A8 | ❌ | | needs a low-permission user |
+| A4 | ⚠️ writes run; WMS confirm step being fixed | hub `flows/a4-short-pick-cancel-refund.spec.js` | |
+| A7 | ⚠️ writes run; cancel-before-pick passes (UX findings only) | hub `flows/a7-cancel.spec.js` | decline = eBay only |
+| B4 | ⚠️ written (read part) | `flows/b4-my-orders.spec.js` | needs ODB_BUYER_LOGIN=1 |
+| B0 | ⚠️ written | `flows/b0-account.spec.js` | guest cases; signed-in cases need ODB_BUYER_LOGIN=1 |
+| B1 | ⚠️ written | `flows/b1-browse.spec.js` | local storefront + dev API |
+| B5 | ⚠️ written | `flows/b5-mobile.spec.js` | |
+| A8 | ⚠️ written; needs a low-permission user | hub `flows/a8-permissions.spec.js` | needs a low-permission user |
 | B6 | ❌ | | needs a B2B test org |
 | S1 | ❌ | | needs a test seller; replaces 6 FAKE specs |
-| C1 | ❌ | | |
+| C1 | ⚠️ writes run; grids have no search box (fixed in spec) | hub `flows/c1-crm.spec.js` | tickets = Help Center |
 
 | Clean-up item | Status |
 |---|---|

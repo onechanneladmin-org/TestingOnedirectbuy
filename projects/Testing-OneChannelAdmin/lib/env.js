@@ -56,6 +56,8 @@ function applyAliases() {
   ];
 
   for (const [alias, target] of pairs) {
+    // Windows always sets USERNAME to the OS user: only an email is a login.
+    if (alias === "USERNAME" && !/@/.test(process.env.USERNAME || "")) continue;
     if (process.env[alias] && !process.env[target]) {
       process.env[target] = process.env[alias];
     }

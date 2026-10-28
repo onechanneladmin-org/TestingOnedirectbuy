@@ -1,0 +1,1208 @@
+{
+  "version": 1,
+  "comment": "Single source of truth for apps/web Navbar and apps/web-v2 shell. apps/web/navbarMenu.js is an adapter only.",
+  "suites": [
+    {
+      "id": "catalog",
+      "label": "Catalog",
+      "icon": "BookOpen",
+      "leaves": [
+        {
+          "id": "products-dashboard",
+          "label": "Dashboard",
+          "path": "/products/dashboard",
+          "group": "General",
+          "icon": "LayoutDashboard",
+          "permissions": ["read:catalog", "read:dashboards"]
+        },
+        {
+          "id": "products-catalog",
+          "label": "Products",
+          "path": "/products/catalog",
+          "group": "General",
+          "icon": "ShoppingCart",
+          "permissions": ["read:catalog", "read:seo"],
+          "permissionType": "or"
+        },
+        {
+          "id": "products-inventory",
+          "label": "Inventory",
+          "path": "/products/inventory",
+          "group": "General",
+          "icon": "Box",
+          "permissions": "read:catalog"
+        },
+        {
+          "id": "products-fitment",
+          "label": "Fitment",
+          "path": "/products/fitment",
+          "group": "General",
+          "icon": "Wrench",
+          "permissions": "read:fitment"
+        },
+        {
+          "id": "products-addons",
+          "label": "Addons",
+          "path": "/products/addons",
+          "group": "General",
+          "icon": "Gift",
+          "permissions": ["read:addons", "superadmin"],
+          "permissionType": "or"
+        },
+        {
+          "id": "products-bundlekits",
+          "label": "Bundles",
+          "path": "/products/bundlekits",
+          "group": "General",
+          "icon": "Layers",
+          "permissions": "read:bundle"
+        },
+        {
+          "id": "products-pricing",
+          "label": "Pricing",
+          "path": "/products/pricing",
+          "group": "General",
+          "icon": "DollarSign",
+          "permissions": "read:pricing"
+        },
+        {
+          "id": "products-images",
+          "label": "Images",
+          "path": "/products/images",
+          "group": "General",
+          "icon": "Image",
+          "permissions": "read:catalog"
+        },
+        {
+          "id": "products-import-export",
+          "label": "Import / Export",
+          "path": "/products/import-export",
+          "group": "General",
+          "icon": "ArrowDownUp",
+          "permissions": "read:catalog"
+        },
+        {
+          "id": "products-catalog-settings",
+          "label": "Settings",
+          "path": "/products/catalog-settings",
+          "group": "General",
+          "icon": "Settings",
+          "permissions": [
+            "read:catalog",
+            "read:businessrules",
+            "read:ai",
+            "superadmin"
+          ],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/products/catalog-settings",
+            "/products/template",
+            "/products/labels",
+            "/products/variation-options",
+            "/products/attribute",
+            "/settings/tasks",
+            "/settings/business-rules",
+            "/products/brands",
+            "/products/business-policies",
+            "/products/catalogs_list",
+            "/products/ai-creation"
+          ]
+        }
+      ],
+      "permissions": "read:catalog"
+    },
+    {
+      "id": "channel",
+      "label": "Channel",
+      "icon": "Radio",
+      "leaves": [
+        {
+          "id": "marketplaceseller",
+          "label": "OneDirectBuy",
+          "path": "/marketplaceseller",
+          "group": "General",
+          "icon": "LayoutDashboard",
+          "permissions": "read:onedirectbuyMarketplace",
+          "activePathPrefixes": ["/marketplaceseller", "/marketplaceseller/"]
+        },
+        {
+          "id": "channel-google-merchant-products",
+          "label": "Google Merchant",
+          "path": "/channel/google-merchant-products",
+          "group": "General",
+          "icon": "Google",
+          "permissions": "read:googleshopping"
+        },
+        {
+          "id": "channel-ebay-dashboard",
+          "label": "eBay",
+          "path": "/channel/ebay-dashboard",
+          "group": "General",
+          "icon": "eBay",
+          "permissions": "read:ebay",
+          "activePathPrefixes": ["/channel/ebay"]
+        },
+        {
+          "id": "channel-amazon-dashboard",
+          "label": "Amazon",
+          "path": "/channel/amazon-dashboard",
+          "group": "General",
+          "icon": "Amazon",
+          "permissions": "read:amazon",
+          "activePathPrefixes": [
+            "/channel/amazon",
+            "/channel/Amazon",
+            "/channel/amazonfba",
+            "/channel/fba-"
+          ]
+        },
+        {
+          "id": "channel-walmart-dashboard",
+          "label": "Walmart",
+          "path": "/channel/walmart-dashboard",
+          "group": "General",
+          "icon": "Walmart",
+          "permissions": "read:walmart",
+          "activePathPrefixes": ["/channel/walmart-"]
+        },
+        {
+          "id": "channel-etsy-dashboard",
+          "label": "Etsy",
+          "path": "/channel/etsy-dashboard",
+          "group": "General",
+          "icon": "Etsy",
+          "permissions": "read:etsy",
+          "activePathPrefixes": ["/channel/etsy"]
+        },
+        {
+          "id": "channel-shopify-dashboard",
+          "label": "Shopify",
+          "path": "/channel/shopify-dashboard",
+          "group": "General",
+          "icon": "Shopify",
+          "permissions": "read:shopify",
+          "activePathPrefixes": ["/channel/shopify"]
+        },
+        {
+          "id": "channel-walmartca-dashboard",
+          "label": "Walmart CA",
+          "path": "/channel/walmartca-products",
+          "group": "General",
+          "icon": "Walmart",
+          "permissions": "read:walmart_ca",
+          "activePathPrefixes": ["/channel/walmartca"]
+        },
+        {
+          "id": "channel-woocommerce-dashboard",
+          "label": "Woocommerce/Wordpress",
+          "path": "/channel/woocommerce-products",
+          "group": "General",
+          "icon": "LayoutDashboard",
+          "permissions": "read:woocommerce",
+          "activePathPrefixes": ["/channel/woocommerce"]
+        },
+        {
+          "id": "channel-quickbook-items",
+          "label": "Quickbooks",
+          "path": "/channel/quickbook-items",
+          "group": "General",
+          "icon": "Box",
+          "permissions": "read:quickbook",
+          "activePathPrefixes": ["/channel/quickbook"]
+        },
+        {
+          "id": "channel-b2b-products",
+          "label": "B2B",
+          "path": "/products/catalogs_list?hub=b2b",
+          "group": "General",
+          "icon": "Box",
+          "permissions": "read:b2bwebsite"
+        },
+        {
+          "id": "channel-facebook-products",
+          "label": "Facebook",
+          "path": "/channel/facebook-products",
+          "group": "General",
+          "icon": "Facebook",
+          "permissions": "read:facebook",
+          "activePathPrefixes": ["/channel/facebook"]
+        },
+        {
+          "id": "channel-tiktok-settings",
+          "label": "TikTok Shop",
+          "path": "/channel/tiktok-settings",
+          "group": "General",
+          "icon": "TikTok",
+          "permissions": "read:tiktokshop",
+          "activePathPrefixes": ["/channel/tiktok"]
+        },
+        {
+          "id": "channel-square-products",
+          "label": "Square",
+          "path": "/channel/square-settings",
+          "group": "General",
+          "icon": "Box",
+          "permissions": "read:square",
+          "activePathPrefixes": ["/channel/square"]
+        }
+      ],
+      "permissions": "read:catalog"
+    },
+    {
+      "id": "fulfillment",
+      "label": "Fulfillment",
+      "icon": "Truck",
+      "leaves": [
+        {
+          "id": "fulfill-orders-dashboard",
+          "label": "Dashboard",
+          "path": "/fulfill/orders/dashboard",
+          "group": "General",
+          "icon": "LayoutDashboard",
+          "permissions": ["read:dashboards", "read:order"]
+        },
+        {
+          "id": "fulfill-orders-rentals",
+          "label": "Rental Orders",
+          "path": "/fulfill/orders/rentals",
+          "group": "General",
+          "icon": "ShoppingCart",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-orders-fulfill-orders",
+          "label": "Orders",
+          "path": "/fulfill/orders/fulfill-orders",
+          "group": "General",
+          "icon": "ShoppingCart",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-orders-shipment",
+          "label": "Shipments",
+          "path": "/fulfill/orders/shipment",
+          "group": "General",
+          "icon": "PackageCheck",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-orders-return",
+          "label": "Returns",
+          "path": "/fulfill/orders/return",
+          "group": "General",
+          "icon": "PackageX",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-orders-refund",
+          "label": "Refunds",
+          "path": "/fulfill/orders/refund",
+          "group": "General",
+          "icon": "DollarSign",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-orders-intake-quote",
+          "label": "Intake Form Queries",
+          "path": "/fulfill/orders/intake-quote",
+          "group": "General",
+          "icon": "ClipboardList",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-orders-deliveries",
+          "label": "Deliveries/Pickups",
+          "path": "/fulfill/orders/deliveries",
+          "group": "General",
+          "icon": "Truck",
+          "permissions": "read:order"
+        },
+        {
+          "id": "delivery-hub",
+          "label": "Driver Hub",
+          "path": "/delivery/hub",
+          "group": "General",
+          "icon": "MapPin",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-orders-cancel",
+          "label": "Cancellations",
+          "path": "/fulfill/orders/cancel",
+          "group": "General",
+          "icon": "XCircle",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-orders-claims",
+          "label": "Claims",
+          "path": "/fulfill/orders/claims",
+          "group": "General",
+          "icon": "AlertCircle",
+          "permissions": "read:order"
+        },
+        {
+          "id": "settings-accounting-invoices",
+          "label": "Invoices",
+          "path": "/settings/accounting-invoices",
+          "group": "General",
+          "icon": "Receipt",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-settings-carriers",
+          "label": "Shipping Carriers",
+          "path": "/fulfill/settings/carriers",
+          "group": "Settings",
+          "icon": "Truck",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-settings-delivery-time-windows",
+          "label": "Delivery Time Windows",
+          "path": "/fulfill/settings/delivery-time-windows",
+          "group": "Settings",
+          "icon": "Calendar",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-settings-rates",
+          "label": "Shipping Lookuplist",
+          "path": "/fulfill/settings/rates",
+          "group": "Settings",
+          "icon": "Search",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-settings-taxrates",
+          "label": "Tax Rates",
+          "path": "/fulfill/settings/taxRates",
+          "group": "Settings",
+          "icon": "FileSpreadsheet",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-settings-label-printing",
+          "label": "Labels Printing",
+          "path": "/fulfill/settings/label-printing",
+          "group": "Settings",
+          "icon": "FileText",
+          "permissions": "read:order"
+        },
+        {
+          "id": "settings-general",
+          "label": "Default Shipping Address",
+          "path": "/settings/general",
+          "group": "Settings",
+          "icon": "MapPin",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-orders-templates",
+          "label": "Order Templates",
+          "path": "/fulfill/orders/templates",
+          "group": "Settings",
+          "icon": "FileText",
+          "permissions": "read:order"
+        },
+        {
+          "id": "fulfill-orders-sendgrid-messages",
+          "label": "SendGrid Messages",
+          "path": "/fulfill/orders/sendgrid-messages",
+          "group": "Settings",
+          "icon": "Mail",
+          "permissions": "read:sendgrid"
+        },
+        {
+          "id": "fulfill-orders-archived",
+          "label": "Archived Orders",
+          "path": "/fulfill/orders/archived",
+          "group": "General",
+          "icon": "Archive",
+          "permissions": "read:order"
+        }
+      ],
+      "permissions": "read:order"
+    },
+    {
+      "id": "wms",
+      "label": "WMS",
+      "icon": "Warehouse",
+      "leaves": [
+        {
+          "id": "wms",
+          "label": "WMS",
+          "path": "/wms",
+          "group": "General",
+          "icon": "Warehouse",
+          "permissions": [
+            "read:warehouse",
+            "read:cyclecount",
+            "read:3pl",
+            "superadmin"
+          ],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/wms/dashboard",
+            "/wms/inventory",
+            "/wms/addInventory",
+            "/products/cycle-count",
+            "/wms/orders",
+            "/wms/pickpack",
+            "/wms/purchaseorders",
+            "/wms/putaway",
+            "/wms/blindRecieve",
+            "/wms/transfers",
+            "/wms/returns",
+            "/wms/operations",
+            "/wms/setup",
+            "/wms/wmssetup",
+            "/wms/3plclients",
+            "/wms/order_replenishment",
+            "/wms/non_inventory_item"
+          ]
+        }
+      ],
+      "permissions": [
+        "read:warehouse",
+        "read:cyclecount",
+        "read:3pl",
+        "superadmin"
+      ],
+      "permissionType": "or"
+    },
+    {
+      "id": "marketing",
+      "label": "Marketing",
+      "icon": "Megaphone",
+      "leaves": [
+        {
+          "id": "marketing-marketingemails",
+          "label": "Email Marketing",
+          "path": "/marketing/marketingemails",
+          "group": "General",
+          "icon": "Mail",
+          "permissions": "read:marketing"
+        },
+        {
+          "id": "marketing-campaigns",
+          "label": "Discounts",
+          "path": "/marketing/campaigns",
+          "group": "General",
+          "icon": "Receipt",
+          "permissions": "read:marketing"
+        },
+        {
+          "id": "marketing-geo-fencing",
+          "label": "Geo Fencing",
+          "path": "/marketing/geo-fencing",
+          "group": "General",
+          "icon": "Globe",
+          "permissions": "superadmin",
+          "badge": "Preview"
+        },
+        {
+          "id": "marketing-allcalendar",
+          "label": "Calendar",
+          "path": "/marketing/allcalendar",
+          "group": "General",
+          "icon": "Calendar",
+          "permissions": "read:calender"
+        },
+        {
+          "id": "marketing-content-management",
+          "label": "Content Management",
+          "path": "/marketing/content-management",
+          "group": "General",
+          "icon": "FileText",
+          "permissions": "read:marketing"
+        },
+        {
+          "id": "marketing-ga4-report",
+          "label": "Google Analytics",
+          "path": "/marketing/ga4-report",
+          "group": "General",
+          "icon": "BarChart3",
+          "permissions": ["read:googleanalytics", "superadmin"],
+          "permissionType": "or"
+        },
+        {
+          "id": "marketing-ads",
+          "label": "Ads",
+          "path": "/marketing/ads",
+          "group": "General",
+          "icon": "Megaphone",
+          "permissions": ["read:facebook", "superadmin"],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/marketing/ads",
+            "/marketing/amazon-ads",
+            "/marketing/add-ebay-ads",
+            "/marketing/metaads",
+            "/marketing/meta-ads",
+            "/marketing/google-ads",
+            "/marketing/tiktokads",
+            "/marketing/fbwizard",
+            "/marketing/sample-dashboards"
+          ]
+        },
+        {
+          "id": "marketing-promotion",
+          "label": "Promotion",
+          "path": "/marketing/promotion",
+          "group": "General",
+          "icon": "Gift",
+          "permissions": "read:ebay",
+          "activePathPrefixes": ["/marketing/promotion", "/marketing/addpromotions"]
+        },
+        {
+          "id": "marketing-settings",
+          "label": "Settings",
+          "path": "/marketing/settings",
+          "group": "General",
+          "icon": "Settings",
+          "permissions": ["read:marketing", "superadmin"],
+          "permissionType": "or",
+          "activePathPrefixes": ["/marketing/settings", "/marketing/templates"]
+        }
+      ],
+      "permissions": "read:marketing"
+    },
+    {
+      "id": "crm",
+      "label": "CRM",
+      "icon": "Users",
+      "leaves": [
+        {
+          "id": "crm",
+          "label": "CRM",
+          "path": "/crm",
+          "group": "General",
+          "icon": "Users",
+          "permissions": [
+            "read:crm",
+            "read:partialcrm",
+            "read:vendorcrm",
+            "read:dashboards",
+            "read:b2bcampaign",
+            "read:serviceorder",
+            "read:chime",
+            "read:marketing-support-supervisor",
+            "read:marketing",
+            "read:catalog",
+            "superadmin"
+          ],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/crm",
+            "/crm/dashboard",
+            "/crm/company",
+            "/crm/account",
+            "/crm/contacts-customers",
+            "/crm/ContactManage",
+            "/crm/leads",
+            "/crm/brand-pipeline",
+            "/crm/deals",
+            "/crm/salespersons",
+            "/crm/tasks",
+            "/crm/workservices",
+            "/crm/workorders",
+            "/crm/sales-performance",
+            "/crm/engage",
+            "/crm/engage-messages",
+            "/settings/telephony",
+            "/b2b/b2bwebsites",
+            "/b2b/websitesettings",
+            "/b2b/seo-tasks",
+            "/crm/sales-products",
+            "/settings/addProduct",
+            "/marketing/contact-addtemplate",
+            "/settings/website-blog"
+          ]
+        }
+      ],
+      "permissions": [
+        "read:crm",
+        "read:partialcrm",
+        "read:dashboards",
+        "read:b2bcampaign",
+        "read:serviceorder",
+        "read:chime",
+        "read:marketing-support-supervisor",
+        "read:marketing",
+        "read:catalog",
+        "superadmin"
+      ],
+      "permissionType": "or"
+    },
+    {
+      "id": "analytics-reports",
+      "label": "Analytics & Reports",
+      "icon": "BarChart3",
+      "leaves": [
+        {
+          "id": "analytics-analytics-reports",
+          "label": "Analytics & Reports",
+          "path": "/analytics/analytics-reports",
+          "group": "General",
+          "icon": "BarChart3",
+          "permissions": [
+            "read:analytics",
+            "read:report",
+            "superadmin"
+          ],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/analytics/analytics-reports",
+            "/analytics/analytics-dashboard",
+            "/analytics/product-analytics",
+            "/analytics/brand-analytics-dashboard",
+            "/analytics/product-supplier",
+            "/wms/wms-analytics",
+            "/reports/report"
+          ]
+        },
+        {
+          "id": "analytics-forecasting",
+          "label": "Forecasting",
+          "path": "/forcasting",
+          "group": "General",
+          "icon": "BarChart3",
+          "permissions": [
+            "read:forcasting",
+            "superadmin"
+          ],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/forcasting"
+          ]
+        },
+        {
+          "id": "products-data-quality",
+          "label": "Data Quality Dashboard",
+          "path": "/products/data-quality-dashboard",
+          "group": "General",
+          "icon": "ShieldCheck",
+          "permissions": [
+            "read:analytics",
+            "superadmin"
+          ],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/products/data-quality-dashboard"
+          ]
+        }
+      ],
+      "permissions": [
+        "read:analytics",
+        "read:report",
+        "read:forcasting",
+        "superadmin"
+      ],
+      "permissionType": "or"
+    },
+    {
+      "id": "gold-pawn",
+      "label": "Gold & Pawn",
+      "icon": "Gem",
+      "leaves": [
+        {
+          "id": "gold",
+          "label": "Gold & Pawn",
+          "path": "/gold",
+          "group": "General",
+          "icon": "Gem",
+          "permissions": "superadmin",
+          "badge": "Preview"
+        }
+      ],
+      "permissions": "superadmin"
+    },
+    {
+      "id": "b2b",
+      "label": "B2B",
+      "icon": "Building2",
+      "leaves": [
+        {
+          "id": "b2b-home",
+          "label": "B2B",
+          "path": "/b2b/home",
+          "group": "General",
+          "icon": "Building2",
+          "permissions": [
+            "read:b2bcampaign",
+            "read:warehouse",
+            "superadmin"
+          ],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/b2b/home",
+            "/b2b/dashboard",
+            "/b2b/b2bvendors",
+            "/b2b/purchaseOrder",
+            "/b2b/vendor-pos",
+            "/b2b/order",
+            "/b2b/b2b",
+            "/b2b/suppliersetup"
+          ]
+        }
+      ],
+      "permissions": [
+        "read:b2bcampaign",
+        "read:warehouse",
+        "superadmin"
+      ],
+      "permissionType": "or"
+    },
+    {
+      "id": "3pl",
+      "label": "3PL",
+      "icon": "Package",
+      "leaves": [
+        {
+          "id": "3pl",
+          "label": "3PL",
+          "path": "/3pl",
+          "group": "General",
+          "icon": "Package",
+          "permissions": ["read:3pl", "read:warehouse"],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/3pl",
+            "/3pl/dashboard",
+            "/3pl/3pl-inventory",
+            "/3pl/3pl-orders",
+            "/3pl/add3pl-order",
+            "/3pl/transfers",
+            "/3pl/3pl-po",
+            "/3pl/billing",
+            "/3pl/portal",
+            "/3pl/ledger",
+            "/3pl/lots",
+            "/3pl/inbound",
+            "/3pl/returns",
+            "/3pl/order-import",
+            "/3pl/packaging-materials"
+          ]
+        }
+      ],
+      "permissions": ["read:3pl", "read:warehouse"],
+      "permissionType": "or"
+    },
+    {
+      "id": "pricing",
+      "label": "Pricing",
+      "icon": "DollarSign",
+      "leaves": [
+        {
+          "id": "pricing-hub",
+          "label": "Pricing",
+          "path": "/pricing",
+          "group": "General",
+          "icon": "DollarSign",
+          "permissions": ["read:pricing", "read:mapprice", "read:repricer"],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/pricing",
+            "/pricing/dashboard",
+            "/pricing/map",
+            "/pricing/targets",
+            "/pricing/violations",
+            "/pricing/resellers",
+            "/pricing/analysis",
+            "/pricing/repricer",
+            "/pricing/settings"
+          ]
+        }
+      ],
+      "permissions": ["read:pricing", "read:mapprice", "read:repricer"],
+      "permissionType": "or"
+    },
+    {
+      "id": "where-to-buy",
+      "label": "Where to Buy",
+      "icon": "MapPin",
+      "leaves": [
+        {
+          "id": "where-to-buy-hub",
+          "label": "Where to Buy",
+          "path": "/where-to-buy",
+          "group": "General",
+          "icon": "MapPin",
+          "permissions": ["superadmin"],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/where-to-buy",
+            "/where-to-buy/locations",
+            "/where-to-buy/product-links",
+            "/where-to-buy/widgets",
+            "/where-to-buy/clicks",
+            "/where-to-buy/settings"
+          ]
+        }
+      ],
+      "permissions": ["superadmin"],
+      "permissionType": "or"
+    },
+    {
+      "id": "operations-hub",
+      "label": "Operations Hub",
+      "icon": "Settings",
+      "leaves": [
+        {
+          "id": "operations-dashboard",
+          "label": "Dashboard",
+          "path": "/operations/dashboard",
+          "group": "General",
+          "icon": "LayoutDashboard",
+          "permissions": "read:operations",
+          "requiresModules": ["Operations"]
+        },
+        {
+          "id": "operations-formulas",
+          "label": "Formulas",
+          "path": "/operations/formulas",
+          "group": "General",
+          "icon": "BookOpen",
+          "permissions": "read:operations",
+          "requiresModules": ["Operations"]
+        },
+        {
+          "id": "operations-raw-material",
+          "label": "Materials Stock",
+          "path": "/operations/raw-material",
+          "group": "General",
+          "icon": "Warehouse",
+          "permissions": "read:operations"
+        },
+        {
+          "id": "operations-products",
+          "label": "Products",
+          "path": "/operations/products",
+          "group": "General",
+          "icon": "Package",
+          "permissions": "superadmin"
+        },
+        {
+          "id": "operations-production",
+          "label": "Production Batches",
+          "path": "/operations/production",
+          "group": "General",
+          "icon": "Factory",
+          "permissions": "read:operations"
+        },
+        {
+          "id": "operations-counts",
+          "label": "Counts",
+          "path": "/operations/counts",
+          "group": "General",
+          "icon": "ClipboardList",
+          "permissions": "read:operations",
+          "requiresModules": ["Operations"]
+        }
+      ],
+      "permissions": "read:operations"
+    },
+    {
+      "id": "restaurant",
+      "label": "Restaurant",
+      "icon": "Menu",
+      "leaves": [
+        {
+          "id": "restaurant-dashboard",
+          "label": "Dashboard",
+          "path": "/restaurant/dashboard",
+          "group": "General",
+          "icon": "LayoutDashboard",
+          "permissions": "superadmin"
+        },
+        {
+          "id": "restaurant-menu-items",
+          "label": "Items",
+          "path": "/restaurant/menu-items",
+          "group": "General",
+          "icon": "Box",
+          "permissions": "superadmin"
+        },
+        {
+          "id": "restaurant-ingredients",
+          "label": "Ingredients",
+          "path": "/restaurant/ingredients",
+          "group": "General",
+          "icon": "ListX",
+          "permissions": "superadmin"
+        },
+        {
+          "id": "restaurant-menu-designer",
+          "label": "Menu Designer",
+          "path": "/restaurant/menu-designer",
+          "group": "General",
+          "icon": "BookOpen",
+          "permissions": "read:restaurant",
+          "requiresModules": ["Restaurant"]
+        },
+        {
+          "id": "restaurant-inventory",
+          "label": "Inventory",
+          "path": "/restaurant/inventory",
+          "group": "Inventory",
+          "icon": "Box",
+          "permissions": "read:restaurant",
+          "requiresModules": ["Restaurant"]
+        },
+        {
+          "id": "restaurant-recipes",
+          "label": "Recipes",
+          "path": "/restaurant/recipes",
+          "group": "Inventory",
+          "icon": "BookOpen",
+          "permissions": "read:restaurant",
+          "requiresModules": ["Restaurant"]
+        },
+        {
+          "id": "restaurant-use-waste",
+          "label": "Use / Waste",
+          "path": "/restaurant/use-waste",
+          "group": "Inventory",
+          "icon": "ListX",
+          "permissions": "read:restaurant",
+          "requiresModules": ["Restaurant"]
+        },
+        {
+          "id": "restaurant-prep-batches",
+          "label": "Prep Batches",
+          "path": "/restaurant/prep-batches",
+          "group": "Inventory",
+          "icon": "Layers",
+          "permissions": "read:restaurant",
+          "requiresModules": ["Restaurant"]
+        },
+        {
+          "id": "restaurant-counts",
+          "label": "Counts",
+          "path": "/restaurant/counts",
+          "group": "Inventory",
+          "icon": "ClipboardList",
+          "permissions": "read:restaurant",
+          "requiresModules": ["Restaurant"]
+        },
+        {
+          "id": "restaurant-usage-cogs",
+          "label": "Usage & COGS",
+          "path": "/restaurant/usage-cogs",
+          "group": "Inventory",
+          "icon": "BarChart3",
+          "permissions": "read:restaurant_reports",
+          "requiresModules": ["Restaurant"]
+        },
+        {
+          "id": "restaurant-kitchen",
+          "label": "Kitchen display",
+          "path": "/restaurant/kitchen",
+          "group": "General",
+          "icon": "ClipboardList",
+          "permissions": "read:kitchen",
+          "requiresModules": ["Restaurant"]
+        },
+        {
+          "id": "restaurant-kitchen-settings",
+          "label": "Kitchen settings",
+          "path": "/restaurant/kitchen-settings",
+          "group": "Settings",
+          "icon": "Settings",
+          "permissions": "read:kitchen",
+          "requiresModules": ["Restaurant"]
+        },
+        {
+          "id": "restaurant-live-map",
+          "label": "Live map",
+          "path": "/restaurant/live-map",
+          "group": "General",
+          "icon": "MapPin",
+          "permissions": "read:delivery-tracking",
+          "requiresModules": ["Restaurant"]
+        },
+        {
+          "id": "restaurant-delivery-hub",
+          "label": "Delivery Hub",
+          "path": "/delivery/hub",
+          "group": "General",
+          "icon": "Truck",
+          "permissions": "read:order",
+          "requiresModules": ["Restaurant"]
+        },
+        {
+          "id": "restaurant-table-booking",
+          "label": "Table booking",
+          "path": "/restaurant/table-booking",
+          "group": "General",
+          "icon": "Calendar",
+          "permissions": "superadmin"
+        },
+        {
+          "id": "restaurant-rewards",
+          "label": "Rewards",
+          "path": "/restaurant/rewards",
+          "group": "General",
+          "icon": "Award",
+          "permissions": "superadmin"
+        },
+        {
+          "id": "restaurant-locations-type-warehouse",
+          "label": "Manage Restaurants",
+          "path": "/restaurant/locations?type=warehouse",
+          "group": "Settings",
+          "icon": "Building2",
+          "permissions": "superadmin"
+        },
+        {
+          "id": "restaurant-website-builder",
+          "label": "Website Builder",
+          "path": "/website-builder",
+          "group": "Website",
+          "icon": "Globe",
+          "permissions": "read:restaurant",
+          "requiresModules": ["Restaurant"],
+          "activePathPrefixes": ["/website-builder", "/website-builder/"],
+          "comment": "CF Worker website-builder via admin path /website-builder; shared Firebase session (no token handoff)"
+        }
+      ],
+      "permissions": "read:restaurant"
+    },
+    {
+      "id": "admin",
+      "label": "Admin",
+      "icon": "Settings",
+      "leaves": [
+        {
+          "id": "admin",
+          "label": "Admin",
+          "path": "/admin",
+          "group": "General",
+          "icon": "Settings",
+          "permissions": [
+            "read:admin",
+            "read:allorganizationusers",
+            "read:shopify",
+            "financeadmin",
+            "superadmin",
+            "read:settings",
+            "read:scheduler",
+            "write:scheduler"
+          ],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/admin",
+            "/settings/user-permission",
+            "/settings/users-attendance",
+            "/settings/allusers",
+            "/settings/marketplace-plans",
+            "/settings/billing-invoices",
+            "/admin/billing",
+            "/settings/developer-settings",
+            "/settings/scheduler",
+            "/settings/scheduler-alerts",
+            "/superadmin/platform-health",
+            "/superadmin/infra-status",
+            "/admin/bigquery",
+            "/settings/integrations",
+            "/settings/channel-settings",
+            "/settings/shipping",
+            "/settings/payment-gateway",
+            "/settings/social-apps",
+            "/settings/connections",
+            "/settings/integration-apps",
+            "/channel/shipengine-settings",
+            "/channel/stripe-settings",
+            "/channel/avalara-settings",
+            "/channel/taxjar-settings",
+            "/channel/netsuite-settings",
+            "/channel/plaid-settings",
+            "/channel/ryder-settings",
+            "/channel/radial-settings",
+            "/settings/email-templates",
+            "/brands/all-brands",
+            "/settings/help-center"
+          ]
+        }
+      ],
+      "permissions": [
+        "read:admin",
+        "read:allorganizationusers",
+        "read:shopify",
+        "financeadmin",
+        "superadmin",
+        "read:settings",
+        "read:scheduler",
+        "write:scheduler"
+      ],
+      "permissionType": "or"
+    },
+    {
+      "id": "accounting",
+      "label": "Accounting",
+      "icon": "Receipt",
+      "leaves": [
+        {
+          "id": "accounting",
+          "label": "Accounting",
+          "path": "/accounting",
+          "group": "General",
+          "icon": "Receipt",
+          "permissions": [
+            "read:accounting",
+            "read:finance",
+            "read:plaid"
+          ],
+          "permissionType": "or",
+          "activePathPrefixes": [
+            "/accounting",
+            "/accounting/dashboard",
+            "/accounting/finance-dashboard",
+            "/accounting/transactions",
+            "/accounting/bank-accounts",
+            "/accounting/general-ledger",
+            "/accounting/invoices",
+            "/accounting/expenses",
+            "/accounting/apar-workflows",
+            "/accounting/reports",
+            "/accounting/customers",
+            "/accounting/vendors",
+            "/accounting/chart-of-accounts",
+            "/accounting/journal-entries",
+            "/accounting/customer-payments",
+            "/accounting/vendor-payments",
+            "/accounting/credit-memos",
+            "/accounting/reconciliation",
+            "/accounting/tax-engine",
+            "/accounting/period-close"
+          ]
+        }
+      ],
+      "permissions": [
+        "read:accounting",
+        "read:finance",
+        "read:plaid"
+      ],
+      "permissionType": "or"
+    },
+    {
+      "id": "onedirectbuy",
+      "label": "OneDirectBuy",
+      "icon": "PackageSearch",
+      "leaves": [
+        {
+          "id": "marketplacecore",
+          "label": "Platform admin",
+          "path": "https://admin.onedirectbuy.com/marketplacecore",
+          "group": "General",
+          "icon": "PackageSearch",
+          "permissions": ["superadmin"],
+          "permissionType": "or"
+        }
+      ],
+      "permissions": "superadmin"
+    }
+  ],
+  "navbar": []
+}

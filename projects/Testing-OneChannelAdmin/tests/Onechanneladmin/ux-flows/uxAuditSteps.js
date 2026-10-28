@@ -5,10 +5,58 @@ const { uiAudit } = require("../../../lib/ui-audit");
 const { findingKey } = require("../../../lib/ui-audit/report");
 const { getReference } = require("../../../lib/ui-audit/references");
 const { captureIssueScreenshot: defaultCaptureShot } = require("../../helpers/flowStep");
+const { auditComponents } = require("../../../lib/ui-audit/components");
 
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || "https://admin.onechanneladmin.com";
-const EMAIL = process.env.TEST_LOGIN_EMAIL || "admin@onechanneladmin.com";
-const PASSWORD = process.env.TEST_LOGIN_PASSWORD || "";
+const { e2eSettings } = require("../../support/env");
+const G = require("../../support/guard");
+
+// Same QA user / admin / test org as the E2E flows (E2E_* in .env); TEST_LOGIN_* still works.
+const E2E = e2eSettings();
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || process.env.E2E_BASE_URL || "https://admin.onechanneladmin.com";
+const EMAIL = E2E.email || process.env.TEST_LOGIN_EMAIL || "admin@onechanneladmin.com";
+const PASSWORD = E2E.password || process.env.TEST_LOGIN_PASSWORD || "";
+/** The audit only looks: every write is aborted unless UX_ALLOW_WRITES=1 (and never for Nexus). */
+const UX_READ_ONLY = process.env.UX_ALLOW_WRITES !== "1";
+/** Re-walk the hub's side-menu pages from every page (slow; each has its own spec). Off by default. */
+const UX_SIDE_MENU = process.env.UX_SIDE_MENU === "1";
+
+/**
+ * Safety for the audit (it clicks Add / Create / tabs / first row on live): pins the test org
+ * (E2E_ORG_ID, Nexus refused) and blocks every write and every request for a denied org.
+ * Installed once per context; blocked calls are listed on page.__uxBlocked.
+ */
+async function installAuditGuard(page) {
+  const context = page.context();
+  if (context.__uxGuard) return;
+  context.__uxGuard = true;
+  G.assertTestOrg(E2E.orgId, process.env);
+  const blocked = [];
+  page.__uxBlocked = blocked;
+  await context.route("**/*", (route) => {
+    const req = route.request();
+    const reason = G.requestBlockReason({ url: req.url(), method: req.method(), headers: req.headers() }, { readOnly: UX_READ_ONLY });
+    if (!reason) return route.fallback();
+    blocked.push({ reason, method: req.method(), url: req.url().split("?")[0] });
+    return route.abort("blockedbyclient");
+  });
+}
+
+/** Pin E2E_ORG_ID in the app and fail if the app moved the session to another org. */
+async function pinTestOrg(page) {
+  let after = await page.evaluate(() => localStorage.getItem("currentorganization")).catch(() => null);
+  // The app's bootstrap can overwrite the org with the user's default after a reload: retry.
+  for (let attempt = 0; attempt < 3 && after !== E2E.orgId; attempt += 1) {
+    await page.evaluate((org) => {
+      localStorage.setItem("currentorganization", org);
+      localStorage.setItem("currentorganization_reset", org);
+    }, E2E.orgId);
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await waitForAdminUiReady(page);
+    after = await page.evaluate(() => localStorage.getItem("currentorganization"));
+  }
+  expect(after, "audit session must be on E2E_ORG_ID (test org)").toBe(E2E.orgId);
+  G.assertTestOrg(after, process.env);
+}
 
 const UX_EXTRA_RULES = new Set([
   "a11y.contrast",
@@ -112,6 +160,7 @@ async function openSignIn(page) {
   if (!PASSWORD) {
     throw new Error("TEST_LOGIN_PASSWORD is empty. Set it in projects/Testing-OneChannelAdmin/.env");
   }
+  await installAuditGuard(page);
   // Prefer home when storageState already has a session; fall back to sign-in.
   await page.goto(`${BASE_URL}/home/dashboard`, {
     waitUntil: "domcontentloaded",
@@ -126,18 +175,27 @@ async function openSignIn(page) {
 }
 
 async function signIn(page) {
-  if (!isLoginUrl(page.url())) {
+  await installAuditGuard(page);
+  if (isLoginUrl(page.url())) {
+    await performLogin(page);
+  } else {
     await waitForAdminUiReady(page);
-    if (!isLoginUrl(page.url())) return;
+    if (isLoginUrl(page.url())) await performLogin(page);
   }
-  await performLogin(page);
+  await pinTestOrg(page);
 }
 
 async function openAdminPage(page, entry) {
+  await installAuditGuard(page);
   const target = new URL(entry.path, BASE_URL).href;
   await page.goto(target, { waitUntil: "domcontentloaded", timeout: 45000 });
   if (isLoginUrl(page.url())) {
     await performLogin(page);
+    await page.goto(target, { waitUntil: "domcontentloaded", timeout: 45000 });
+  }
+  const org = await page.evaluate(() => localStorage.getItem("currentorganization")).catch(() => null);
+  if (org !== E2E.orgId) {
+    await pinTestOrg(page);
     await page.goto(target, { waitUntil: "domcontentloaded", timeout: 45000 });
   }
   await waitForAdminUiReady(page);
@@ -145,7 +203,37 @@ async function openAdminPage(page, entry) {
     throw new Error(`Still on login after opening ${entry.path}: ${page.url()}`);
   }
   const pathOnly = String(entry.path || "").split("?")[0];
-  await expect(page).toHaveURL(new RegExp(pathOnly.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  const onPage = new RegExp(pathOnly.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const stayed = await expect(page).toHaveURL(onPage, { timeout: 10000 }).then(() => true, () => false);
+  if (!stayed) handleRedirect(page, pathOnly);
+}
+
+let auditedPathsCache = null;
+/** Paths that have their own ux-flows spec (so a redirect onto them needs no second audit). */
+function auditedPaths() {
+  if (auditedPathsCache) return auditedPathsCache;
+  auditedPathsCache = new Set();
+  for (const file of fs.readdirSync(__dirname).filter((f) => f.endsWith(".spec.js"))) {
+    const m = fs.readFileSync(path.join(__dirname, file), "utf8").match(/"path":\s*"([^"?]+)/);
+    if (m) auditedPathsCache.add(m[1]);
+  }
+  return auditedPathsCache;
+}
+
+/**
+ * The menu path redirected. Landing on a dashboard or on a page with its own spec means the
+ * feature is off for this org (or the page moved onto an audited one): skip with the reason.
+ * Otherwise the page moved to a new path — keep auditing it there and say so.
+ */
+function handleRedirect(page, pathOnly) {
+  const { test } = require("@playwright/test");
+  const landed = new URL(page.url()).pathname;
+  test.info().annotations.push({ type: "redirect", description: `${pathOnly} → ${landed}` });
+  if (/\/dashboard$/.test(landed) || auditedPaths().has(landed)) {
+    test.skip(true, `${pathOnly} redirects to ${landed} on org ${E2E.orgId} (feature not enabled for this org, or page moved)`);
+  }
+  page.__uxRedirectedTo = landed;
+  console.log(`[ux-audit] ${pathOnly} moved to ${landed}; auditing it there`);
 }
 
 function specFinding(fields) {
@@ -523,7 +611,7 @@ async function listOverlayTriggers(page, limit, rootSelector) {
         el.removeAttribute("data-audit-overlay-trigger");
       });
       const unsafe =
-        /delete|remove|logout|sign out|log out|destroy|void|refund|archive|deactivate|download|export|print|save|submit|confirm|apply|pay|disable|reset|discard/i;
+        /delete|remove|logout|sign out|log out|destroy|void|refund|archive|deactivate|download|export|print|save|submit|confirm|apply|\bpay\b|pay now|disable|reset|discard/i;
       const scored = [];
       for (const el of root.querySelectorAll("button, [role=button]")) {
         const rect = el.getBoundingClientRect();
@@ -533,7 +621,8 @@ async function listOverlayTriggers(page, limit, rootSelector) {
         if (!rootSel && el.closest("aside[aria-label='Home navigation'], .p-paginator, [role=tablist]")) continue;
         if (el.getAttribute("role") === "tab") continue;
         if (/\bp-dialog-header-close\b|\bp-sidebar-close\b/.test(String(el.className || ""))) continue;
-        const text = ((el.innerText || el.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim()).slice(0, 60);
+        // Names start with an icon-font glyph (" Add New"): drop leading non-letters before matching.
+        const text = ((el.innerText || el.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim().replace(/^[^A-Za-z0-9]+/, "")).slice(0, 60);
         if (!text && !el.querySelector(".pi-plus, .pi-eye, .pi-pencil, .pi-filter, .pi-window-maximize")) continue;
         if (unsafe.test(text) || /^(close|cancel|dismiss)$/i.test(text)) continue;
         if (/^(today|yesterday|last 7 days|last 30 days|this week|this month|this year|custom|all time)$/i.test(text)) continue;
@@ -620,6 +709,27 @@ async function readOpenSurfaces(page) {
           name,
           key: `${kind}|${name}|${side}|${Math.round(rect.x / 24)}|${Math.round(rect.width / 16)}`,
         });
+      }
+      // Custom (Tailwind) modals with no dialog role: a fixed full-screen backdrop holding a form panel.
+      if (!surfaces.some((x) => x.kind === "modal" || x.kind === "sidebar")) {
+        for (const backdrop of document.querySelectorAll("body div")) {
+          const bs = getComputedStyle(backdrop);
+          if (bs.position !== "fixed") continue;
+          const br = backdrop.getBoundingClientRect();
+          if (br.width < window.innerWidth * 0.9 || br.height < window.innerHeight * 0.9) continue;
+          if (backdrop.closest("[data-audit-open-surface], aside[aria-label='Home navigation'], .oneca-app-top")) continue;
+          const panel = [...backdrop.querySelectorAll("div, form, section")].find((p) => {
+            const r = p.getBoundingClientRect();
+            return r.width >= 240 && r.width < window.innerWidth * 0.9 && r.height >= 120 && p.querySelector("input:not([type=hidden]), textarea, select, button");
+          });
+          if (!panel) continue;
+          const heading = panel.querySelector("h1,h2,h3,h4,[role=heading]");
+          const name = ((heading && heading.innerText) || "").replace(/\s+/g, " ").trim().slice(0, 80);
+          panel.setAttribute("data-audit-open-surface", String(surfaces.length));
+          const r = panel.getBoundingClientRect();
+          surfaces.push({ index: surfaces.length, kind: "modal", name, noRole: true, key: `modal|${name}|C|${Math.round(r.x / 24)}|${Math.round(r.width / 16)}` });
+          break;
+        }
       }
       return surfaces;
     })
@@ -732,9 +842,21 @@ async function auditOpenedSurfaces(page, entry, seenKeys, stats, options = {}) {
   }
 }
 
+/** Add one component-coverage map into another ({ kind: { found, probed, failed } }). */
+function mergeCoverage(into, add) {
+  for (const [kind, c] of Object.entries(add || {})) {
+    const t = (into[kind] = into[kind] || { found: 0, probed: 0, failed: 0 });
+    t.found += c.found;
+    t.probed += c.probed;
+    t.failed += c.failed;
+  }
+  return into;
+}
+
 async function auditOpenedSurfacesBody(page, entry, seenKeys, stats, options, extras) {
   const limit = options.limit || 4;
   const triggers = await listOverlayTriggers(page, limit, options.rootSelector || "");
+  if (process.env.UX_DEBUG) console.log('[ux-debug] triggers', JSON.stringify(triggers));
   for (const trigger of triggers) {
     if (stats.opened.length >= MAX_OVERLAYS_PER_PAGE) break;
     let originPath = "";
@@ -820,6 +942,24 @@ async function auditOpenedSurfacesBody(page, entry, seenKeys, stats, options, ex
     surface.name = surface.name || trigger.name || surface.kind;
     recordOpenedSurface(stats, surface.kind, surface.name, entry);
     extras.push(...(await auditSurfaceUi(page, entry, surface, seenKeys)));
+    if (surface.noRole) {
+      extras.push(specFinding({
+        ruleId: "overlays.modal-missing-role",
+        element: `modal "${surface.name}"`,
+        selector: `[data-audit-open-surface="${surface.index}"]`,
+        message: `Modal "${surface.name}" has no role="dialog" / aria-modal, so screen readers do not announce it or keep focus in it`,
+        expected: 'role="dialog" aria-modal="true" with an accessible name',
+        actual: "plain <div> overlay",
+      }));
+    }
+    // Components inside the dialog / sidebar (where the forms' inputs live) + empty-submit validation.
+    const surfaceComponents = await auditComponents(page, {
+      rootSelector: `[data-audit-open-surface="${surface.index}"]`,
+      surfaceName: `${surface.kind}: ${surface.name}`,
+      formProbe: UX_READ_ONLY,
+    }).catch(() => ({ findings: [], coverage: {} }));
+    extras.push(...surfaceComponents.findings);
+    mergeCoverage((stats.componentCoverage = stats.componentCoverage || {}), surfaceComponents.coverage);
     if (!options.rootSelector && stats.opened.length < MAX_OVERLAYS_PER_PAGE) {
       const nested = await listOverlayTriggers(page, 2, `[data-audit-open-surface="${surface.index}"]`);
       if (nested.length) {
@@ -832,6 +972,14 @@ async function auditOpenedSurfacesBody(page, entry, seenKeys, stats, options, ex
       }
     }
     await dismissOpenSurfaces(page);
+    // A modal with no close control (or a custom one Esc does not close) would block every later
+    // trigger: start over from a fresh load and re-tag the triggers (same order, same indices).
+    const stuck = await page.locator('[data-audit-open-surface="' + surface.index + '"]').first().isVisible().catch(() => false);
+    if (stuck && !options.rootSelector) {
+      await page.goto(page.url(), { waitUntil: 'domcontentloaded', timeout: 45000 }).catch(() => {});
+      await waitForAdminUiReady(page).catch(() => {});
+      await listOverlayTriggers(page, limit, '');
+    }
   }
   if (!options.rootSelector && (stats.rowProbes || 0) < 2 && stats.opened.length < MAX_OVERLAYS_PER_PAGE) {
     stats.rowProbes = (stats.rowProbes || 0) + 1;
@@ -888,12 +1036,15 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
       ? captureIssueScreenshot
       : defaultCaptureShot;
 
+  const t0 = Date.now();
+  const lap = (label) => console.log(`[ux-audit] timing ${entry.path || entry.name}: ${label} ${Math.round((Date.now() - t0) / 1000)}s`);
   await waitForAdminUiReady(page);
   const reportDir = path.join(
     process.cwd(),
-    "test-results",
-    "ux-audit-pages",
-    String(entry.name || entry.path || "page")
+    // Outside test-results/ (Playwright empties that on every run), so partial re-runs merge.
+    "ux-audit-report",
+    // hub + name: many hubs have a page called "Dashboard".
+    `${entry.hub || ""} ${entry.name || entry.path || "page"}`.trim()
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-"),
   );
@@ -904,6 +1055,7 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
     reportDir,
   });
 
+  lap("rules");
   const prefix = entry.stepPrefix || "UX";
   const reported = [];
 
@@ -969,20 +1121,73 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
   await publishFindings(pageFindings, "page");
 
   const seenFindingKeys = new Set(pageFindings.map((finding) => findingKey(finding)));
+  // Every component kind on the page: static checks + safe probes (lib/ui-audit/components.js).
+  const pageUrl = page.url();
+  const reloadPage = async () => {
+    await page.goto(pageUrl, { waitUntil: "domcontentloaded", timeout: 45000 }).catch(() => {});
+    await waitForAdminUiReady(page).catch(() => {});
+  };
+  // Start from a fresh load: the rule pass can leave a custom (non-PrimeReact) modal open over the page.
+  await reloadPage();
+  const components = await auditComponents(page, {
+    reportDir,
+    reload: reloadPage,
+  }).catch((err) => ({ findings: [], coverage: {}, error: String(err && err.message) }));
+  lap("components");
+  const pageCoverageLine = Object.entries(components.coverage || {})
+    .filter(([, c]) => c.found)
+    .map(([kind, c]) => `${kind} ${c.found}/${c.probed}${c.failed ? `!${c.failed}` : ""}`)
+    .join(", ");
+  console.log(`[ux-audit] components on ${entry.path || entry.name}: ${pageCoverageLine || "(none)"} (found/probed!failed)`);
   const overlayStats = emptyOverlayStats();
   const interactionFindings = [
+    ...components.findings,
     ...(await auditOpenedSurfaces(page, entry, seenFindingKeys, overlayStats, { limit: 6 }).catch(() => [])),
-    ...(await auditSideMenuPages(page, entry, seenFindingKeys, overlayStats).catch(() => [])),
+    ...(lap("overlays"), []),
+    ...(UX_SIDE_MENU ? await auditSideMenuPages(page, entry, seenFindingKeys, overlayStats).catch(() => []) : []),
     ...(await auditInactiveTabs(page, entry, seenFindingKeys, overlayStats).catch(() => [])),
+    ...(lap("tabs"), []),
     ...(await auditOtherTheme(page, entry).catch(() => [])),
-  ].filter((finding) => isUxFinding(finding) || String(finding.ruleId || "").startsWith("overlays."));
+    ...(lap("other theme"), []),
+  ].filter((finding) => isUxFinding(finding) || /^(overlays|components)\./.test(String(finding.ruleId || "")));
+  // User actions that failed earlier on this page (runUserActionSteps) are findings too.
+  for (const f of page.__uxActionFailures || []) {
+    interactionFindings.push(
+      specFinding({
+        ruleId: "interaction.user-action",
+        severity: "major",
+        element: `${f.action.type} "${f.action.name}"`,
+        message: `User action ${f.id} failed: ${f.error}`,
+        expected: "The control responds and the page can return to where it was",
+        actual: f.error,
+      }),
+    );
+  }
+  page.__uxActionFailures = [];
   await publishFindings(interactionFindings, "interaction");
   console.log(
     `[ux-audit] overlays on ${entry.path || entry.name}: ${overlayStats.modals} modal, ${overlayStats.popups} popup, ${overlayStats.sidebars} sidebar`,
   );
   stampOverlayCounts(reportDir, overlayStats);
+  const dialogCoverage = overlayStats.componentCoverage || {};
+  const dialogLine = Object.entries(dialogCoverage)
+    .filter(([, c]) => c.found)
+    .map(([kind, c]) => `${kind} ${c.found}/${c.probed}${c.failed ? `!${c.failed}` : ""}`)
+    .join(", ");
+  console.log(`[ux-audit] components in dialogs on ${entry.path || entry.name}: ${dialogLine || "(none)"}`);
+  components.coverage = mergeCoverage(mergeCoverage({}, components.coverage), dialogCoverage);
+  try {
+    fs.writeFileSync(path.join(reportDir, "component-coverage.json"), JSON.stringify(components.coverage, null, 2));
+  } catch {
+    // reporting must never break the audit
+  }
 
   const findings = [...pageFindings, ...interactionFindings];
+  try {
+    fs.writeFileSync(path.join(reportDir, "findings.json"), JSON.stringify(findings, null, 2));
+  } catch {
+    // reporting must never break the audit
+  }
 
   if (findings.length) {
     const counts = {};
@@ -1000,10 +1205,11 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
     err.uxFindings = reported;
     err.uxFindingCount = findings.length;
     err.overlayStats = overlayStats;
+    err.componentCoverage = components.coverage;
     throw err;
   }
 
-  return { ...result, reportedIssues: reported, overlayStats };
+  return { ...result, reportedIssues: reported, overlayStats, componentCoverage: components.coverage };
 }
 
 function overlayCell(row) {
@@ -1419,14 +1625,22 @@ async function performUserAction(page, action) {
   }
 
   if (action.type === "tab") {
-    const selected = await page
-      .locator("[role=tab][aria-selected=true]")
-      .first()
-      .innerText()
-      .catch(() => "");
-    if (!selected || !selected.replace(/\s+/g, " ").trim().includes(action.name.slice(0, 24))) {
-      throw new Error(`Tab "${action.name}" did not become selected`);
+    // Any VISIBLE selected tab (pages can hold several tab lists); the switch may land a moment later.
+    const want = action.name.slice(0, 24);
+    const isSelected = () =>
+      page
+        .evaluate((name) =>
+          [...document.querySelectorAll("[role=tab][aria-selected=true]")].some((el) => {
+            const r = el.getBoundingClientRect();
+            return r.width > 0 && r.height > 0 && (el.innerText || "").replace(/\s+/g, " ").trim().includes(name);
+          }), want)
+        .catch(() => false);
+    let ok = await isSelected();
+    for (let i = 0; !ok && i < 10; i += 1) {
+      await page.waitForTimeout(300);
+      ok = await isSelected();
     }
+    if (!ok) throw new Error(`Tab "${action.name}" did not become selected`);
     if (action.returnTo) {
       const back = await listUserActions(page);
       const home = back.find((item) => item.type === "tab" && item.name === action.returnTo);
@@ -1459,7 +1673,8 @@ function userActionTitle(action) {
 }
 
 async function runUserActionSteps(page, entry, soft) {
-  const actions = await listUserActions(page);
+  // Side-menu entries are other pages with their own audit spec: walk them only with UX_SIDE_MENU=1.
+  const actions = (await listUserActions(page)).filter((a) => UX_SIDE_MENU || a.type !== "side-menu");
   const prefix = entry.stepPrefix || "UX";
   const typeOrder = { button: 0, link: 1, tab: 2, row: 3, "side-menu": 4 };
   actions.sort((a, b) => (typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9));
@@ -1471,13 +1686,22 @@ async function runUserActionSteps(page, entry, soft) {
     return [];
   }
   const outcomes = [];
+  // A failing action is shown as failed in the live steps but does NOT stop the page: it becomes an
+  // `interaction.user-action` finding that runFullUxAudit reports (and fails on) at the end.
+  page.__uxActionFailures = page.__uxActionFailures || [];
   for (let i = 0; i < actions.length; i += 1) {
     const action = actions[i];
     const id = `${prefix}-05A-${String(i + 1).padStart(2, "0")}`;
-    await soft(id, userActionTitle(action), async () => {
-      const outcome = await performUserAction(page, action);
-      outcomes.push({ ...action, outcome: outcome.result });
-    });
+    try {
+      await soft(id, userActionTitle(action), async () => {
+        const outcome = await performUserAction(page, action);
+        outcomes.push({ ...action, outcome: outcome.result });
+      });
+    } catch (err) {
+      outcomes.push({ ...action, outcome: "failed" });
+      page.__uxActionFailures.push({ id, action, error: String((err && err.message) || err).slice(0, 300) });
+      await returnToOrigin(page, new URL(entry.path, BASE_URL).pathname).catch(() => {});
+    }
   }
   console.log(
     `[ux-audit] user actions on ${entry.path || entry.name}: ${outcomes.map((item) => `${item.name}=${item.outcome}`).join(", ")}`,
