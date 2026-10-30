@@ -9,7 +9,7 @@
  *   node scrapers/gibson/scrape.js 619001 69553-B      # specific MPNs
  *   node scrapers/gibson/scrape.js --file list.txt     # .json array or one MPN per line
  *
- * Options: --out <xlsx>  --workers <n>  --search box|url  --fresh  --no-revalidate
+ * Options: --out <xlsx>  --workers <n>  --search box|url  --fresh  --retry-failed  --no-revalidate
  *          --no-inspect  --headed
  *
  * For every MPN: search the site, open only result cards whose PART # equals the
@@ -49,6 +49,7 @@ function parseArgs(argv) {
     else if (a === '--no-inspect') opts.inspect = false;
     else if (a === '--no-revalidate') opts.revalidate = false;
     else if (a === '--fresh') opts.fresh = true;
+    else if (a === '--retry-failed') opts.retryFailed = true;
     else if (a === '--workers') opts.workers = Math.max(1, Number(argv[++i]) || 1);
     else if (a === '--search') opts.search = argv[++i];
     else if (a === '--out') opts.out = path.resolve(argv[++i]);
@@ -186,6 +187,7 @@ async function main() {
   const progressFile = path.join(outDir, 'progress.jsonl');
   if (opts.fresh && fs.existsSync(progressFile)) fs.unlinkSync(progressFile);
   const done = loadProgress(progressFile);
+  if (opts.retryFailed) for (const [mpn, rec] of done) if (!rec.ok) done.delete(mpn);
   const todo = opts.mpns.filter((m) => !done.has(m));
   log(`${opts.mpns.length} MPNs (${opts.mpns.length - todo.length} already done, ${todo.length} to scrape), search: ${opts.search}, workers: ${opts.workers}`);
 

@@ -36,6 +36,7 @@ node scrapers/gibson/scrape.js 619001 69553-B GP309S-C --out ./gibson_products.x
 | `--workers <n>` | parallel browser tabs (default 3) |
 | `--search box\|url` | `box` types into the header search box like a shopper; `url` opens `/search.html?q=<MPN>`, the page the box submits to. Default: `box` for up to 25 MPNs, `url` above that |
 | `--fresh` | ignore saved progress and start over |
+| `--retry-failed` | keep found products, search the failed MPNs again |
 | `--no-revalidate` | skip re-opening each product page for the second check |
 | `--no-inspect` | skip the home/category structure inspection |
 | `--headed` | show the browser |

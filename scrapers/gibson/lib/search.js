@@ -46,6 +46,13 @@ async function waitForResults(page) {
     null,
     { timeout: 25000 },
   );
+  // Cards can paint before their PART # fills in: wait for every card's part number.
+  await page.waitForFunction(
+    () => Array.from(document.querySelectorAll('.Sui-ProductListItem--root'))
+      .every((c) => ((c.querySelector('.Sui-ProductListItem--dealerid') || {}).innerText || '').replace(/PART\s*#\s*:?/i, '').trim()),
+    null,
+    { timeout: 8000 },
+  ).catch(() => {});
   await page.waitForTimeout(300);
 }
 
@@ -106,7 +113,14 @@ async function searchMpn(page, mpn, mode = 'box') {
     await goto(page, searchUrl(mpn));
   }
   await waitForResults(page);
-  const cards = (await readResultCards(page)).filter((c) => isProductUrl(c.href));
+  let cards = (await readResultCards(page)).filter((c) => isProductUrl(c.href));
+  // An empty or half-rendered result list is searched once more before it counts as a miss.
+  if (!cards.length || cards.some((c) => !c.partNumber)) {
+    await goto(page, searchUrl(mpn));
+    await waitForResults(page);
+    cards = (await readResultCards(page)).filter((c) => isProductUrl(c.href));
+    method += ' (searched twice)';
+  }
 
   // The site writes some part numbers with spaces ("70 - 0006"); spaces never change the part.
   const key = (s) => String(s).toUpperCase().replace(/\s+/g, '');
