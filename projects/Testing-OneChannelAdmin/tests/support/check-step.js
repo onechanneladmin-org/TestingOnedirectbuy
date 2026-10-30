@@ -193,11 +193,29 @@ function appendLog(record) {
  * @param {{id:string,name:string,health?:{issues():any[],reset():void},scope?:string,axe?:boolean,baseline?:boolean,extraMasks?:string[]}} opts
  *   scope — CSS selector of the popup (plain CSS, e.g. ".p-dialog"; the first visible match is used) to limit axe + layout to it.
  */
+/**
+ * Mirror each step to the flow-control dashboard's live feed, the same NDJSON
+ * channel flowStep() writes. Without this the server sees no live steps for the
+ * flows/ specs and reports every declared step as
+ * "Playwright exited 1 before reporting live steps", even on a clean run.
+ * No-ops outside a server-spawned run (RUNNING_OCCURRENCE_ID unset) and never
+ * lets a reporting failure break the test.
+ */
+function emitLive(event) {
+  if (!process.env.RUNNING_OCCURRENCE_ID) return;
+  try {
+    require("../helpers/flowStep").appendLive(event);
+  } catch {
+    // reporting is best-effort
+  }
+}
+
 async function checkStep(page, testInfo, opts) {
   const { expect } = require("@playwright/test");
   const { id, name, health, scope, axe = true, extraMasks = [] } = opts || {};
   const baseline = opts && opts.baseline != null ? opts.baseline : process.env.E2E_VISUAL === "1";
   const slug = stepSlug(id, name);
+  emitLive({ kind: "step", stepId: id, title: name || id, status: "running" });
   const vp = page.viewportSize();
   const viewport = vp ? `${vp.width}x${vp.height}` : "";
   await settle(page);
@@ -234,6 +252,20 @@ async function checkStep(page, testInfo, opts) {
   const record = { at: new Date().toISOString(), test: testInfo.title, id, name, viewport, screenshot: path.relative(process.cwd(), shotPath), issues };
   appendLog(record);
   await testInfo.attach(`ux: ${id} ${name}`, { body: JSON.stringify(record, null, 2), contentType: "application/json" });
+  emitLive({
+    kind: "step",
+    stepId: id,
+    title: name || id,
+    status: bad.length ? "failed" : "passed",
+    ...(bad.length
+      ? {
+          error: `${id} ${name}: UX/health issues — ${bad
+            .map((i) => `${i.kind}: ${i.text}`)
+            .slice(0, 5)
+            .join("; ")}`.slice(0, 2000),
+        }
+      : {}),
+  });
   expect.soft(bad, `${id} ${name}: UX/health issues`).toEqual([]);
   return record;
 }

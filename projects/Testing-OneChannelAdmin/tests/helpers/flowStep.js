@@ -124,6 +124,7 @@ async function reportFlowIssue(issue) {
 
 module.exports = {
   flowStep,
+  appendLive,
   reportFlowIssue,
   captureIssueScreenshot,
   occurrenceId,

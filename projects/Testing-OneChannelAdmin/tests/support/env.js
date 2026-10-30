@@ -43,8 +43,13 @@ function e2eSettings(env = loadE2eEnv()) {
       .filter(Boolean);
   return {
     baseURL: (env.E2E_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, ""),
-    email: env.E2E_USER_EMAIL || "",
-    password: env.E2E_USER_PASSWORD || "",
+    // Fall back to the generic login vars this project already configures
+    // (same aliasing playwright.config.js does for BASE_URL/USERNAME/PASSWORD),
+    // so a single set of credentials serves both the legacy specs and the
+    // flow/UX suites — including runs spawned by the flow-control server,
+    // which inherit only what is in .env.
+    email: env.E2E_USER_EMAIL || env.TEST_LOGIN_EMAIL || "",
+    password: env.E2E_USER_PASSWORD || env.TEST_LOGIN_PASSWORD || "",
     totp: env.E2E_USER_TOTP || "",
     totpSecret: env.E2E_USER_TOTP_SECRET || "",
     orgId: (env.E2E_ORG_ID || "").trim(),
