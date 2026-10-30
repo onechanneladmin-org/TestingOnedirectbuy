@@ -25,3 +25,6 @@ tmp-ocr/
 fix.txt
 # Use-case workbook copies (internal data; the source is the private Google Sheet)
 docs/qa/use-cases-v2.xlsx
+
+# Gibson scraper output (workbook, JSON, progress checkpoint)
+/scrapers/gibson/output/
