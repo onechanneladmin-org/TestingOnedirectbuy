@@ -650,82 +650,6 @@ async function setTheme(page, want) {
   return { changed: true, signature: await themeSignature(page), before };
 }
 
-/**
- * Run the full rule set again in the other theme. Every page is audited dark first (the app's
- * default), then light, because this app applies light mode only to some surfaces — tables repaint
- * while the shell stays dark — and those defects exist only in the second theme.
- */
-async function auditOtherTheme(page, entry, reload) {
-  const extras = [];
-  // The component and overlay passes probe dialogs and can leave the shell torn down, so the top
-  // bar (and with it the theme control) may be gone by now — that is why this used to report
-  // "single-theme" on pages that do have a toggle. Start the theme pass from a clean load.
-  if (typeof reload === "function") {
-    await reload().catch(() => {});
-    await waitForDataLoad(page, { quietMs: 800, timeout: 20000 }).catch(() => {});
-  }
-  const switched = await setTheme(page, "light").catch((error) => {
-    extras.push(
-      specFinding({
-        ruleId: "design.validation.theme-switch",
-        element: "theme toggle",
-        message: "Theme control did not switch to light mode",
-        expected: "clicking the theme control switches the app to light mode",
-        actual: error.message,
-      }),
-    );
-    return undefined;
-  });
-  if (switched === null) {
-    console.log(`[ux-audit] theme on ${entry.path || entry.name}: no theme control, dark only`);
-    return extras;
-  }
-  if (!switched) return extras;
-
-  if (switched.before && switched.signature === switched.before) {
-    extras.push(
-      specFinding({
-        ruleId: "design.validation.theme-switch",
-        element: "theme toggle",
-        message: "Light mode did not repaint any surface",
-        expected: "switching to light mode restyles the page",
-        actual: "every sampled surface kept its dark-mode background",
-      }),
-    );
-  }
-
-  try {
-    const result = await uiAudit(page, {
-      pageName: `${entry.hub || ""} ${entry.name || ""} (light)`.trim(),
-      viewport: { width: 1440, height: 900 },
-      writeReport: false,
-    });
-    const kept = (result.findings || []).filter(isUxFinding);
-    console.log(`[ux-audit] theme on ${entry.path || entry.name}: light pass found ${kept.length}`);
-    for (const finding of kept) {
-      extras.push({
-        ...finding,
-        element: `${finding.element || finding.message} [light mode]`,
-        message: `${finding.message} (light mode)`,
-      });
-    }
-  } catch (error) {
-    extras.push(
-      specFinding({
-        ruleId: "design.validation.theme-switch",
-        element: "theme toggle",
-        message: "Validation could not run in light mode",
-        expected: "audit completes in light mode",
-        actual: error.message,
-      }),
-    );
-  }
-
-  // Leave the app as we found it: currenttheme persists across reloads and leaks into later specs.
-  await setTheme(page, "dark").catch(() => {});
-  return extras;
-}
-
 const MAX_OVERLAYS_PER_PAGE = 10;
 
 function emptyOverlayStats() {
@@ -1206,11 +1130,6 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
   const t0 = Date.now();
   const lap = (label) => console.log(`[ux-audit] timing ${entry.path || entry.name}: ${label} ${Math.round((Date.now() - t0) / 1000)}s`);
   await waitForAdminUiReady(page);
-  // Dark first, always: currenttheme persists in localStorage, so a page is otherwise audited in
-  // whatever theme the previous spec happened to leave behind. auditOtherTheme() runs light after.
-  await setTheme(page, "dark").catch((error) => {
-    console.log(`[ux-audit] theme on ${entry.path || entry.name}: could not force dark — ${error.message}`);
-  });
   const reportDir = path.join(
     process.cwd(),
     // Outside test-results/ (Playwright empties that on every run), so partial re-runs merge.
@@ -1220,14 +1139,6 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-"),
   );
-  const result = await uiAudit(page, {
-    pageName: `${entry.hub || ""} ${entry.name || ""}`.trim() || entry.path,
-    viewport: { width: 1440, height: 900 },
-    writeReport: true,
-    reportDir,
-  });
-
-  lap("rules");
   const prefix = entry.stepPrefix || "UX";
   const reported = [];
 
@@ -1284,16 +1195,6 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
     }
   }
 
-  const pageFindings = (result.findings || [])
-    .filter(isUxFinding)
-    .sort((a, b) => {
-      const rank = (item) => (String(item.ruleId || "").startsWith("design.validation.") ? 0 : 1);
-      return rank(a) - rank(b);
-    });
-  await publishFindings(pageFindings, "page");
-
-  const seenFindingKeys = new Set(pageFindings.map((finding) => findingKey(finding)));
-  // Every component kind on the page: static checks + safe probes (lib/ui-audit/components.js).
   const pageUrl = page.url();
   const reloadPage = async () => {
     await page.goto(pageUrl, { waitUntil: "domcontentloaded", timeout: 45000 }).catch(() => {});
@@ -1307,29 +1208,156 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
       });
     }
   };
-  // Start from a fresh load: the rule pass can leave a custom (non-PrimeReact) modal open over the page.
-  await reloadPage();
-  const components = await auditComponents(page, {
-    reportDir,
-    reload: reloadPage,
-  }).catch((err) => ({ findings: [], coverage: {}, error: String(err && err.message) }));
-  lap("components");
-  const pageCoverageLine = Object.entries(components.coverage || {})
-    .filter(([, c]) => c.found)
-    .map(([kind, c]) => `${kind} ${c.found}/${c.probed}${c.failed ? `!${c.failed}` : ""}`)
-    .join(", ");
-  console.log(`[ux-audit] components on ${entry.path || entry.name}: ${pageCoverageLine || "(none)"} (found/probed!failed)`);
-  const overlayStats = emptyOverlayStats();
+
+  /** Label a finding with the theme it was found in, so the two passes stay distinguishable. */
+  const tagTheme = (list, theme) =>
+    theme === "dark"
+      ? list
+      : list.map((finding) => ({
+          ...finding,
+          element: `${finding.element || finding.message} [${theme} mode]`,
+          message: `${finding.message} (${theme} mode)`,
+        }));
+
+  /**
+   * The whole battery for one theme: rules, then every component kind, then overlays, side menu
+   * and inactive tabs. Light mode gets exactly this too — it used to get only the rules pass, so
+   * component and overlay defects that exist solely in light mode were never looked for.
+   * Returns null when the page has no theme control (the audit then stays single-theme).
+   */
+  async function runThemePass(theme, { writeReport }) {
+    // Clean load BEFORE touching the theme control: the previous pass probes dialogs and can leave
+    // the shell torn down, so the top bar — and the toggle with it — is often gone by now. Switching
+    // first would find no control and skip the whole pass without a word.
+    await reloadPage();
+    const switched = await setTheme(page, theme);
+    if (switched === null) return null;
+    const switchFindings = [];
+    // A switch that flips currenttheme but repaints nothing is a real defect, not a pass.
+    if (switched.before && switched.signature === switched.before) {
+      switchFindings.push(
+        specFinding({
+          ruleId: "design.validation.theme-switch",
+          element: "theme toggle",
+          message: `Switching to ${theme} mode did not repaint any surface`,
+          expected: `switching to ${theme} mode restyles the page`,
+          actual: "every sampled surface kept its previous background",
+        }),
+      );
+    }
+    const themeResult = await uiAudit(page, {
+      pageName: `${entry.hub || ""} ${entry.name || ""}`.trim() || entry.path,
+      viewport: { width: 1440, height: 900 },
+      writeReport,
+      reportDir,
+    });
+    lap(`${theme}: rules`);
+    const themePageFindings = (themeResult.findings || [])
+      .filter(isUxFinding)
+      .sort((a, b) => {
+        const rank = (item) => (String(item.ruleId || "").startsWith("design.validation.") ? 0 : 1);
+        return rank(a) - rank(b);
+      });
+
+    const seenFindingKeys = new Set(themePageFindings.map((finding) => findingKey(finding)));
+    await reloadPage();
+    const themeComponents = await auditComponents(page, {
+      reportDir,
+      reload: reloadPage,
+    }).catch((err) => ({ findings: [], coverage: {}, error: String(err && err.message) }));
+    lap(`${theme}: components`);
+    const coverageLine = Object.entries(themeComponents.coverage || {})
+      .filter(([, c]) => c.found)
+      .map(([kind, c]) => `${kind} ${c.found}/${c.probed}${c.failed ? `!${c.failed}` : ""}`)
+      .join(", ");
+    console.log(
+      `[ux-audit] components on ${entry.path || entry.name} [${theme}]: ${coverageLine || "(none)"} (found/probed!failed)`,
+    );
+
+    const themeOverlayStats = emptyOverlayStats();
+    const themeInteraction = [
+      ...switchFindings,
+      ...themeComponents.findings,
+      ...(await auditOpenedSurfaces(page, entry, seenFindingKeys, themeOverlayStats, { limit: 6 }).catch(() => [])),
+      ...(lap(`${theme}: overlays`), []),
+      ...(UX_SIDE_MENU ? await auditSideMenuPages(page, entry, seenFindingKeys, themeOverlayStats).catch(() => []) : []),
+      ...(await auditInactiveTabs(page, entry, seenFindingKeys, themeOverlayStats).catch(() => [])),
+      ...(lap(`${theme}: tabs`), []),
+    ].filter((finding) => isUxFinding(finding) || /^(overlays|components)\./.test(String(finding.ruleId || "")));
+
+    return {
+      result: themeResult,
+      pageFindings: themePageFindings,
+      interactionFindings: themeInteraction,
+      components: themeComponents,
+      overlayStats: themeOverlayStats,
+    };
+  }
+
+  // Dark first, always: currenttheme persists in localStorage, so a page would otherwise be audited
+  // in whatever theme the previous spec left behind.
+  const dark = await runThemePass("dark", { writeReport: true });
+  const themeFindings = [];
+  let light = null;
+  if (dark) {
+    try {
+      light = await runThemePass("light", { writeReport: false });
+      if (light) {
+        console.log(
+          `[ux-audit] theme on ${entry.path || entry.name}: light pass found ${light.pageFindings.length + light.interactionFindings.length}`,
+        );
+      } else {
+        // Never fail quietly here: a missing toggle is exactly how the old implementation hid the
+        // fact that no page was ever audited in its second theme.
+        console.log(
+          `[ux-audit] theme on ${entry.path || entry.name}: NO THEME CONTROL after the dark pass — light mode NOT audited`,
+        );
+        themeFindings.push(
+          specFinding({
+            ruleId: "design.validation.theme-switch",
+            element: "theme toggle",
+            message: "Light mode could not be audited: no theme control on the page",
+            expected: "the top bar exposes the theme toggle so both themes can be audited",
+            actual: "no i.pi-sun / i.pi-moon control found after reloading the page",
+          }),
+        );
+      }
+    } catch (error) {
+      themeFindings.push(
+        specFinding({
+          ruleId: "design.validation.theme-switch",
+          element: "theme toggle",
+          message: "Theme control did not switch to light mode",
+          expected: "clicking the theme control switches the app to light mode",
+          actual: error.message,
+        }),
+      );
+    }
+    // Leave the app as we found it: currenttheme persists and leaks into later specs.
+    await setTheme(page, "dark").catch(() => {});
+  } else {
+    console.log(`[ux-audit] theme on ${entry.path || entry.name}: no theme control, dark only`);
+  }
+
+  const base = dark || { pageFindings: [], interactionFindings: [], components: { findings: [], coverage: {} }, overlayStats: emptyOverlayStats(), result: {} };
+  const result = base.result;
+  const components = base.components;
+  const overlayStats = base.overlayStats;
+  if (light) {
+    overlayStats.modals += light.overlayStats.modals;
+    overlayStats.popups += light.overlayStats.popups;
+    overlayStats.sidebars += light.overlayStats.sidebars;
+    components.coverage = mergeCoverage(mergeCoverage({}, components.coverage), light.components.coverage);
+  }
+
+  const pageFindings = [...base.pageFindings, ...tagTheme(light ? light.pageFindings : [], "light")];
+  await publishFindings(pageFindings, "page");
+
   const interactionFindings = [
-    ...components.findings,
-    ...(await auditOpenedSurfaces(page, entry, seenFindingKeys, overlayStats, { limit: 6 }).catch(() => [])),
-    ...(lap("overlays"), []),
-    ...(UX_SIDE_MENU ? await auditSideMenuPages(page, entry, seenFindingKeys, overlayStats).catch(() => []) : []),
-    ...(await auditInactiveTabs(page, entry, seenFindingKeys, overlayStats).catch(() => [])),
-    ...(lap("tabs"), []),
-    ...(await auditOtherTheme(page, entry, reloadPage).catch(() => [])),
-    ...(lap("light theme"), []),
-  ].filter((finding) => isUxFinding(finding) || /^(overlays|components)\./.test(String(finding.ruleId || "")));
+    ...base.interactionFindings,
+    ...tagTheme(light ? light.interactionFindings : [], "light"),
+    ...themeFindings,
+  ];
   // User actions that failed earlier on this page (runUserActionSteps) are findings too.
   for (const f of page.__uxActionFailures || []) {
     interactionFindings.push(
