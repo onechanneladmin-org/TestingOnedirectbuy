@@ -2,7 +2,7 @@ const { expect } = require("@playwright/test");
 const fs = require("fs");
 const path = require("path");
 const { uiAudit } = require("../../../lib/ui-audit");
-const { findingKey } = require("../../../lib/ui-audit/report");
+const { findingKey, summarize, writeReport } = require("../../../lib/ui-audit/report");
 const { getReference } = require("../../../lib/ui-audit/references");
 const { captureIssueScreenshot: defaultCaptureShot } = require("../../helpers/flowStep");
 const { auditComponents } = require("../../../lib/ui-audit/components");
@@ -1347,6 +1347,26 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
     await setTheme(page, "dark").catch(() => {});
   } else {
     console.log(`[ux-audit] theme on ${entry.path || entry.name}: no theme control, dark only`);
+  }
+
+  // report.md / report.json are written by uiAudit from a single pass, so they carried the dark
+  // findings only — the light pass runs with writeReport:false to avoid clobbering them. Rewrite
+  // them once both passes are done so the human-readable report holds both themes.
+  if (light && dark?.result?.report && dark?.result?.reportPaths?.dir) {
+    const mergedReport = {
+      ...dark.result.report,
+      theme: `${dark.result.report.theme || "dark"} + light`,
+      findings: [
+        ...(dark.result.report.findings || []),
+        ...tagTheme(light.result?.report?.findings || [], "light"),
+      ],
+    };
+    mergedReport.summary = summarize(mergedReport.findings);
+    try {
+      writeReport(mergedReport, dark.result.reportPaths.dir);
+    } catch (error) {
+      console.log(`[ux-audit] could not write the merged report: ${error.message}`);
+    }
   }
 
   const base = dark || { pageFindings: [], interactionFindings: [], components: { findings: [], coverage: {} }, overlayStats: emptyOverlayStats(), result: {} };
