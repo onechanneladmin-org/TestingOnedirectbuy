@@ -208,6 +208,126 @@ async function openAdminPage(page, entry) {
   if (!stayed) handleRedirect(page, pathOnly);
 }
 
+/**
+ * The dashboard body scrolls inside .oneca-suite-content, not the document: window.scrollTo is a
+ * no-op there and document.scrollHeight equals the viewport height, so anything below the fold
+ * never mounts. Resolve the real scroller, falling back to the tallest overflow-y container.
+ */
+async function scrollContainerHandle(page) {
+  return page.evaluateHandle(() => {
+    const named = document.querySelector(".oneca-suite-content");
+    if (named && named.scrollHeight > named.clientHeight) return named;
+    let best = document.scrollingElement || document.documentElement;
+    let bestOverflow = best.scrollHeight - best.clientHeight;
+    document.querySelectorAll("div, main, section").forEach((el) => {
+      if (!/auto|scroll/.test(getComputedStyle(el).overflowY)) return;
+      const overflow = el.scrollHeight - el.clientHeight;
+      if (overflow > bestOverflow) {
+        best = el;
+        bestOverflow = overflow;
+      }
+    });
+    return best;
+  });
+}
+
+/** Resolves once no XHR/fetch has been in flight for `quietMs`, or `timeout` elapses. */
+async function waitForDataLoad(page, { quietMs = 1200, timeout = 45000 } = {}) {
+  let inflight = 0;
+  let lastActivity = Date.now();
+  const track = (delta) => (request) => {
+    if (!["xhr", "fetch"].includes(request.resourceType())) return;
+    inflight += delta;
+    lastActivity = Date.now();
+  };
+  const onRequest = track(1);
+  const onSettled = track(-1);
+  page.on("request", onRequest);
+  page.on("requestfinished", onSettled);
+  page.on("requestfailed", onSettled);
+  try {
+    const deadline = Date.now() + timeout;
+    while (Date.now() < deadline) {
+      if (inflight <= 0 && Date.now() - lastActivity >= quietMs) break;
+      await page.waitForTimeout(150);
+    }
+    // Widgets paint a skeleton while their own request resolves.
+    await page
+      .locator(".p-skeleton, .p-progress-spinner, [class*=skeleton]")
+      .first()
+      .waitFor({ state: "hidden", timeout: 15000 })
+      .catch(() => {});
+  } finally {
+    page.off("request", onRequest);
+    page.off("requestfinished", onSettled);
+    page.off("requestfailed", onSettled);
+  }
+}
+
+/**
+ * Pick a date-range pill (PrimeReact SelectButton: .p-selectbutton > .p-button, selected = .p-highlight)
+ * and wait for the refetch it triggers. listUserActions() skips these pills on purpose, so without
+ * this the whole audit only ever sees the default "Today" range.
+ * @param {string} label exact pill text, e.g. "This year"
+ */
+async function selectDateRange(page, label) {
+  const group = page.locator(".p-selectbutton").first();
+  await group.waitFor({ state: "visible", timeout: 20000 });
+  const pill = group.locator(".p-button").filter({ hasText: new RegExp(`^\\s*${label}\\s*$`, "i") }).first();
+  if (!(await pill.count())) {
+    const available = await group.locator(".p-button").allInnerTexts().catch(() => []);
+    throw new Error(`Date range "${label}" not found. Available: ${available.join(" | ") || "(none)"}`);
+  }
+  await pill.click();
+  await waitForDataLoad(page);
+  const selected = (await group.locator(".p-button.p-highlight").first().innerText().catch(() => "")).trim();
+  if (!new RegExp(`^${label}$`, "i").test(selected)) {
+    throw new Error(`Date range did not apply: expected "${label}", active pill is "${selected || "(none)"}"`);
+  }
+  return selected;
+}
+
+/**
+ * Step the real scroll container to the bottom so every lazy section mounts, waiting for data
+ * after each move, then report what rendered. Returns a summary for the step log.
+ */
+async function scrollThroughPage(page) {
+  const scroller = await scrollContainerHandle(page);
+  const geometry = await scroller.evaluate((el) => ({
+    scrollHeight: el.scrollHeight,
+    clientHeight: el.clientHeight,
+  }));
+  const stride = Math.max(200, Math.round(geometry.clientHeight * 0.8));
+  for (let y = 0; y <= geometry.scrollHeight; y += stride) {
+    await scroller.evaluate((el, top) => el.scrollTo(0, top), y);
+    await page.waitForTimeout(400);
+  }
+  await scroller.evaluate((el) => el.scrollTo(0, el.scrollHeight));
+  await waitForDataLoad(page);
+
+  const result = await scroller.evaluate((el) => {
+    const atBottom = el.scrollTop >= el.scrollHeight - el.clientHeight - 2;
+    const q = (sel) => document.querySelectorAll(sel).length;
+    return {
+      atBottom,
+      scrollTop: el.scrollTop,
+      maxScroll: el.scrollHeight - el.clientHeight,
+      charts: q("canvas, svg.recharts-surface, .p-chart"),
+      tables: q("table"),
+      cards: q("[class*=metric], [class*=card]"),
+      pendingSkeletons: q(".p-skeleton, .p-progress-spinner"),
+    };
+  });
+  await scroller.dispose();
+  if (!result.atBottom) {
+    throw new Error(`Did not reach the bottom: scrollTop ${result.scrollTop} of ${result.maxScroll}`);
+  }
+  if (result.pendingSkeletons > 0) {
+    throw new Error(`${result.pendingSkeletons} widget(s) still loading after scrolling to the bottom`);
+  }
+  return result;
+}
+
 let auditedPathsCache = null;
 /** Paths that have their own ux-flows spec (so a redirect onto them needs no second audit). */
 function auditedPaths() {
@@ -1734,6 +1854,9 @@ module.exports = {
   signIn,
   openAdminPage,
   waitForAdminUiReady,
+  selectDateRange,
+  scrollThroughPage,
+  waitForDataLoad,
   runFullUxAudit,
   runUserActionSteps,
   listUserActions,
