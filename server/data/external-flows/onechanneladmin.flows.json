@@ -95,18 +95,20 @@
     {
       "id": 11,
       "name": "Catalog Dashboard",
-      "enabled": true,
+      "enabled": false,
       "tests": [
         "tests/Onechanneladmin/CatalogDashboardCards.spec.js"
-      ]
+      ],
+      "note": "Spec was never written (CatalogDashboardCards.spec.js). The UI/UX equivalent runs as the 'UX Audit — Catalog Dashboard' flow. Re-enable once the spec exists."
     },
     {
       "id": 12,
       "name": "Accounting Dashboard",
-      "enabled": true,
+      "enabled": false,
       "tests": [
         "tests/Onechanneladmin/AccountingDashboardCards.spec.js"
-      ]
+      ],
+      "note": "Spec was never written (AccountingDashboardCards.spec.js). The UI/UX equivalent runs as the 'UX Audit — Accounting Dashboard' flow. Re-enable once the spec exists."
     },
     {
       "id": 13,

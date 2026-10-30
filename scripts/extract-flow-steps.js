@@ -27,6 +27,13 @@ function extractStepsFromFile(absPath, relPath) {
   // requireSoft(soft, "id", "title"
   const reqRe =
     /requireSoft\(\s*soft\s*,\s*["']([^"']+)["']\s*,\s*["']([^"']+)["']/gs;
+  // checkStep(page, testInfo, { id: "1CA-A1-01", name: "landing page" }) and the
+  // literal page tables those loops iterate. The flows/ specs report live steps
+  // through checkStep, which keys on this id — without it the catalog holds
+  // synthetic "<spec>-N" ids that no live event can ever match, and every step
+  // shows "Playwright exited 1 before reporting live steps" on a clean run.
+  const checkStepRe =
+    /\bid:\s*["']([A-Za-z0-9][A-Za-z0-9._-]*)["']\s*,\s*name:\s*["']([^"']+)["']/gs;
 
   /** @type {Array<{ index: number; stepId: string; title: string }>} */
   const found = [];
@@ -36,6 +43,9 @@ function extractStepsFromFile(absPath, relPath) {
     found.push({ index: m.index, stepId: m[1], title: m[2] });
   }
   while ((m = reqRe.exec(text))) {
+    found.push({ index: m.index, stepId: m[1], title: m[2] });
+  }
+  while ((m = checkStepRe.exec(text))) {
     found.push({ index: m.index, stepId: m[1], title: m[2] });
   }
 
