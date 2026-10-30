@@ -387,14 +387,6 @@ const TAB_PANEL_RULES = new Set([
   "forms.placeholder-contrast",
 ]);
 
-const THEME_RULES = new Set([
-  "design.validation.title-color",
-  "design.validation.component-contrast",
-  "design.validation.scrollbar",
-  "a11y.contrast",
-  "forms.placeholder-contrast",
-]);
-
 function tableSpacingSignature(tables) {
   const rows = (tables || []).filter((table) => !table.hasEmptyMarker && (table.rowCount || 0) > 0);
   if (!rows.length) return null;
@@ -606,61 +598,115 @@ async function auditSideMenuPages(page, entry, seenKeys, overlayStats) {
   return extras;
 }
 
-async function auditOtherTheme(page, entry) {
+/**
+ * The theme control is an unlabelled PrimeIcon in the top bar — it shows a sun in dark mode and a
+ * moon in light mode. It carries no aria-label or data-testid (that gap is itself reported as
+ * components.icon-button.accessible-name), so the old attribute-based selector matched nothing and
+ * every page silently skipped its second theme.
+ */
+const THEME_TOGGLE = "i.pi-sun, i.pi-moon";
+
+/**
+ * The app records the active theme in localStorage.currenttheme and defaults to dark. Do NOT infer
+ * it from document.body: this app keeps the body background dark in both modes, so a body-colour
+ * diff reports "theme did not change" even on a successful switch.
+ */
+async function readTheme(page) {
+  return page.evaluate(() => {
+    const stored = String(localStorage.getItem("currenttheme") || "").toLowerCase();
+    if (stored === "light" || stored === "dark") return stored;
+    return document.querySelector("i.pi-moon") ? "light" : "dark";
+  });
+}
+
+/** Computed background of the surfaces that do repaint, so we can tell a real switch from a no-op. */
+async function themeSignature(page) {
+  return page.evaluate(() =>
+    ["body", "aside", "table", "thead th", "[class*=card]", ".oneca-suite-content"]
+      .map((sel) => {
+        const el = document.querySelector(sel);
+        return el ? `${sel}:${getComputedStyle(el).backgroundColor}` : `${sel}:-`;
+      })
+      .join("|"),
+  );
+}
+
+/**
+ * Switch to `want` ("dark" | "light") and confirm it took. Returns null when the page has no theme
+ * control (the audit then stays single-theme rather than inventing a finding).
+ */
+async function setTheme(page, want) {
+  const toggle = page.locator(THEME_TOGGLE).first();
+  if (!(await toggle.count().catch(() => 0))) return null;
+  if ((await readTheme(page)) === want) return { changed: false, signature: await themeSignature(page) };
+
+  const before = await themeSignature(page);
+  await toggle.click({ timeout: 5000 });
+  await page.waitForTimeout(900);
+  await waitForDataLoad(page, { quietMs: 600, timeout: 15000 }).catch(() => {});
+
+  const now = await readTheme(page);
+  if (now !== want) throw new Error(`Theme did not switch to ${want} (still ${now})`);
+  return { changed: true, signature: await themeSignature(page), before };
+}
+
+/**
+ * Run the full rule set again in the other theme. Every page is audited dark first (the app's
+ * default), then light, because this app applies light mode only to some surfaces — tables repaint
+ * while the shell stays dark — and those defects exist only in the second theme.
+ */
+async function auditOtherTheme(page, entry, reload) {
   const extras = [];
-  const toggle = page
-    .locator(
-      "[aria-label*='theme' i], [aria-label*='dark mode' i], [aria-label*='light mode' i], [data-testid*='theme' i]",
-    )
-    .first();
-  const found = await toggle.count().catch(() => 0);
-  if (!found) {
-    if (entry && page) {
-      extras.coverageTheme = "single-theme";
-    }
-    return extras;
+  // The component and overlay passes probe dialogs and can leave the shell torn down, so the top
+  // bar (and with it the theme control) may be gone by now — that is why this used to report
+  // "single-theme" on pages that do have a toggle. Start the theme pass from a clean load.
+  if (typeof reload === "function") {
+    await reload().catch(() => {});
+    await waitForDataLoad(page, { quietMs: 800, timeout: 20000 }).catch(() => {});
   }
-  const before = await page.evaluate(() => getComputedStyle(document.body).backgroundColor).catch(() => "");
-  const clicked = await toggle.click({ timeout: 3000 }).then(() => true).catch(() => false);
-  if (!clicked) {
+  const switched = await setTheme(page, "light").catch((error) => {
     extras.push(
       specFinding({
         ruleId: "design.validation.theme-switch",
         element: "theme toggle",
-        message: "Theme control did not respond",
-        expected: "clicking the theme control switches mode",
-        actual: "click failed",
+        message: "Theme control did not switch to light mode",
+        expected: "clicking the theme control switches the app to light mode",
+        actual: error.message,
       }),
     );
+    return undefined;
+  });
+  if (switched === null) {
+    console.log(`[ux-audit] theme on ${entry.path || entry.name}: no theme control, dark only`);
     return extras;
   }
-  await page.waitForTimeout(400);
-  const after = await page.evaluate(() => getComputedStyle(document.body).backgroundColor).catch(() => "");
-  if (!after || after === before) {
+  if (!switched) return extras;
+
+  if (switched.before && switched.signature === switched.before) {
     extras.push(
       specFinding({
         ruleId: "design.validation.theme-switch",
         element: "theme toggle",
-        message: "Theme control did not change the rendered theme",
-        expected: "body background changes between light and dark mode",
-        actual: `background stayed ${after || "unknown"}`,
+        message: "Light mode did not repaint any surface",
+        expected: "switching to light mode restyles the page",
+        actual: "every sampled surface kept its dark-mode background",
       }),
     );
-    return extras;
   }
+
   try {
     const result = await uiAudit(page, {
-      pageName: `${entry.hub || ""} ${entry.name || ""}`.trim(),
+      pageName: `${entry.hub || ""} ${entry.name || ""} (light)`.trim(),
       viewport: { width: 1440, height: 900 },
       writeReport: false,
     });
-    const mode = (result.snapshot && result.snapshot.renderedTheme) || "other";
-    for (const finding of result.findings || []) {
-      if (!THEME_RULES.has(finding.ruleId)) continue;
+    const kept = (result.findings || []).filter(isUxFinding);
+    console.log(`[ux-audit] theme on ${entry.path || entry.name}: light pass found ${kept.length}`);
+    for (const finding of kept) {
       extras.push({
         ...finding,
-        element: `${finding.element || finding.message} [${mode} mode]`,
-        message: `${finding.message} (${mode} mode)`,
+        element: `${finding.element || finding.message} [light mode]`,
+        message: `${finding.message} (light mode)`,
       });
     }
   } catch (error) {
@@ -668,14 +714,15 @@ async function auditOtherTheme(page, entry) {
       specFinding({
         ruleId: "design.validation.theme-switch",
         element: "theme toggle",
-        message: "Validation could not run after the theme switch",
-        expected: "audit completes in the other theme",
+        message: "Validation could not run in light mode",
+        expected: "audit completes in light mode",
         actual: error.message,
       }),
     );
   }
-  await toggle.click({ timeout: 3000 }).catch(() => {});
-  await page.waitForTimeout(300);
+
+  // Leave the app as we found it: currenttheme persists across reloads and leaks into later specs.
+  await setTheme(page, "dark").catch(() => {});
   return extras;
 }
 
@@ -1159,6 +1206,11 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
   const t0 = Date.now();
   const lap = (label) => console.log(`[ux-audit] timing ${entry.path || entry.name}: ${label} ${Math.round((Date.now() - t0) / 1000)}s`);
   await waitForAdminUiReady(page);
+  // Dark first, always: currenttheme persists in localStorage, so a page is otherwise audited in
+  // whatever theme the previous spec happened to leave behind. auditOtherTheme() runs light after.
+  await setTheme(page, "dark").catch((error) => {
+    console.log(`[ux-audit] theme on ${entry.path || entry.name}: could not force dark — ${error.message}`);
+  });
   const reportDir = path.join(
     process.cwd(),
     // Outside test-results/ (Playwright empties that on every run), so partial re-runs merge.
@@ -1246,6 +1298,14 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
   const reloadPage = async () => {
     await page.goto(pageUrl, { waitUntil: "domcontentloaded", timeout: 45000 }).catch(() => {});
     await waitForAdminUiReady(page).catch(() => {});
+    // A reload drops whatever state the spec set up before auditing (the dashboard's date range
+    // resets to Today), which would audit the reloaded passes against a different page than the
+    // first one. entry.prepare lets a spec put it back.
+    if (typeof entry.prepare === "function") {
+      await entry.prepare(page).catch((error) => {
+        console.log(`[ux-audit] prepare on ${entry.path || entry.name} failed: ${error.message}`);
+      });
+    }
   };
   // Start from a fresh load: the rule pass can leave a custom (non-PrimeReact) modal open over the page.
   await reloadPage();
@@ -1267,8 +1327,8 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
     ...(UX_SIDE_MENU ? await auditSideMenuPages(page, entry, seenFindingKeys, overlayStats).catch(() => []) : []),
     ...(await auditInactiveTabs(page, entry, seenFindingKeys, overlayStats).catch(() => [])),
     ...(lap("tabs"), []),
-    ...(await auditOtherTheme(page, entry).catch(() => [])),
-    ...(lap("other theme"), []),
+    ...(await auditOtherTheme(page, entry, reloadPage).catch(() => [])),
+    ...(lap("light theme"), []),
   ].filter((finding) => isUxFinding(finding) || /^(overlays|components)\./.test(String(finding.ruleId || "")));
   // User actions that failed earlier on this page (runUserActionSteps) are findings too.
   for (const f of page.__uxActionFailures || []) {
@@ -1857,6 +1917,8 @@ module.exports = {
   selectDateRange,
   scrollThroughPage,
   waitForDataLoad,
+  setTheme,
+  readTheme,
   runFullUxAudit,
   runUserActionSteps,
   listUserActions,

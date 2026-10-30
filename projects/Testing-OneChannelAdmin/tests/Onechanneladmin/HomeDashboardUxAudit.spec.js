@@ -15,6 +15,13 @@ const entry = {
   name: "Dashboard",
   path: "/home/dashboard",
   stepPrefix: "HD",
+  // runFullUxAudit reloads between passes (components, then the light-theme pass), and a reload puts
+  // the dashboard back on "Today" with everything below the fold unmounted. Re-apply both so every
+  // pass audits the same populated page.
+  prepare: async (page) => {
+    await selectDateRange(page, "This year");
+    await scrollThroughPage(page);
+  },
 };
 
 test("Home Dashboard UI UX audit", async ({ page }) => {
