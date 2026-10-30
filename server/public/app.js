@@ -44,16 +44,37 @@ async function api(path, opts = {}) {
       url.searchParams.set("projectId", state.projectId);
     }
   }
-  const res = await fetch(`${url.pathname}${url.search}`, {
-    ...opts,
-    headers: { ...headers(Boolean(opts.body)), ...(opts.headers || {}) },
-  });
+  let res;
+  try {
+    res = await fetch(`${url.pathname}${url.search}`, {
+      ...opts,
+      headers: { ...headers(Boolean(opts.body)), ...(opts.headers || {}) },
+    });
+  } catch {
+    const err = new Error("API unreachable");
+    err.code = "unreachable";
+    throw err;
+  }
   const text = await res.text();
   let data = null;
   try {
     data = text ? JSON.parse(text) : null;
   } catch {
     data = { raw: text };
+  }
+  if (res.status === 401) {
+    const err = new Error(
+      "Wrong or missing API token. Paste API_TOKEN from .env into the token field.",
+    );
+    err.code = "unauthorized";
+    throw err;
+  }
+  if (res.status === 503) {
+    const err = new Error(
+      "API is off. Set API_TOKEN in .env and restart the server.",
+    );
+    err.code = "disabled";
+    throw err;
   }
   if (!res.ok) {
     const msg = data?.error || data?.raw || res.statusText;
@@ -1559,7 +1580,7 @@ function bindUi() {
   $("apiToken").addEventListener("change", () => {
     state.token = $("apiToken").value.trim();
     localStorage.setItem("odb_api_token", state.token);
-    toast("API token saved");
+    reloadDashboard("API token saved");
   });
 
   $("btnRefresh").addEventListener("click", async () => {
@@ -1660,16 +1681,28 @@ function bindUi() {
   });
 }
 
-async function init() {
-  bindUi();
-  setLiveIdle();
+function flowCountForError(err) {
+  if (err?.code === "unauthorized" || err?.code === "disabled") return "API token required";
+  if (err?.code === "unreachable") return "API unreachable";
+  return "Could not load";
+}
+
+async function reloadDashboard(okMessage) {
   try {
     await loadProjects();
     await Promise.all([loadFlows(), loadHistory()]);
+    if (okMessage) toast(okMessage);
   } catch (err) {
     toast(err.message || "Failed to load API", true);
-    $("flowCount").textContent = "API unreachable";
+    const count = $("flowCount");
+    if (count) count.textContent = flowCountForError(err);
   }
+}
+
+async function init() {
+  bindUi();
+  setLiveIdle();
+  await reloadDashboard();
 }
 
 init();
