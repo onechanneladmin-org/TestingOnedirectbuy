@@ -1196,17 +1196,23 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
   }
 
   const pageUrl = page.url();
-  const reloadPage = async () => {
+  /**
+   * A reload drops whatever state the spec set up before auditing (the dashboard's date range
+   * resets to Today and the page unscrolls), which would audit the later passes against a
+   * different page than the first. entry.prepare puts it back.
+   */
+  const applyPrepare = async () => {
+    if (typeof entry.prepare !== "function") return;
+    await entry.prepare(page).catch((error) => {
+      console.log(`[ux-audit] prepare on ${entry.path || entry.name} failed: ${error.message}`);
+    });
+  };
+  // prepare: false loads the bare page — used once per theme so the theme is switched on a clean
+  // shell before the page state is set up in that theme.
+  const reloadPage = async ({ prepare = true } = {}) => {
     await page.goto(pageUrl, { waitUntil: "domcontentloaded", timeout: 45000 }).catch(() => {});
     await waitForAdminUiReady(page).catch(() => {});
-    // A reload drops whatever state the spec set up before auditing (the dashboard's date range
-    // resets to Today), which would audit the reloaded passes against a different page than the
-    // first one. entry.prepare lets a spec put it back.
-    if (typeof entry.prepare === "function") {
-      await entry.prepare(page).catch((error) => {
-        console.log(`[ux-audit] prepare on ${entry.path || entry.name} failed: ${error.message}`);
-      });
-    }
+    if (prepare) await applyPrepare();
   };
 
   /** Label a finding with the theme it was found in, so the two passes stay distinguishable. */
@@ -1226,12 +1232,16 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
    * Returns null when the page has no theme control (the audit then stays single-theme).
    */
   async function runThemePass(theme, { writeReport }) {
-    // Clean load BEFORE touching the theme control: the previous pass probes dialogs and can leave
-    // the shell torn down, so the top bar — and the toggle with it — is often gone by now. Switching
-    // first would find no control and skip the whole pass without a word.
-    await reloadPage();
+    // Order matters: bare reload, switch theme, then set the page up in that theme.
+    //   - Reload first because the previous pass probes dialogs and can leave the shell torn down,
+    //     taking the top bar and its toggle with it; switching on a dirty page finds no control and
+    //     would skip the whole pass without a word.
+    //   - prepare AFTER the switch so the date range and scroll are applied in the theme being
+    //     audited, rather than being set up and then switched out from under.
+    await reloadPage({ prepare: false });
     const switched = await setTheme(page, theme);
     if (switched === null) return null;
+    await applyPrepare();
     const switchFindings = [];
     // A switch that flips currenttheme but repaints nothing is a real defect, not a pass.
     if (switched.before && switched.signature === switched.before) {
