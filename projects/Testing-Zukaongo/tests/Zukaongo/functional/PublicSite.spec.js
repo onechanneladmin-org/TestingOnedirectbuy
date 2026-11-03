@@ -1,5 +1,5 @@
 import { test, expect } from "../../fixtures/zukaTest.js";
-import { CUSTOMER_URL, STEP_TIMEOUT } from "../../helpers/zukaEnv.js";
+import { CUSTOMER_URL, PARTNER_ALIAS_URL, STEP_TIMEOUT } from "../../helpers/zukaEnv.js";
 
 /** zukaongo.com marketing site and legal pages (no sign-in). */
 test.describe("ZUKAongo — public site", () => {
@@ -38,7 +38,7 @@ test.describe("ZUKAongo — public site", () => {
     });
     await soft("ZUKA-PUB-07", "Partner CTAs link to /partner and the partner web app", async () => {
       await expect(page.locator('a[href="/partner"]').first()).toBeVisible();
-      await expect(page.locator('a[href^="https://partners.zukaongo.com"]').first()).toBeAttached();
+      await expect(page.locator(`a[href^="${PARTNER_ALIAS_URL}"]`).first()).toBeAttached();
       await expect(page.locator('a[href="mailto:support@zukaongo.com"]').first()).toBeAttached();
     });
   });

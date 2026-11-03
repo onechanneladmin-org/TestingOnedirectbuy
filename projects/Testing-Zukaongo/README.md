@@ -5,12 +5,28 @@ other projects under `projects/`. Two sections:
 
 | Section | Folder | What it does |
 |---|---|---|
-| **Functional** | `tests/Zukaongo/functional/` | Drives the three live sites as each real user: customer, restaurant (reception), driver, superadmin. Includes a live order lifecycle. |
+| **Functional** | `tests/Zukaongo/functional/` | Drives the three sites as each real user: customer, restaurant (reception), driver, superadmin. Includes an order lifecycle (staging only). |
 | **UI / UX theme audit** | `tests/Zukaongo/ui-audit/` | Opens every screen (desktop + phone width) and checks it against the ZUKAongo theme and UX rules. |
 
-Sites: `https://zukaongo.com` (customer + marketing), `https://admin.zukaongo.com` (superadmin + restaurant
+Live sites: `https://zukaongo.com` (customer + marketing), `https://admin.zukaongo.com` (superadmin + restaurant
 logins), `https://drivers.zukaongo.com` / `https://partners.zukaongo.com` (partner app). All three apps are
 Expo (React Native Web): client-routed, so specs use roles/labels, never CSS classes.
+
+**Target: Zuka staging by default.** `lib/targetGuard.cjs` (wired in `playwright.config.js`):
+
+| Setting | Default | Notes |
+|---|---|---|
+| `ZUKA_CUSTOMER_URL` (alias `ZUKA_BASE_URL`) | `https://staging.zukaongo.com` | planned staging hosts, to be confirmed |
+| `ZUKA_API_URL` | `https://staging-api.zukaongo.com` | |
+| `ZUKA_ADMIN_URL` | `https://staging-admin.zukaongo.com` | |
+| `ZUKA_PARTNER_URL` / `ZUKA_PARTNER_ALIAS_URL` (alias `ZUKA_PARTNERS_URL`) | `https://staging-partners.zukaongo.com` | |
+
+- The live sites are refused unless `ALLOW_PROD_READONLY=1`. Then only `PublicSite`, `Auth` and the public, admin
+  and customer UI audits run. Order, cart, account, staff, driver, partner and admin-console specs never run there.
+- A mix of staging and live URLs is always refused.
+- On staging runs the browser cannot resolve live `*.zukaongo.com` hosts, and Node-side API calls
+  (`tests/helpers/zukaApi.js`) are checked too: a live API is refused on staging, and GET-only on a read-only run.
+- Guard tests: `npm run test:unit`.
 
 Flow reference: [docs/ORDER_AND_PARTNER_FLOWS.md](docs/ORDER_AND_PARTNER_FLOWS.md). Step ids in the specs cite
 its case ids (CO-xx, KI-xx, DR-xx, AF-xx, PA-xx).
@@ -55,9 +71,10 @@ at one worker (it shares the test kitchen and drivers).
 
 ### Live data this suite creates
 
-`OrderLifecycle.spec.js` places 3 real orders per run on **Burger House** as `test-customer@zuka.test`, paid with
+`OrderLifecycle.spec.js` places 3 orders per run on **Burger House** as `test-customer@zuka.test`, paid with
 Zuka Credit (the decline order is refunded automatically). If the wallet drops below CI$60 the spec tops it up
-through Admin → Customers → Credit (reason "QA automation top-up"). Turn it off with `ZUKA_ALLOW_ORDER_E2E=0`.
+through Admin → Customers → Credit (reason "QA automation top-up"). It is off by default: set
+`ZUKA_ALLOW_ORDER_E2E=1`, and it runs on Zuka staging only (refused whenever any Zuka URL is a live site).
 Partner application submits are off by default (`ZUKA_ALLOW_PARTNER_SUBMIT=1` to enable) because each one emails the
 support inbox.
 

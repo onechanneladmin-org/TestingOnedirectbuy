@@ -36,14 +36,15 @@ jobs:
       PW_HEADLESS: "1"
       PW_WORKERS: ${{ github.event.inputs.workers || '1' }}
       TEST_ENV: ci
-      ZUKA_CUSTOMER_URL: ${{ vars.ZUKA_CUSTOMER_URL || 'https://zukaongo.com' }}
-      ZUKA_ADMIN_URL: ${{ vars.ZUKA_ADMIN_URL || 'https://admin.zukaongo.com' }}
-      ZUKA_PARTNER_URL: ${{ vars.ZUKA_PARTNER_URL || 'https://drivers.zukaongo.com' }}
+      ZUKA_CUSTOMER_URL: ${{ vars.ZUKA_CUSTOMER_URL || 'https://staging.zukaongo.com' }}
+      ZUKA_ADMIN_URL: ${{ vars.ZUKA_ADMIN_URL || 'https://staging-admin.zukaongo.com' }}
+      ZUKA_PARTNER_URL: ${{ vars.ZUKA_PARTNER_URL || 'https://staging-partners.zukaongo.com' }}
+      ZUKA_PARTNER_ALIAS_URL: ${{ vars.ZUKA_PARTNER_ALIAS_URL || 'https://staging-partners.zukaongo.com' }}
+      ZUKA_API_URL: ${{ vars.ZUKA_API_URL || 'https://staging-api.zukaongo.com' }}
       ZUKA_ADMIN_EMAIL: ${{ secrets.ZUKA_ADMIN_EMAIL }}
       ZUKA_ADMIN_PASSWORD: ${{ secrets.ZUKA_ADMIN_PASSWORD }}
       ZUKA_TEST_PASSWORD: ${{ secrets.ZUKA_TEST_PASSWORD }}
       ZUKA_ALLOW_ORDER_E2E: ${{ vars.ZUKA_ALLOW_ORDER_E2E || '0' }}
-      ZUKA_ALLOW_PROD_ORDERS: ${{ vars.ZUKA_ALLOW_PROD_ORDERS || '0' }}
       ZUKA_ALLOW_PARTNER_SUBMIT: "0"
       REPORT_UPLOAD: "0"
       REPORT_UPLOAD_URL: ${{ secrets.REPORT_UPLOAD_URL }}

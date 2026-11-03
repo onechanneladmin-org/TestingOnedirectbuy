@@ -104,6 +104,19 @@ USECASE_RESULTS_UPLOAD=1 npx playwright test tests/OneDirectBuy/flows --project=
 
 Every run writes `test-results/usecase-results.json`. With `USECASE_RESULTS_UPLOAD=1` it is also posted to `/coverage`.
 
+## 5a. Targets and safety flags (every project)
+
+Each project refuses a live target by default. Its guard is in `lib/targetGuard.cjs` (ODB: `lib/targetEnv.cjs`), checked when the Playwright config loads, with unit tests under `npm run test:unit`. On staging or local runs, the browser cannot resolve the live hosts.
+
+| Project | Default target | Live site | Writes / orders |
+|---|---|---|---|
+| ODB (root) | `ONEDIRECTBUY_BASE_URL` (dev). Use `https://staging.onedirectbuy.com` + `ONEDIRECTBUY_API_URL=https://staging-api.onedirectbuy.com` | `ALLOW_PROD=1`: read-only specs only | `ODB_ALLOW_ORDERS=1` places Stripe-test orders, staging or local only. Storefront and API on different environments are refused |
+| 1CA (`projects/Testing-OneChannelAdmin`) | `PLAYWRIGHT_BASE_URL` and `E2E_BASE_URL` = `https://staging-admin.onechanneladmin.com` | `ALLOW_PROD_READONLY=1`: `login.spec.js` + read-only flows. A live target next to a staging one is refused | flows write only on staging, in the `E2E_ORG_ID` test org; Nexus is always refused |
+| OneProductHub (`projects/Testing-OneProductHubV2`) | `http://localhost:3000` (UI), `http://localhost:4000` (API) | `ALLOW_PROD_READONLY=1`: 17 read-only specs | product create, access requests, approve: never on the live site |
+| Zuka (`projects/Testing-Zukaongo`) | Zuka staging: `staging.`, `staging-api.`, `staging-admin.`, `staging-partners.zukaongo.com` (planned, to be confirmed) | `ALLOW_PROD_READONLY=1`: PublicSite, Auth, Public/Admin/Customer UI audits | `ZUKA_ALLOW_ORDER_E2E=1` on Zuka staging only; never on the live site, no override |
+
+Logins come only from each project's `.env`; there are no fallbacks in code. The passwords that used to be hard-coded (OneProductHub client/brand/superadmin, 1CA datatable admin) are still in git history, so rotate them before you use those accounts.
+
 ## 6. Add a new flow (the repeatable part)
 
 1. **Sheet first.** Add one row per step: an ID (`ODB-UC-…` or `1CA-UC-…`), Priority, **Expected Result** (specific and checkable), Layer and Flow. Click **Sync sheet**.

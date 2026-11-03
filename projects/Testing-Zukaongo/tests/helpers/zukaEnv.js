@@ -3,11 +3,16 @@
  * Passwords come only from .env / CI secrets (see .env.example).
  */
 import orderGuard from "../../lib/orderGuard.cjs";
+import targetGuard from "../../lib/targetGuard.cjs";
 
-export const CUSTOMER_URL = (process.env.ZUKA_CUSTOMER_URL || "https://zukaongo.com").replace(/\/$/, "");
-export const ADMIN_URL = (process.env.ZUKA_ADMIN_URL || "https://admin.zukaongo.com").replace(/\/$/, "");
-export const PARTNER_URL = (process.env.ZUKA_PARTNER_URL || "https://drivers.zukaongo.com").replace(/\/$/, "");
-export const PARTNER_ALIAS_URL = (process.env.ZUKA_PARTNER_ALIAS_URL || "https://partners.zukaongo.com").replace(/\/$/, "");
+// Zuka staging by default (lib/targetGuard.cjs); playwright.config.js refuses live sites
+// unless ALLOW_PROD_READONLY=1, and mixed staging/live URLs always.
+const ZUKA_URLS = targetGuard.resolveUrls(process.env);
+export const CUSTOMER_URL = ZUKA_URLS.customer;
+export const ADMIN_URL = ZUKA_URLS.admin;
+export const PARTNER_URL = ZUKA_URLS.partner;
+export const PARTNER_ALIAS_URL = ZUKA_URLS.partnerAlias;
+export const API_URL = ZUKA_URLS.api;
 
 /** Grand Cayman postal code used to set the delivery pin (doc §3.1 step 1). */
 export const DELIVERY_POSTAL_CODE = process.env.ZUKA_DELIVERY_ADDRESS || "KY1-1201";
@@ -122,7 +127,7 @@ function flag(name, fallback) {
 
 /**
  * Live order lifecycle (pays with Zuka Credit on the test customer). Off by default:
- * needs ZUKA_ALLOW_ORDER_E2E=1, plus ZUKA_ALLOW_PROD_ORDERS=1 on the live site (lib/orderGuard.cjs).
+ * needs ZUKA_ALLOW_ORDER_E2E=1, and runs on Zuka staging only, never the live site (lib/orderGuard.cjs).
  */
 export const ORDER_E2E = orderGuard.orderE2eDecision(process.env);
 export const ALLOW_ORDER_E2E = ORDER_E2E.ok;

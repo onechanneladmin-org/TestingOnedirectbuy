@@ -15,9 +15,13 @@ const { chromium } = require("@playwright/test");
 const ROOT = path.resolve(__dirname, "..");
 const OUT = path.join(ROOT, "docs", "crawl");
 
-const CUSTOMER = process.env.ZUKA_CUSTOMER_URL || "https://zukaongo.com";
-const ADMIN = process.env.ZUKA_ADMIN_URL || "https://admin.zukaongo.com";
-const PARTNER = process.env.ZUKA_PARTNER_URL || "https://drivers.zukaongo.com";
+// Same target gate as playwright.config.js: Zuka staging by default, the live sites only
+// with ALLOW_PROD_READONLY=1 (this crawl only looks).
+const TARGET = require("../lib/targetGuard.cjs").checkTarget(process.env);
+if (!TARGET.ok) throw new Error(`[crawl] ${TARGET.reason}`);
+const CUSTOMER = TARGET.urls.customer;
+const ADMIN = TARGET.urls.admin;
+const PARTNER = TARGET.urls.partner;
 const TEST_PW = process.env.ZUKA_TEST_PASSWORD || "";
 
 const ROLES = {
@@ -128,7 +132,10 @@ async function crawlRole(browser, role, extraPaths) {
   const pathsArg = args.find((a) => a.startsWith("--paths="));
   const extraPaths = pathsArg ? pathsArg.slice(8).split(",").filter(Boolean) : [];
   const roles = args.filter((a) => !a.startsWith("--"));
-  const browser = await chromium.launch({ headless: process.env.PW_HEADED !== "1" });
+  const browser = await chromium.launch({
+    headless: process.env.PW_HEADED !== "1",
+    args: require("../lib/targetGuard.cjs").hostResolverArgs(TARGET),
+  });
   for (const role of roles.length ? roles : Object.keys(ROLES)) {
     try {
       await crawlRole(browser, role, extraPaths);

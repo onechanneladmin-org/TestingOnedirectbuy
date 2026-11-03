@@ -2,6 +2,7 @@
 import path from "path";
 import { config as loadDotenv } from "dotenv";
 import { defineConfig, devices } from "@playwright/test";
+import targetGuard from "./lib/targetGuard.cjs";
 
 /**
  * Environment variables are loaded from `.env` here and again in global-setup.cjs.
@@ -9,6 +10,23 @@ import { defineConfig, devices } from "@playwright/test";
  * See `.env.example`.
  */
 loadDotenv({ path: path.resolve(process.cwd(), ".env") });
+
+// Target gate (lib/targetGuard.cjs): Zuka staging by default; the live sites only with
+// ALLOW_PROD_READONLY=1 and then only the read-only specs. Mixed staging/live is refused.
+const target = targetGuard.checkTarget(process.env);
+if (!target.ok) {
+  throw new Error(`[config] ${target.reason}`);
+}
+process.env.ZUKA_CUSTOMER_URL = target.urls.customer;
+process.env.ZUKA_API_URL = target.urls.api;
+process.env.ZUKA_ADMIN_URL = target.urls.admin;
+process.env.ZUKA_PARTNER_URL = target.urls.partner;
+process.env.ZUKA_PARTNER_ALIAS_URL = target.urls.partnerAlias;
+if (target.prod) {
+  console.warn(`[config] ALLOW_PROD_READONLY=1 — production run limited to: ${target.readOnlySpecs.join(", ")}`);
+}
+/** Non-prod runs: the browser cannot resolve the live Zuka hosts. */
+const guardLaunchArgs = targetGuard.hostResolverArgs(target);
 
 if (process.env.API_TOKEN && !process.env.REPORT_UPLOAD_AUTH_TOKEN) {
   process.env.REPORT_UPLOAD_AUTH_TOKEN = process.env.API_TOKEN;
@@ -102,12 +120,11 @@ export default defineConfig({
       : []),
   ],
   use: {
-    baseURL: process.env.ZUKA_CUSTOMER_URL || "https://zukaongo.com",
+    baseURL: target.urls.customer,
     headless: useHeadless,
-    launchOptions:
-      testEnv === "production"
-        ? { args: ["--disable-dev-shm-usage"] }
-        : undefined,
+    launchOptions: {
+      args: [...(testEnv === "production" ? ["--disable-dev-shm-usage"] : []), ...guardLaunchArgs],
+    },
     actionTimeout: 15_000,
     navigationTimeout: 45_000,
     screenshot: "only-on-failure",
@@ -129,6 +146,8 @@ export default defineConfig({
     {
       name: "zukaongo",
       testDir: "./tests/Zukaongo",
+      // Production read-only run: only the allow-listed spec files.
+      ...(target.prod ? { testMatch: target.readOnlySpecs.map((f) => `**/${f}`) } : {}),
       use: {
         ...devices["Desktop Chrome"],
         ...(ci || process.env.PW_USE_CHROME === "0"

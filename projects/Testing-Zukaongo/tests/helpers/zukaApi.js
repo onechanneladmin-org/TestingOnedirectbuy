@@ -7,6 +7,8 @@
  * 402 unpaid, 403 scope, 409 final status — doc §2).
  */
 
+import targetGuard from "../../lib/targetGuard.cjs";
+
 const SESSION_KEY = Symbol.for("zukaApiSession");
 
 /**
@@ -55,6 +57,8 @@ export async function apiSession(page, timeoutMs = 20_000) {
  */
 export async function api(page, method, path, body) {
   const session = await apiSession(page);
+  // page.request skips the browser's host block, so check the API host here (lib/targetGuard.cjs).
+  targetGuard.assertApiAllowed(session.base, method);
   const res = await page.request.fetch(`${session.base}${path}`, {
     method,
     headers: {

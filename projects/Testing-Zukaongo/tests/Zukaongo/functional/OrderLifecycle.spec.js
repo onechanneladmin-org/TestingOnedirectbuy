@@ -31,10 +31,10 @@ import {
 } from "../../helpers/zukaPartner.js";
 
 /**
- * Doc §3: customer → restaurant → driver → delivered, on the live site.
+ * Doc §3: customer → restaurant → driver → delivered, on Zuka staging.
  * Pays with Zuka Credit (CO-08) so no card is needed. Each run creates real
  * orders on Burger House (the test kitchen's restaurant). Off unless
- * ZUKA_ALLOW_ORDER_E2E=1, and on the live site also ZUKA_ALLOW_PROD_ORDERS=1.
+ * ZUKA_ALLOW_ORDER_E2E=1, and on Zuka staging only (never the live site).
  * No retries: a retry would place the orders again.
  */
 test.describe.configure({ mode: "serial", retries: 0 });
