@@ -12,22 +12,28 @@
  */
 const path = require("path");
 
-/** Planned staging hosts (to be confirmed when Zuka staging is up). */
+/**
+ * Zuka staging hosts. partner = the drivers app (live drivers.zukaongo.com),
+ * partnerAlias = the partners host (live partners.zukaongo.com).
+ */
 const STAGING_URLS = {
   customer: "https://staging.zukaongo.com",
   api: "https://staging-api.zukaongo.com",
   admin: "https://staging-admin.zukaongo.com",
-  partner: "https://staging-partners.zukaongo.com",
+  partner: "https://staging-drivers.zukaongo.com",
   partnerAlias: "https://staging-partners.zukaongo.com",
 };
 
-/** Env vars per site, first one set wins (ZUKA_BASE_URL / ZUKA_PARTNERS_URL are aliases). */
+/**
+ * Env vars per site, first one set wins. Aliases: ZUKA_BASE_URL (customer),
+ * ZUKA_DRIVER_URL (drivers app), ZUKA_PARTNERS_URL (partners host).
+ */
 const URL_VARS = {
   customer: ["ZUKA_CUSTOMER_URL", "ZUKA_BASE_URL"],
   api: ["ZUKA_API_URL"],
   admin: ["ZUKA_ADMIN_URL"],
-  partner: ["ZUKA_PARTNER_URL", "ZUKA_PARTNERS_URL"],
-  partnerAlias: ["ZUKA_PARTNER_ALIAS_URL", "ZUKA_PARTNERS_URL", "ZUKA_PARTNER_URL"],
+  partner: ["ZUKA_PARTNER_URL", "ZUKA_DRIVER_URL"],
+  partnerAlias: ["ZUKA_PARTNER_ALIAS_URL", "ZUKA_PARTNERS_URL"],
 };
 
 const NON_PROD_HOST =

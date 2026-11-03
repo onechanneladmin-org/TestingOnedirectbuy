@@ -41,6 +41,7 @@ Note: the production public API origin is **backend.onechanneladmin.com**. `api.
 | Customer web | https://staging.zukaongo.com | https://zukaongo.com |
 | API | https://staging-api.zukaongo.com | https://api.zukaongo.com |
 | Restaurant partners | https://staging-partners.zukaongo.com | https://partners.zukaongo.com |
+| Drivers app | https://staging-drivers.zukaongo.com | https://drivers.zukaongo.com |
 | Zuka admin | https://staging-admin.zukaongo.com | https://admin.zukaongo.com |
 
 Plan:

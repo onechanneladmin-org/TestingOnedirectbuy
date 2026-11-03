@@ -38,7 +38,7 @@ jobs:
       TEST_ENV: ci
       ZUKA_CUSTOMER_URL: ${{ vars.ZUKA_CUSTOMER_URL || 'https://staging.zukaongo.com' }}
       ZUKA_ADMIN_URL: ${{ vars.ZUKA_ADMIN_URL || 'https://staging-admin.zukaongo.com' }}
-      ZUKA_PARTNER_URL: ${{ vars.ZUKA_PARTNER_URL || 'https://staging-partners.zukaongo.com' }}
+      ZUKA_PARTNER_URL: ${{ vars.ZUKA_PARTNER_URL || 'https://staging-drivers.zukaongo.com' }}
       ZUKA_PARTNER_ALIAS_URL: ${{ vars.ZUKA_PARTNER_ALIAS_URL || 'https://staging-partners.zukaongo.com' }}
       ZUKA_API_URL: ${{ vars.ZUKA_API_URL || 'https://staging-api.zukaongo.com' }}
       ZUKA_ADMIN_EMAIL: ${{ secrets.ZUKA_ADMIN_EMAIL }}

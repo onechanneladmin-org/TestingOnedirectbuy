@@ -20,11 +20,30 @@ test("defaults to Zuka staging", () => {
   assert.deepEqual(r.urls, g.STAGING_URLS);
 });
 
-test("aliases ZUKA_BASE_URL and ZUKA_PARTNERS_URL are read", () => {
-  const u = g.resolveUrls({ ZUKA_BASE_URL: "http://localhost:8081/", ZUKA_PARTNERS_URL: "http://localhost:8083" });
+test("drivers and partners are separate staging hosts", () => {
+  const u = g.resolveUrls({});
+  assert.equal(u.partner, "https://staging-drivers.zukaongo.com");
+  assert.equal(u.partnerAlias, "https://staging-partners.zukaongo.com");
+});
+
+test("aliases ZUKA_BASE_URL, ZUKA_DRIVER_URL and ZUKA_PARTNERS_URL are read", () => {
+  const u = g.resolveUrls({
+    ZUKA_BASE_URL: "http://localhost:8081/",
+    ZUKA_DRIVER_URL: "http://localhost:8083",
+    ZUKA_PARTNERS_URL: "http://localhost:8084",
+  });
   assert.equal(u.customer, "http://localhost:8081");
   assert.equal(u.partner, "http://localhost:8083");
-  assert.equal(u.partnerAlias, "http://localhost:8083");
+  assert.equal(u.partnerAlias, "http://localhost:8084");
+});
+
+test("live drivers.zukaongo.com is refused through every drivers setting", () => {
+  for (const k of ["ZUKA_PARTNER_URL", "ZUKA_DRIVER_URL"]) {
+    const r = g.checkTarget({ [k]: "https://drivers.zukaongo.com" });
+    assert.equal(r.ok, false, k);
+    assert.match(r.reason, /partner=https:\/\/drivers\.zukaongo\.com/);
+  }
+  assert.equal(g.isNonProdUrl("https://staging-drivers.zukaongo.com"), true);
 });
 
 test("host classification: only staging/dev zukaongo.com subdomains and local hosts are non-prod", () => {

@@ -16,10 +16,11 @@ Expo (React Native Web): client-routed, so specs use roles/labels, never CSS cla
 
 | Setting | Default | Notes |
 |---|---|---|
-| `ZUKA_CUSTOMER_URL` (alias `ZUKA_BASE_URL`) | `https://staging.zukaongo.com` | planned staging hosts, to be confirmed |
-| `ZUKA_API_URL` | `https://staging-api.zukaongo.com` | |
-| `ZUKA_ADMIN_URL` | `https://staging-admin.zukaongo.com` | |
-| `ZUKA_PARTNER_URL` / `ZUKA_PARTNER_ALIAS_URL` (alias `ZUKA_PARTNERS_URL`) | `https://staging-partners.zukaongo.com` | |
+| `ZUKA_CUSTOMER_URL` (alias `ZUKA_BASE_URL`) | `https://staging.zukaongo.com` | live: zukaongo.com |
+| `ZUKA_API_URL` | `https://staging-api.zukaongo.com` | live: api.zukaongo.com |
+| `ZUKA_ADMIN_URL` | `https://staging-admin.zukaongo.com` | live: admin.zukaongo.com |
+| `ZUKA_PARTNER_URL` (alias `ZUKA_DRIVER_URL`), drivers app | `https://staging-drivers.zukaongo.com` | live: drivers.zukaongo.com |
+| `ZUKA_PARTNER_ALIAS_URL` (alias `ZUKA_PARTNERS_URL`), partners host | `https://staging-partners.zukaongo.com` | live: partners.zukaongo.com |
 
 - The live sites are refused unless `ALLOW_PROD_READONLY=1`. Then only `PublicSite`, `Auth` and the public, admin
   and customer UI audits run. Order, cart, account, staff, driver, partner and admin-console specs never run there.
