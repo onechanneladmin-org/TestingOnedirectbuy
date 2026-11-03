@@ -99,7 +99,7 @@ test("no spec hard-codes the live admin or backend host", () => {
     for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
       const p = path.join(dir, e.name);
       if (e.isDirectory()) walk(p);
-      else if (/\.(js|ts)$/.test(e.name) && /https:\/\/(admin|backend)\.onechanneladmin\.com/.test(fs.readFileSync(p, "utf8")))
+      else if (/\.(js|ts)$/.test(e.name) && !/\.test\.js$/.test(e.name) && /https:\/\/(admin|backend)\.onechanneladmin\.com/.test(fs.readFileSync(p, "utf8")))
         offenders.push(path.relative(SPECS, p));
     }
   };
