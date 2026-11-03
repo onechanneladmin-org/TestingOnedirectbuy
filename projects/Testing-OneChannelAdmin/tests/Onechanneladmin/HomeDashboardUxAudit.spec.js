@@ -15,6 +15,8 @@ const entry = {
   name: "Dashboard",
   path: "/home/dashboard",
   stepPrefix: "HD",
+  // This spec runs the audit in HD-04, not the usual <PREFIX>-05, so findings must be filed there.
+  auditStepId: "HD-04",
   // runFullUxAudit reloads between passes (components, then the light-theme pass), and a reload puts
   // the dashboard back on "Today" with everything below the fold unmounted. Re-apply both so every
   // pass audits the same populated page.

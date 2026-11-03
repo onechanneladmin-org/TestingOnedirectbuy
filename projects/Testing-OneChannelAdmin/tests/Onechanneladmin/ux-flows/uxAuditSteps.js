@@ -119,6 +119,17 @@ async function waitForAdminUiReady(page) {
     .waitForLoadState("networkidle", { timeout: 8000 })
     .catch(() => page.waitForTimeout(800));
 
+  // A fresh sign-in on this app can land on a blocking "Welcome / Add Organization" modal whose
+  // mask swallows every click on the page behind it. Clear it before anyone tries to use the page;
+  // a reload is the fallback, since the org is already pinned in localStorage by then.
+  await dismissBlockingOverlay(page);
+  if (await page.locator(".p-dialog-mask").filter({ visible: true }).count().catch(() => 0)) {
+    console.log("[ux-audit] modal still blocking after dismiss — reloading once");
+    await page.reload({ waitUntil: "domcontentloaded" }).catch(() => {});
+    await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+    await dismissBlockingOverlay(page);
+  }
+
   const content = page
     .locator(
       "main:visible, [role=main]:visible, h1:visible, h2:visible, h3:visible, h4:visible, table:visible, aside button:visible, nav button:visible",
@@ -270,6 +281,40 @@ async function waitForDataLoad(page, { quietMs = 1200, timeout = 45000 } = {}) {
  * this the whole audit only ever sees the default "Today" range.
  * @param {string} label exact pill text, e.g. "This year"
  */
+/**
+ * A modal mask left open by an earlier probe — or raised by the app itself — swallows every click
+ * on the page underneath. Dismiss it so the caller's click can land.
+ */
+async function dismissBlockingOverlay(page) {
+  const mask = page.locator(".p-dialog-mask, .p-component-overlay").filter({ visible: true });
+  const closers = [
+    ".p-dialog-header-close",
+    ".p-dialog-header-icon",
+    ".p-dialog button[aria-label*='close' i]",
+    ".p-dialog .pi-times",
+    ".p-dialog button:has(.pi-times)",
+  ].join(", ");
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    if (!(await mask.count().catch(() => 0))) return;
+    if (attempt === 0) {
+      const title = await page.locator(".p-dialog").filter({ visible: true }).first()
+        .innerText().then((t) => t.replace(/\s+/g, " ").trim().slice(0, 60)).catch(() => "");
+      console.log(`[ux-audit] dismissing modal blocking the page: "${title || "(untitled)"}"`);
+    }
+    const close = page.locator(closers).filter({ visible: true }).first();
+    if (await close.count().catch(() => 0)) {
+      await close.click({ timeout: 3000, force: true }).catch(() => {});
+    }
+    await page.keyboard.press("Escape").catch(() => {});
+    await page.waitForTimeout(500);
+    // dismissableMask dialogs close on a click outside the panel.
+    if (await mask.count().catch(() => 0)) {
+      await page.mouse.click(5, 5).catch(() => {});
+      await page.waitForTimeout(500);
+    }
+  }
+}
+
 async function selectDateRange(page, label) {
   const group = page.locator(".p-selectbutton").first();
   await group.waitFor({ state: "visible", timeout: 20000 });
@@ -278,7 +323,14 @@ async function selectDateRange(page, label) {
     const available = await group.locator(".p-button").allInnerTexts().catch(() => []);
     throw new Error(`Date range "${label}" not found. Available: ${available.join(" | ") || "(none)"}`);
   }
-  await pill.click();
+  await dismissBlockingOverlay(page);
+  await pill.click({ timeout: 15000 }).catch(async (error) => {
+    // One retry after clearing whatever appeared between the check and the click.
+    await dismissBlockingOverlay(page);
+    await pill.click({ timeout: 15000 }).catch(() => {
+      throw error;
+    });
+  });
   await waitForDataLoad(page);
   const selected = (await group.locator(".p-button.p-highlight").first().innerText().catch(() => "")).trim();
   if (!new RegExp(`^${label}$`, "i").test(selected)) {
@@ -360,8 +412,13 @@ function specFinding(fields) {
   return {
     ruleId: fields.ruleId,
     kind: "deterministic",
-    severity: "major",
-    category: "design",
+    // Honour a caller's severity: it used to be hardcoded, so a finding raised as "minor" was
+    // silently reported as "major". Existing callers all pass "major" or nothing, so this is a
+    // no-op for them.
+    severity: fields.severity || "major",
+    // renderMarkdown prints the confidence; without it every spec finding reads "confidence undefined".
+    confidence: fields.confidence || "high",
+    category: fields.category || "design",
     element: fields.element || "",
     selector: fields.selector || "",
     message: fields.message,
@@ -648,6 +705,259 @@ async function setTheme(page, want) {
   const now = await readTheme(page);
   if (now !== want) throw new Error(`Theme did not switch to ${want} (still ${now})`);
   return { changed: true, signature: await themeSignature(page), before };
+}
+
+/**
+ * The card "three dots" (kebab) control. PrimeReact renders it as an icon-only button holding a
+ * pi-ellipsis-v/h glyph, and this app sets no aria-haspopup, aria-label or data-testid on it — so
+ * the component audit's menu-button selector ("button[aria-haspopup=...]") matches none of them and
+ * the icon-button probe only ever checks for a tooltip. Nothing opened these menus.
+ */
+const KEBAB_SELECTOR = [
+  "button:has(.pi-ellipsis-v)",
+  "button:has(.pi-ellipsis-h)",
+  "[role=button]:has(.pi-ellipsis-v)",
+  "button[aria-label*='more' i]",
+  "button[aria-label*='option' i]",
+].join(", ");
+
+const KEBAB_PANEL = ".p-overlaypanel, .p-menu, .p-tieredmenu, .p-slidemenu, [role=menu], .p-contextmenu";
+
+/** Max kebab controls probed per page per theme, so a grid of cards cannot blow up the run. */
+const MAX_KEBABS = 4;
+/** A panel this short is a header with its body clipped, not a usable menu. */
+const MIN_USABLE_PANEL_HEIGHT = 40;
+/** WCAG 2.1 1.4.11: non-text UI components need 3:1 against their background. */
+const MIN_ICON_CONTRAST = 3;
+
+function relativeLuminance(rgb) {
+  const parts = String(rgb || "").match(/[\d.]+/g);
+  if (!parts || parts.length < 3) return null;
+  const [r, g, b] = parts.slice(0, 3).map((value) => {
+    const channel = Number(value) / 255;
+    return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrastRatio(foreground, background) {
+  const a = relativeLuminance(foreground);
+  const b = relativeLuminance(background);
+  if (a === null || b === null) return null;
+  const [light, dark] = a >= b ? [a, b] : [b, a];
+  return Number(((light + 0.05) / (dark + 0.05)).toFixed(2));
+}
+
+/** Icon colour against the first ancestor that actually paints a background. */
+async function kebabColours(button) {
+  return button.evaluate((el) => {
+    const icon = el.querySelector("[class*=ellipsis]") || el;
+    const foreground = getComputedStyle(icon).color;
+    let node = el;
+    let background = "rgba(0, 0, 0, 0)";
+    while (node && /rgba\(0, 0, 0, 0\)|transparent/.test(background)) {
+      background = getComputedStyle(node).backgroundColor;
+      node = node.parentElement;
+    }
+    return { foreground, background };
+  });
+}
+
+async function closeAnyKebabPanel(page) {
+  await page.keyboard.press("Escape").catch(() => {});
+  await page.waitForTimeout(250);
+  if (await page.locator(KEBAB_PANEL).filter({ visible: true }).count()) {
+    await page.mouse.click(3, 3).catch(() => {});
+    await page.waitForTimeout(250);
+  }
+}
+
+/**
+ * Open every kebab menu and check what it actually does, in whichever theme is active: the icon has
+ * enough contrast to be seen, the panel opens, it holds usable controls rather than a clipped
+ * header, it stays on screen, and Esc closes it. The first one is re-checked at phone width.
+ */
+async function auditKebabMenus(page, entry, theme) {
+  const findings = [];
+  const where = entry.path || entry.name || "page";
+  const buttons = page.locator(KEBAB_SELECTOR).filter({ visible: true });
+  const total = await buttons.count().catch(() => 0);
+  if (!total) {
+    console.log(`[ux-audit] kebab on ${where} [${theme}]: none found`);
+    return findings;
+  }
+  console.log(
+    `[ux-audit] kebab on ${where} [${theme}]: ${total} found, probing ${Math.min(total, MAX_KEBABS)}`,
+  );
+
+  for (let index = 0; index < Math.min(total, MAX_KEBABS); index += 1) {
+    const button = buttons.nth(index);
+    const label = `three-dot menu #${index + 1}`;
+    const selector = `button:has(.pi-ellipsis-v) #${index + 1}`;
+
+    const colours = await kebabColours(button).catch(() => null);
+    if (colours) {
+      const ratio = contrastRatio(colours.foreground, colours.background);
+      if (ratio !== null && ratio < MIN_ICON_CONTRAST) {
+        findings.push(
+          specFinding({
+            ruleId: "components.kebab-menu.icon-contrast",
+            severity: "major",
+            element: label,
+            selector,
+            // No theme in the message: tagTheme() appends "(light mode)" to the light pass, and
+            // saying it here too gives "... in light mode (light mode)".
+            message: `Three-dot icon is only ${ratio}:1 against its background`,
+            expected: `at least ${MIN_ICON_CONTRAST}:1 (WCAG 1.4.11) so the control can be seen`,
+            actual: `${theme} mode: icon ${colours.foreground} on ${colours.background} = ${ratio}:1`,
+          }),
+        );
+      }
+    }
+
+    await button.scrollIntoViewIfNeeded().catch(() => {});
+    const clicked = await button.click({ timeout: 5000 }).then(() => true, () => false);
+    if (!clicked) {
+      findings.push(
+        specFinding({
+          ruleId: "components.kebab-menu.opens",
+          severity: "major",
+          element: label,
+          selector,
+          message: "Three-dot control could not be clicked",
+          expected: "clicking it opens its menu",
+          actual: "the click did not land",
+        }),
+      );
+      continue;
+    }
+    await page.waitForTimeout(1200);
+
+    const panel = page.locator(KEBAB_PANEL).filter({ visible: true }).first();
+    if (!(await panel.count())) {
+      findings.push(
+        specFinding({
+          ruleId: "components.kebab-menu.opens",
+          severity: "major",
+          element: label,
+          selector,
+          message: "Three-dot menu did not open",
+          expected: "a menu or overlay panel appears",
+          actual: "nothing opened",
+        }),
+      );
+      continue;
+    }
+
+    const shape = await panel.evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+      return {
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+        left: Math.round(rect.left),
+        right: Math.round(rect.right),
+        text: (el.innerText || "").replace(/\s+/g, " ").trim().slice(0, 80),
+        controls: el.querySelectorAll(
+          "a, button, input, [role=menuitem], .p-menuitem-link, .p-checkbox, .field-checkbox label",
+        ).length,
+      };
+    });
+
+    if (shape.controls === 0 || shape.height < MIN_USABLE_PANEL_HEIGHT) {
+      findings.push(
+        specFinding({
+          ruleId: "components.kebab-menu.empty",
+          severity: "major",
+          element: label,
+          selector,
+          message: "Three-dot menu opens with nothing usable in it",
+          expected: "the menu lists options the user can click",
+          actual: `panel ${shape.width}x${shape.height}px with ${shape.controls} control(s)${shape.text ? `, text "${shape.text}"` : ""}`,
+        }),
+      );
+    }
+
+    const viewport = page.viewportSize() || { width: 1440, height: 900 };
+    if (shape.left < 0 || shape.right > viewport.width) {
+      findings.push(
+        specFinding({
+          ruleId: "components.kebab-menu.offscreen",
+          severity: "major",
+          element: label,
+          selector,
+          message: "Three-dot menu opens partly off screen",
+          expected: "the menu stays inside the viewport",
+          actual: `panel spans ${shape.left}..${shape.right}px in a ${viewport.width}px viewport`,
+        }),
+      );
+    }
+
+    const closed = await page.keyboard
+      .press("Escape")
+      .then(() => page.waitForTimeout(500))
+      .then(async () => (await page.locator(KEBAB_PANEL).filter({ visible: true }).count()) === 0)
+      .catch(() => false);
+    if (!closed) {
+      findings.push(
+        specFinding({
+          ruleId: "components.kebab-menu.esc-closes",
+          severity: "minor",
+          element: label,
+          selector,
+          message: "Esc does not close the three-dot menu",
+          expected: "Esc dismisses it, as for every other overlay",
+          actual: "the menu stayed open",
+        }),
+      );
+    }
+    await closeAnyKebabPanel(page);
+  }
+
+  // Phone width: the control must survive the breakpoint and its menu must still fit.
+  const original = page.viewportSize() || { width: 1440, height: 900 };
+  try {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.waitForTimeout(1200);
+    const narrow = page.locator(KEBAB_SELECTOR).filter({ visible: true });
+    if (!(await narrow.count())) {
+      findings.push(
+        specFinding({
+          ruleId: "components.kebab-menu.responsive",
+          severity: "major",
+          element: "three-dot menu",
+          message: "Three-dot control disappears at 375px",
+          expected: "the menu is reachable at phone width",
+          actual: `${total} control(s) at ${original.width}px, none at 375px`,
+        }),
+      );
+    } else {
+      await narrow.first().scrollIntoViewIfNeeded().catch(() => {});
+      await narrow.first().click({ timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(1200);
+      const panel = page.locator(KEBAB_PANEL).filter({ visible: true }).first();
+      if (await panel.count()) {
+        const box = await panel.boundingBox();
+        if (box && (box.x < 0 || box.x + box.width > 375)) {
+          findings.push(
+            specFinding({
+              ruleId: "components.kebab-menu.responsive",
+              severity: "major",
+              element: "three-dot menu",
+              message: "Three-dot menu overflows the viewport at 375px",
+              expected: "the menu stays inside a 375px viewport",
+              actual: `panel spans ${Math.round(box.x)}..${Math.round(box.x + box.width)}px`,
+            }),
+          );
+        }
+      }
+      await closeAnyKebabPanel(page);
+    }
+  } finally {
+    await page.setViewportSize(original).catch(() => {});
+    await page.waitForTimeout(800);
+  }
+
+  return findings;
 }
 
 const MAX_OVERLAYS_PER_PAGE = 10;
@@ -1140,18 +1450,23 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
       .replace(/[^a-z0-9]+/g, "-"),
   );
   const prefix = entry.stepPrefix || "UX";
+  // Findings are filed against the step that runs this audit. Most ux-flows specs call it
+  // "<PREFIX>-05", but a spec is free to name it otherwise (Home Dashboard uses HD-04), and a step
+  // id that no step in the flow owns leaves every finding orphaned — present in the occurrence but
+  // attached to nothing, so the dashboard lists none of them.
+  const auditStep = entry.auditStepId || `${prefix}-05`;
   const reported = [];
 
-  async function publishFindings(list, shotTag) {
+  async function publishFindings(list, shotTag, theme = "dark") {
     const capped = list.slice(0, 60 - reported.length);
     if (!capped.length) return;
     let pageFallbackShot = "";
-    pageFallbackShot = await captureShot(page, `${prefix}-05-${shotTag}`, null, {
+    pageFallbackShot = await captureShot(page, `${auditStep}-${shotTag}-${theme}`, null, {
       force: true,
     });
     for (const finding of capped) {
       const index = reported.length + 1;
-      const issueId = `${prefix}-05-${String(index).padStart(2, "0")}-${String(
+      const issueId = `${auditStep}-${String(index).padStart(2, "0")}-${String(
         finding.ruleId || "rule",
       ).replace(/[^a-z0-9.-]+/gi, "-")}`;
       const priorShot = finding.evidence && (finding.evidence.clip || finding.evidence.screenshot);
@@ -1165,8 +1480,11 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
       const referenceShot = ref?.inventoryRel || "";
       const payload = {
         id: issueId,
-        step: `${prefix}-05`,
-        title: `${finding.ruleId}: ${finding.element || finding.message}`,
+        step: auditStep,
+        // The theme leads the title so a reader scanning the list can see which pass a finding
+        // came from without reading to the end of the element name.
+        title: `[${theme.toUpperCase()} MODE] ${finding.ruleId}: ${finding.element || finding.message}`,
+        theme,
         severity: finding.severity || "major",
         marker: "[UX]",
         ruleId: finding.ruleId || "",
@@ -1179,6 +1497,7 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
         referenceShot: referenceShot || undefined,
         screenshotFile: screenshotFile || undefined,
         evidence: [
+          `Theme: ${theme} mode`,
           finding.message,
           `Expected: ${finding.expected || ref?.expected || ""}`,
           `Actual: ${finding.actual || ""}`,
@@ -1293,6 +1612,11 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
       ...(UX_SIDE_MENU ? await auditSideMenuPages(page, entry, seenFindingKeys, themeOverlayStats).catch(() => []) : []),
       ...(await auditInactiveTabs(page, entry, seenFindingKeys, themeOverlayStats).catch(() => [])),
       ...(lap(`${theme}: tabs`), []),
+      ...(await auditKebabMenus(page, entry, theme).catch((error) => {
+        console.log(`[ux-audit] kebab on ${entry.path || entry.name} [${theme}] failed: ${error.message}`);
+        return [];
+      })),
+      ...(lap(`${theme}: kebab menus`), []),
     ].filter((finding) => isUxFinding(finding) || /^(overlays|components)\./.test(String(finding.ruleId || "")));
 
     return {
@@ -1352,13 +1676,27 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
   // report.md / report.json are written by uiAudit from a single pass, so they carried the dark
   // findings only — the light pass runs with writeReport:false to avoid clobbering them. Rewrite
   // them once both passes are done so the human-readable report holds both themes.
-  if (light && dark?.result?.report && dark?.result?.reportPaths?.dir) {
+  if (dark?.result?.report && dark?.result?.reportPaths?.dir) {
+    // uiAudit only knows about its own rule findings, so the report never carried the interaction
+    // ones — component probes, overlays and the kebab-menu checks were absent from report.md even
+    // though findings.json held them. Fold both themes' interaction findings in as well.
+    const withConfidence = (list) =>
+      (list || []).map((finding) => ({
+        kind: "deterministic",
+        category: "components",
+        confidence: "high",
+        severity: "major",
+        ...finding,
+      }));
     const mergedReport = {
       ...dark.result.report,
-      theme: `${dark.result.report.theme || "dark"} + light`,
+      theme: light ? `${dark.result.report.theme || "dark"} + light` : dark.result.report.theme,
       findings: [
         ...(dark.result.report.findings || []),
-        ...tagTheme(light.result?.report?.findings || [], "light"),
+        ...withConfidence(dark.interactionFindings),
+        ...tagTheme(light?.result?.report?.findings || [], "light"),
+        ...tagTheme(withConfidence(light?.interactionFindings), "light"),
+        ...withConfidence(themeFindings),
       ],
     };
     mergedReport.summary = summarize(mergedReport.findings);
@@ -1381,16 +1719,16 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
   }
 
   const pageFindings = [...base.pageFindings, ...tagTheme(light ? light.pageFindings : [], "light")];
-  await publishFindings(pageFindings, "page");
 
-  const interactionFindings = [
-    ...base.interactionFindings,
+  const lightInteraction = [
     ...tagTheme(light ? light.interactionFindings : [], "light"),
     ...themeFindings,
   ];
-  // User actions that failed earlier on this page (runUserActionSteps) are findings too.
+  const darkInteraction = [...base.interactionFindings];
+  // User actions that failed earlier on this page (runUserActionSteps) are findings too. They are
+  // run before the audit, in the app's default theme, so they belong with the dark pass.
   for (const f of page.__uxActionFailures || []) {
-    interactionFindings.push(
+    darkInteraction.push(
       specFinding({
         ruleId: "interaction.user-action",
         severity: "major",
@@ -1402,7 +1740,19 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
     );
   }
   page.__uxActionFailures = [];
-  await publishFindings(interactionFindings, "interaction");
+  const interactionFindings = [...darkInteraction, ...lightInteraction];
+
+  // Publish one theme at a time. Issue ids are handed out in publish order, so this is what makes
+  // the report read as two blocks — every dark finding, then every light one — instead of
+  // interleaving page findings from both themes and then interaction findings from both, which
+  // buried the light-mode results in the middle of the list.
+  console.log(
+    `[ux-audit] findings on ${entry.path || entry.name}: dark ${base.pageFindings.length + darkInteraction.length}, light ${(light ? light.pageFindings.length : 0) + lightInteraction.length}`,
+  );
+  await publishFindings(base.pageFindings, "page", "dark");
+  await publishFindings(darkInteraction, "interaction", "dark");
+  await publishFindings(tagTheme(light ? light.pageFindings : [], "light"), "page", "light");
+  await publishFindings(lightInteraction, "interaction", "light");
   console.log(
     `[ux-audit] overlays on ${entry.path || entry.name}: ${overlayStats.modals} modal, ${overlayStats.popups} popup, ${overlayStats.sidebars} sidebar`,
   );

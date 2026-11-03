@@ -41,6 +41,10 @@ const KINDS = {
   "icon-button": "button.p-button-icon-only, button:not(:has(*:not(i):not(svg):not(span.p-button-icon)))",
   tree: ".p-tree, .p-treetable",
   breadcrumb: ".p-breadcrumb, nav[aria-label*=breadcrumb i]",
+  // Data tables and charts carry most of what a dashboard actually shows, and neither was a known
+  // kind: they never appeared in the coverage line and nothing checked that they rendered at all.
+  table: ".p-datatable",
+  chart: ".p-chart",
 };
 
 /** Kinds whose controls get an accessible-name / label check. */
@@ -69,7 +73,9 @@ function finding(kind, check, severity, el, message, expected, actual) {
 
 /** Tag + describe every visible component in the page content (runs in the browser). */
 /** Kinds whose root wraps many parts — a disabled part does not disable the whole. */
-const CONTAINER_KINDS = new Set(["paginator", "accordion", "breadcrumb", "tree", "select-button"]);
+const CONTAINER_KINDS = new Set([
+  "paginator", "accordion", "breadcrumb", "tree", "select-button", "table", "chart",
+]);
 
 /**
  * App chrome present on every page: left nav (with its "Search menu" box), top bar (org switcher,
@@ -517,6 +523,128 @@ const PROBES = {
     if (after !== before) await header.click().catch(() => {});
     return after !== before ? [] : [finding(el.kind, "expands", "major", el, "Accordion header click did not change aria-expanded", "Click toggles the panel and aria-expanded", `stays ${before}`)];
   },
+  /**
+   * Date-range / toggle pills (Today · Last 7 days · This month · This year · Custom). Click each
+   * option and confirm the selection actually moves to it — a pill that never takes the highlight
+   * leaves the page showing another range's data.
+   */
+  async "select-button"(page, el) {
+    const group = loc(page, el);
+    const options = group.locator(".p-button");
+    const count = await options.count();
+    if (count < 2) return [];
+    const selected = async () =>
+      (await group.locator(".p-button.p-highlight").first().innerText().catch(() => "")).trim();
+    const original = await selected();
+    const out = [];
+    for (let i = 0; i < Math.min(count, 5); i += 1) {
+      const option = options.nth(i);
+      const name = (await option.innerText().catch(() => "")).replace(/\s+/g, " ").trim();
+      if (!name) continue;
+      if (await option.evaluate((n) => n.classList.contains("p-disabled")).catch(() => false)) continue;
+      await option.click({ timeout: 4000 }).catch(() => {});
+      await page.waitForLoadState("networkidle", { timeout: 4000 }).catch(() => {});
+      await page.waitForTimeout(400);
+      const now = await selected();
+      if (now.toLowerCase() !== name.toLowerCase()) {
+        out.push(
+          finding(el.kind, "selects", "major", el, `Option "${name}" does not become the selected one`,
+            `clicking "${name}" highlights it`, `selection stayed on "${now || "(none)"}"`),
+        );
+      }
+    }
+    // Put the group back the way we found it so later checks see the page they expected.
+    if (original) {
+      await options.filter({ hasText: new RegExp(`^\\s*${original.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`, "i") })
+        .first().click({ timeout: 4000 }).catch(() => {});
+      await page.waitForTimeout(600);
+    }
+    return out;
+  },
+  /**
+   * Breadcrumb: every crumb needs readable text, and the trail must be navigable — the non-final
+   * crumbs are links. Checked without clicking, so the audit never navigates away from the page.
+   */
+  async breadcrumb(page, el) {
+    const items = await loc(page, el).locator("li, .p-menuitem").filter({ visible: true }).all();
+    if (!items.length) return [];
+    const out = [];
+    const labels = [];
+    for (const item of items) {
+      const text = (await item.innerText().catch(() => "")).replace(/\s+/g, " ").trim();
+      // chevrons and other separators carry no text
+      if (!text) continue;
+      labels.push({ text, hasLink: (await item.locator("a[href]").count().catch(() => 0)) > 0 });
+    }
+    if (!labels.length) {
+      return [finding(el.kind, "has-items", "major", el, "Breadcrumb renders no readable items",
+        "the trail names the path to this page", "no text in any crumb")];
+    }
+    const withoutLink = labels.slice(0, -1).filter((l) => !l.hasLink).map((l) => l.text);
+    if (withoutLink.length) {
+      out.push(
+        finding(el.kind, "navigable", "minor", el, `Breadcrumb step(s) ${withoutLink.map((t) => `"${t}"`).join(", ")} are not links`,
+          "every crumb before the current page links back to it", "plain text, so the trail cannot be used to go back"),
+      );
+    }
+    return out;
+  },
+  /**
+   * A data table must show either rows or an explicit empty message. A table with neither is a
+   * blank box the user cannot tell apart from a failed load.
+   */
+  async table(page, el) {
+    const table = loc(page, el);
+    const headers = await table.locator("th").filter({ visible: true }).count().catch(() => 0);
+    const bodyRows = await table.locator("tbody tr:not(.p-datatable-emptymessage)").filter({ visible: true }).count().catch(() => 0);
+    const emptyMessage = await table.locator(".p-datatable-emptymessage").filter({ visible: true }).count().catch(() => 0);
+    const out = [];
+    if (!headers) {
+      out.push(finding(el.kind, "has-headers", "major", el, "Table renders no column headers",
+        "each column is labelled", "no visible th cells"));
+    }
+    if (!bodyRows && !emptyMessage) {
+      out.push(finding(el.kind, "empty-state", "major", el, "Table shows neither rows nor an empty message",
+        "rows, or a message saying there is nothing to show", "a blank table body"));
+    }
+    const blankHeaders = await table.locator("th").filter({ visible: true })
+      .evaluateAll((cells) => cells.filter((c) => !(c.innerText || "").trim()).length).catch(() => 0);
+    if (headers && blankHeaders === headers) {
+      out.push(finding(el.kind, "header-text", "major", el, "Every column header is blank",
+        "headers name their columns", `${headers} header cell(s), none with text`));
+    }
+    return out;
+  },
+  /**
+   * A chart that paints nothing looks identical to one that is still loading. Sample the canvas:
+   * a single flat colour across it means nothing was drawn.
+   */
+  async chart(page, el) {
+    const canvas = loc(page, el).locator("canvas").first();
+    if (!(await canvas.count())) {
+      return [finding(el.kind, "renders", "major", el, "Chart container holds no canvas",
+        "the chart draws itself", "no canvas element")];
+    }
+    const painted = await canvas.evaluate((node) => {
+      if (!node.width || !node.height) return { ok: false, why: `canvas is ${node.width}x${node.height}` };
+      try {
+        const ctx = node.getContext("2d");
+        const { data } = ctx.getImageData(0, 0, node.width, node.height);
+        const seen = new Set();
+        for (let i = 0; i < data.length; i += 4 * 97) {
+          seen.add(`${data[i]},${data[i + 1]},${data[i + 2]},${data[i + 3]}`);
+          if (seen.size > 3) return { ok: true };
+        }
+        return { ok: false, why: `only ${seen.size} distinct colour(s) across the canvas` };
+      } catch (error) {
+        return { ok: true, why: `could not sample: ${error.message}` };
+      }
+    }).catch(() => ({ ok: true }));
+    return painted.ok
+      ? []
+      : [finding(el.kind, "renders", "major", el, "Chart canvas is blank",
+          "the chart paints its data", painted.why)];
+  },
   async "sortable-header"(page, el) {
     const th = loc(page, el);
     const sortOf = () => th.getAttribute("aria-sort");
@@ -607,7 +735,18 @@ async function probeEmptySubmit(page, rootSelector, items) {
 const GRID_KINDS = new Set(["sortable-header", "column-filter", "paginator"]);
 
 /** Kinds that only get static checks (no safe interaction exists or it is covered elsewhere). */
-const STATIC_ONLY = new Set(["file-upload", "editor", "select-button", "tree", "breadcrumb"]);
+// select-button and breadcrumb were static-only, so the date-range pills and the breadcrumb trail
+// were counted as "found" and never exercised (coverage read "select-button 2/0, breadcrumb 1/0").
+// Both now have probes: the pills are clicked and restored, the breadcrumb is inspected without
+// navigating. file-upload / editor / tree stay static — probing them would create or destroy data.
+const STATIC_ONLY = new Set(["file-upload", "editor", "tree"]);
+
+/**
+ * Kinds whose probe only reads the page — no click, no state change — so every instance is checked
+ * instead of the first `perKind`. Without this a page with three tables had only two of them
+ * looked at, and the third could be blank with nothing to show for it.
+ */
+const PROBE_EVERY_INSTANCE = new Set(["table", "chart", "breadcrumb"]);
 
 async function auditComponents(page, { reportDir, perKind = PER_KIND_PROBES, reload, rootSelector = "", surfaceName = "", formProbe = false } = {}) {
   const items = await inventory(page, rootSelector).catch(() => []);
@@ -626,7 +765,8 @@ async function auditComponents(page, { reportDir, perKind = PER_KIND_PROBES, rel
   for (const kind of kinds) {
     const probe = PROBES[kind];
     if (!probe || STATIC_ONLY.has(kind)) continue;
-    for (let i = 0; i < perKind; i += 1) {
+    const budget = PROBE_EVERY_INSTANCE.has(kind) ? byKind[kind].length : perKind;
+    for (let i = 0; i < budget; i += 1) {
       let list = byKind[kind];
       if (GRID_KINDS.has(kind)) {
         // Earlier probes (e.g. a filter checkbox) may have reloaded the grid: let it settle first.
