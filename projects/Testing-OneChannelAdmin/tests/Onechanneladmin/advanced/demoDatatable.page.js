@@ -1,7 +1,6 @@
 import { expect } from "@playwright/test";
 
-export const DATATABLE_URL =
-  "https://admin.onechanneladmin.com/v2/demo/datatable";
+export const DATATABLE_URL = "/v2/demo/datatable";
 
 function resolveEmail() {
   const fromEnv = process.env.TEST_LOGIN_EMAIL || process.env.DATATABLE_LOGIN_EMAIL;
@@ -195,7 +194,7 @@ export class DemoDatatablePage {
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         await this.page.goto(
-          "https://admin.onechanneladmin.com/v2/login?returnUrl=%2F",
+          "/v2/login?returnUrl=%2F",
           { waitUntil: "domcontentloaded" },
         );
 
@@ -268,7 +267,7 @@ export class DemoDatatablePage {
     const clientName =
       process.env.DATATABLE_CLIENT_NAME || "oneauto";
     await this.page.route(
-      "https://backend.onechanneladmin.com/**",
+      `${(process.env.ONECHANNELADMIN_API_URL || "https://staging-api.onechanneladmin.com").replace(/\/+$/, "")}/**`,
       async (route) => {
         if (route.request().method() === "OPTIONS") {
           await route.continue();

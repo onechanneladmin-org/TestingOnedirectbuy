@@ -8,7 +8,7 @@ import { loginOneChannelAdmin } from "./loginSteps.js";
  */
 
 // Test configuration
-const BASE_URL = "https://admin.onechanneladmin.com";
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || "https://staging-admin.onechanneladmin.com";
 const FULFILL_ORDERS_URL = `${BASE_URL}/fulfill/orders/fulfill-orders`;
 
 const TRACKING = {

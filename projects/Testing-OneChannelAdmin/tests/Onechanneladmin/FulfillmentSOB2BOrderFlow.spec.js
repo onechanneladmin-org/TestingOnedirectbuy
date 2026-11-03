@@ -966,7 +966,7 @@ test("Fulfillment SO B2B Order Flow - Complete Pick and Pack", async ({
     !ordersPageUrl.includes("/b2b/order") &&
     !ordersPageUrl.includes("/fulfill")
   ) {
-    await page.goto("https://admin.onechanneladmin.com/b2b/order");
+    await page.goto("/b2b/order");
     await page.waitForLoadState("networkidle");
   } else {
     // Already on orders page, just wait for it to load
@@ -1510,7 +1510,7 @@ test("Fulfillment SO B2B Order Flow - Complete Pick and Pack", async ({
     );
     if (orderId) {
       await page.goto(
-        `https://admin.onechanneladmin.com/wms/orders?orderId=${orderId}&warehouse=wh1`
+        `/wms/orders?orderId=${orderId}&warehouse=wh1`
       );
       await page.waitForLoadState("networkidle");
       page1 = page; // Use same page
@@ -1548,7 +1548,7 @@ test("Fulfillment SO B2B Order Flow - Complete Pick and Pack", async ({
           // Navigate manually if we have orderId
           if (orderId) {
             await page.goto(
-              `https://admin.onechanneladmin.com/wms/orders?orderId=${orderId}&warehouse=wh1`
+              `/wms/orders?orderId=${orderId}&warehouse=wh1`
             );
             page1 = page;
           } else {
@@ -1571,7 +1571,7 @@ test("Fulfillment SO B2B Order Flow - Complete Pick and Pack", async ({
     // If popup doesn't navigate automatically, navigate explicitly
     if (orderId) {
       await page1.goto(
-        `https://admin.onechanneladmin.com/wms/orders?orderId=${orderId}&warehouse=wh1`
+        `/wms/orders?orderId=${orderId}&warehouse=wh1`
       );
     }
   }
@@ -1715,7 +1715,7 @@ test("Fulfillment SO B2B Order Flow - Complete Pick and Pack", async ({
   // Navigate to orders page for packing
   if (orderId) {
     await page1.goto(
-      `https://admin.onechanneladmin.com/wms/orders?orderId=${orderId}&warehouse=wh1`
+      `/wms/orders?orderId=${orderId}&warehouse=wh1`
     );
   } else {
     // Fallback: try to reload or go back

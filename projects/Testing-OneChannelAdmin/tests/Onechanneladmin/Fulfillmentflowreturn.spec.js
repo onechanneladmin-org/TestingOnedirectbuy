@@ -9,7 +9,7 @@ test("test", async ({ page }) => {
   await page.getByRole("button", { name: "Fulfillment" }).click();
   await page.getByRole("link", { name: "Orders", exact: true }).click();
   await page.goto(
-    "https://admin.onechanneladmin.com/fulfill/orders/fulfill-orders",
+    "/fulfill/orders/fulfill-orders",
   );
   await page.getByRole("button", { name: " Add New " }).click();
   await page.getByRole("menuitem", { name: "SO - D2C Order" }).click();
@@ -27,7 +27,7 @@ test("test", async ({ page }) => {
   await page.getByRole("option", { name: "Pay Later" }).click();
   await page.getByRole("button", { name: " Create Order" }).click();
   await page.goto(
-    "https://admin.onechanneladmin.com/fulfill/orders/fulfill-orders",
+    "/fulfill/orders/fulfill-orders",
   );
   await page.getByRole("button", { name: " Fulfillment" }).first().click();
   await page.getByRole("button", { name: "Continue Shipping" }).click();
@@ -50,7 +50,7 @@ test("test", async ({ page }) => {
   await page.getByRole("option", { name: "Fedex" }).click();
   await page.getByRole("button", { name: "Save Shipping" }).click();
   await page.goto(
-    "https://admin.onechanneladmin.com/fulfill/orders/fulfill-orders",
+    "/fulfill/orders/fulfill-orders",
   );
   await page.getByRole("link", { name: "-000500 D2C" }).click();
   await page
@@ -64,7 +64,7 @@ test("test", async ({ page }) => {
   await page.getByRole("button", { name: " Pick/Pack" }).click();
   const page1 = await page1Promise;
   await page1.goto(
-    "https://admin.onechanneladmin.com/wms/orders?orderId=2026-000500&warehouse=wh1",
+    "/wms/orders?orderId=2026-000500&warehouse=wh1",
   );
   await page1.getByText("pick Unassigned").click();
   await page1
@@ -89,7 +89,7 @@ test("test", async ({ page }) => {
   await page1.getByRole("button", { name: "Submit" }).click();
   await page1.getByRole("button", { name: "Confirm" }).click();
   await page1.goto(
-    "https://admin.onechanneladmin.com/wms/orders?orderId=2026-000500&warehouse=wh1",
+    "/wms/orders?orderId=2026-000500&warehouse=wh1",
   );
   await page1.getByText("pack", { exact: true }).click();
   await page1

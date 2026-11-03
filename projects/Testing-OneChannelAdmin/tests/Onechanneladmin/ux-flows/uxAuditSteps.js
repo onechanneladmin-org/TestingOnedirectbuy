@@ -6,7 +6,7 @@ const { findingKey } = require("../../../lib/ui-audit/report");
 const { getReference } = require("../../../lib/ui-audit/references");
 const { captureIssueScreenshot: defaultCaptureShot } = require("../../helpers/flowStep");
 
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || "https://admin.onechanneladmin.com";
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || "https://staging-admin.onechanneladmin.com";
 const EMAIL = process.env.TEST_LOGIN_EMAIL || "admin@onechanneladmin.com";
 const PASSWORD = process.env.TEST_LOGIN_PASSWORD || "";
 

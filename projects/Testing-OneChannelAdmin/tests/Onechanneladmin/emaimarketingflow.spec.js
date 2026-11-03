@@ -12,7 +12,7 @@ import { test, expect } from "@playwright/test";
 import { loginOneChannelAdmin } from "./loginSteps.js";
 
 const BASE_URL =
-  process.env.PLAYWRIGHT_BASE_URL || "https://admin.onechanneladmin.com";
+  process.env.PLAYWRIGHT_BASE_URL || "https://staging-admin.onechanneladmin.com";
 const LOGIN_EMAIL = process.env.TEST_LOGIN_EMAIL || "admin@onechanneladmin.com";
 const LOGIN_PASSWORD = process.env.TEST_LOGIN_PASSWORD || (process.env.TEST_LOGIN_PASSWORD || "");
 

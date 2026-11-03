@@ -10,6 +10,7 @@
     "test:debug": "playwright test --debug",
     "test:smoke": "playwright test tests/Onechanneladmin/login.spec.js",
     "test:regression": "playwright test",
+    "test:unit": "node --test lib/targetGuard.test.cjs",
     "report": "playwright show-report",
     "show-report": "playwright show-report",
     "upload-report": "tsx scripts/upload-report.ts",

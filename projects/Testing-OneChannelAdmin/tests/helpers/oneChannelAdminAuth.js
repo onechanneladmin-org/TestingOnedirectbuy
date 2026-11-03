@@ -1,7 +1,7 @@
 import { expect } from "@playwright/test";
 
 const BASE_URL =
-  process.env.PLAYWRIGHT_BASE_URL || "https://admin.onechanneladmin.com";
+  process.env.PLAYWRIGHT_BASE_URL || "https://staging-admin.onechanneladmin.com";
 
 export const SIGNIN_URL = `${BASE_URL}/signin?returnUrl=%2F`;
 
