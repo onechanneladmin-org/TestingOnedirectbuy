@@ -3,6 +3,7 @@ import path from "path";
 import { config as loadDotenv } from "dotenv";
 import { defineConfig, devices } from "@playwright/test";
 import e2eEnv from "./tests/support/env.js";
+import targetGuard from "./lib/targetGuard.cjs";
 
 /**
  * Environment variables are loaded from `.env` here and again in global-setup.cjs.
@@ -31,8 +32,40 @@ if (process.env.API_URL && !process.env.REPORT_API_URL) {
 
 // E2E flow settings (E2E_* vars from this project's .env or the hub .env).
 const e2eBaseURL = e2eEnv.e2eSettings().baseURL;
+// The flows' own host goes through the same target gate. On a production read-only run the
+// flows are forced read-only (tests/support/guard.js aborts every write) and writes stay off.
+const flowsTarget = targetGuard.checkTarget({
+  PLAYWRIGHT_BASE_URL: e2eBaseURL,
+  ALLOW_PROD_READONLY: process.env.ALLOW_PROD_READONLY,
+});
+if (!flowsTarget.ok) {
+  throw new Error(`[config] E2E_BASE_URL: ${flowsTarget.reason}`);
+}
+if (flowsTarget.prod) {
+  process.env.E2E_READ_ONLY = "1";
+  delete process.env.E2E_ALLOW_PROD_WRITES;
+  delete process.env.UX_ALLOW_WRITES;
+}
 const E2E_AUTH_FILE = e2eEnv.AUTH_FILE;
 const localChrome = process.env.CI || process.env.PW_USE_CHROME === "0" ? {} : { channel: "chrome" };
+// Target gate: staging by default; the live admin only with ALLOW_PROD_READONLY=1
+// and then only the read-only specs (lib/targetGuard.cjs).
+const target = targetGuard.checkTarget(process.env);
+if (!target.ok) {
+  throw new Error(`[config] ${target.reason}`);
+}
+process.env.PLAYWRIGHT_BASE_URL = target.baseUrl;
+if (target.prod) {
+  console.warn(
+    `[config] ALLOW_PROD_READONLY=1 — production run limited to: ${target.readOnlySpecs.join(", ")}`,
+  );
+}
+/** Non-prod runs: the browser cannot resolve live 1CA hosts. */
+const guardLaunchArgs = flowsTarget.prod ? [] : targetGuard.hostResolverArgs(target);
+/** Production read-only runs: only the allowlisted spec files. */
+const prodOnly = target.prod
+  ? { testMatch: target.readOnlySpecs.map((f) => `**/${f}`), testIgnore: [] }
+  : {};
 
 const ci = Boolean(process.env.CI);
 const testEnv = (
@@ -134,10 +167,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL when tests use relative goto(); product helpers still use their own URLs. */
-    baseURL:
-      process.env.BASE_URL ||
-      process.env.PLAYWRIGHT_BASE_URL ||
-      undefined,
+    baseURL: target.baseUrl,
 
     headless: useHeadless,
 
@@ -154,6 +184,8 @@ export default defineConfig({
     trace: "retain-on-failure",
 
     ignoreHTTPSErrors: process.env.IGNORE_HTTPS_ERRORS === "1",
+
+    launchOptions: { args: guardLaunchArgs },
   },
 
   /* One Channel Admin only. CI uses Playwright Chromium; local keeps Google Chrome when available. */
@@ -204,6 +236,7 @@ export default defineConfig({
       name: "onechanneladmin",
       testDir: "./tests/Onechanneladmin",
       testIgnore: [/ux-flows\//, /flows\//, /HomeDashboardUxAudit\.spec\.js/],
+      ...prodOnly,
       use: {
         ...devices["Desktop Chrome"],
         ...(ci || process.env.PW_USE_CHROME === "0"
@@ -215,6 +248,8 @@ export default defineConfig({
       name: "ux-audit",
       testDir: "./tests/Onechanneladmin",
       testMatch: [/ux-flows\/.*\.spec\.js/, /HomeDashboardUxAudit\.spec\.js/],
+      // Not part of a production read-only run.
+      ...(target.prod ? { testMatch: [], testIgnore: [/.*/] } : {}),
       // Batch scans 100+ pages; default 5m timeout closes the browser mid-run.
       timeout: Number(process.env.UX_BATCH_TIMEOUT_MS) || 3 * 60 * 60 * 1000,
       // Optional warm session: run setup project first when UX_USE_STORAGE_STATE=1.

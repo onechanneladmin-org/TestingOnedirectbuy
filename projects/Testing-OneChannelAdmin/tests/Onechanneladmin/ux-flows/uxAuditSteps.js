@@ -12,7 +12,7 @@ const G = require("../../support/guard");
 
 // Same QA user / admin / test org as the E2E flows (E2E_* in .env); TEST_LOGIN_* still works.
 const E2E = e2eSettings();
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || process.env.E2E_BASE_URL || "https://admin.onechanneladmin.com";
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || process.env.E2E_BASE_URL || "https://staging-admin.onechanneladmin.com";
 const EMAIL = E2E.email || process.env.TEST_LOGIN_EMAIL || "admin@onechanneladmin.com";
 const PASSWORD = E2E.password || process.env.TEST_LOGIN_PASSWORD || "";
 /** The audit only looks: every write is aborted unless UX_ALLOW_WRITES=1 (and never for Nexus). */

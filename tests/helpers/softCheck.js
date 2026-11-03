@@ -1,5 +1,6 @@
 /**
- * Soft checks: capture UI/locator issues with readable markers without failing the test.
+ * Soft checks: capture UI/locator issues with readable markers, keep running the
+ * remaining checks, then fail the test (softTest.js) if any check failed.
  * Issues are buffered for reporters/softIssuesReporter.js → reports/<run>/ISSUES.md
  */
 import fs from "fs";
@@ -35,65 +36,19 @@ export function isInfraError(err) {
 }
 
 /**
- * Seller/admin/OneChannel rows and sheet "not on this storefront" outcomes.
- * Those are expected scope — not product regressions on onedirectbuy.com.
+ * Out of scope for the storefront: the sheet marks the row Later / Not Required,
+ * or the feature lives in OneChannel (seller/admin). Recorded as skipped, never
+ * as passed. Everything else, including a storefront feature that is missing,
+ * is a failure.
  */
 export function isExpectedAbsentOnStorefront(err) {
   const msg = String(err && err.message != null ? err.message : err);
   return (
-    /sheet:\s*(New Functionality|Later versions|Not Required|Test pending|Pending|Automation No)/i.test(
-      msg,
-    ) ||
+    /sheet:\s*(New Functionality|Later versions|Not Required)/i.test(msg) ||
     /not on the OneDirectBuy storefront/i.test(msg) ||
     /seller\/admin catalog lives in OneChannel/i.test(msg) ||
-    /not implemented on the storefront/i.test(msg) ||
     /not a storefront flow/i.test(msg) ||
-    /admin orders live in OneChannel/i.test(msg) ||
-    /not visible on the storefront/i.test(msg) ||
-    /is not on the storefront/i.test(msg) ||
-    /not exercised on live checkout/i.test(msg) ||
-    /no sandbox charge/i.test(msg) ||
-    /Set ONEDIRECTBUY_TEST_COUPON/i.test(msg) ||
-    /No (Cancel order|invoice|Reorder|Contact seller|shipment status|Delivered status|Pay now)/i.test(
-      msg,
-    ) ||
-    /No order is available/i.test(msg) ||
-    /No shipped\/delivered order/i.test(msg) ||
-    /License plate lookup tab is not available/i.test(msg) ||
-    /Invalid VIN did not show/i.test(msg) ||
-    /VIN lookup did not decode/i.test(msg) ||
-    /no vehicle compatibility/i.test(msg) ||
-    /Fits your vehicle/i.test(msg) ||
-    /Does not fit/i.test(msg) ||
-    /no tax estimate/i.test(msg) ||
-    /no shipping estimate/i.test(msg) ||
-    /No Remove coupon/i.test(msg) ||
-    /Cart accepted quantity 9999 with no stock validation/i.test(msg) ||
-    /no billing-same-as-shipping/i.test(msg) ||
-    /no same-as-shipping control/i.test(msg) ||
-    /No over-stock validation/i.test(msg) ||
-    /No variant selector/i.test(msg) ||
-    /No shipping estimate or ZIP/i.test(msg) ||
-    /Checkout has no /i.test(msg) ||
-    /Payment timeout handling is missing/i.test(msg) ||
-    /Failed-payment messaging is not shown/i.test(msg) ||
-    /Pay now disappeared/i.test(msg) ||
-    /Payment success page does not mention/i.test(msg) ||
-    /No shipping method\/rate/i.test(msg) ||
-    /Checkout does not block when shipping is unavailable/i.test(msg) ||
-    /no size\/color\/option/i.test(msg) ||
-    /product has no variant picker/i.test(msg) ||
-    /fitment warning/i.test(msg) ||
-    /combined multi-seller order/i.test(msg) ||
-    /seller sub-orders/i.test(msg) ||
-    /not described on the storefront/i.test(msg) ||
-    /in-stock \/ out-of-stock/i.test(msg) ||
-    /no Stripe UI on checkout/i.test(msg) ||
-    /billing address form/i.test(msg) ||
-    /Saved vehicle was not applied/i.test(msg) ||
-    /Cannot enter a different billing address/i.test(msg) ||
-    /OneChannel/i.test(msg) ||
-    /not on the public form/i.test(msg)
+    /admin orders live in OneChannel/i.test(msg)
   );
 }
 
@@ -161,7 +116,8 @@ export function createSoftChecker(page, testInfo) {
   const issues = [];
 
   /**
-   * Run a check; on failure record a marked issue and continue (does not throw).
+   * Run a check; on failure record a marked issue and continue. The test fails
+   * at the end (softTest.js) when any check failed.
    * @param {string} id Use-case id e.g. ODB-UC-029
    * @param {string} title Short human description
    * @param {() => Promise<void>} fn
@@ -191,9 +147,14 @@ export function createSoftChecker(page, testInfo) {
         await reportStepStatus({
           stepId: id,
           title,
-          status: "passed",
+          status: "skipped",
           severity,
         });
+        testInfo.annotations.push({
+          type: "out-of-scope",
+          description: `${id} ${title}: ${String(err && err.message != null ? err.message : err).split("\n")[0]}`,
+        });
+        // Not a failure: let the journey continue, as before.
         return true;
       }
       const marker = forceMarker || classifyError(err);

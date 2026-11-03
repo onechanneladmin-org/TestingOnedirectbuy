@@ -33,7 +33,7 @@ function loadE2eEnv() {
   return process.env;
 }
 
-const DEFAULT_BASE_URL = "https://devadmin.onechanneladmin.com";
+const DEFAULT_BASE_URL = "https://staging-admin.onechanneladmin.com";
 
 function e2eSettings(env = loadE2eEnv()) {
   const list = (v) =>

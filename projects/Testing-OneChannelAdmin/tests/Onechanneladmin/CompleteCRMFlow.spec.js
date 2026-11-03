@@ -77,7 +77,7 @@ test('Complete CRM Flow Test', async ({ page }) => {
 
   // Step 6: Navigate to dashboard
   await executeStep('Navigate to dashboard', async () => {
-    await page.goto('https://admin.onechanneladmin.com/home/dashboard');
+    await page.goto('/home/dashboard');
     await page.waitForLoadState('networkidle');
   }, testResults);
 

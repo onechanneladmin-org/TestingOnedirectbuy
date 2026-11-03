@@ -2,7 +2,7 @@ const { test, expect } = require("@playwright/test");
 const fs = require("fs");
 const path = require("path");
 
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || "https://admin.onechanneladmin.com";
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || "https://staging-admin.onechanneladmin.com";
 const EMAIL = process.env.TEST_LOGIN_EMAIL || "admin@onechanneladmin.com";
 const PASSWORD = process.env.TEST_LOGIN_PASSWORD || "";
 const AUTH_FILE = path.join(__dirname, "../playwright/.auth/admin.json");

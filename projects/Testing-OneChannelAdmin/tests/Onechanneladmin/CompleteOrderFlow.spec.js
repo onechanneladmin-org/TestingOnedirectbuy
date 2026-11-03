@@ -5,7 +5,7 @@ test('test', async ({ page }) => {
   await loginOneChannelAdmin(page);
   await page.getByRole('button', { name: 'Fulfillment' }).click();
   await page.getByRole('link', { name: 'Orders', exact: true }).click();
-  await page.goto('https://admin.onechanneladmin.com/fulfill/orders/fulfill-orders');
+  await page.goto('/fulfill/orders/fulfill-orders');
   await page.getByRole('button', { name: ' Add New ' }).click();
   await page.getByRole('menuitem', { name: 'SO - D2C Order' }).click();
   await page.locator('span').filter({ hasText: 'Select SKU' }).click();
@@ -20,7 +20,7 @@ test('test', async ({ page }) => {
   await page.locator('span').filter({ hasText: 'Payment Details' }).click();
   await page.getByRole('option', { name: 'Pay Later' }).click();
   await page.getByRole('button', { name: ' Create Order' }).click();
-  await page.goto('https://admin.onechanneladmin.com/fulfill/orders/fulfill-orders');
+  await page.goto('/fulfill/orders/fulfill-orders');
   await page.getByRole('button', { name: ' Fulfillment' }).first().click();
   await page.getByRole('button', { name: 'Continue Shipping' }).click();
   await page.locator('div').filter({ hasText: /^empty$/ }).click();
@@ -40,7 +40,7 @@ test('test', async ({ page }) => {
   const page1Promise = page.waitForEvent('popup');
   await page.getByRole('button', { name: ' Pick/Pack' }).click();
   const page1 = await page1Promise;
-  await page1.goto('https://admin.onechanneladmin.com/wms/orders?orderId=2026-000453&warehouse=wh1');
+  await page1.goto('/wms/orders?orderId=2026-000453&warehouse=wh1');
   await page1.getByText('pick Unassigned').click();
   await page1.locator('#fulfillLpn > div > .p-dropdown').click();
   await page1.locator('.pi.pi-pencil').click();
@@ -66,7 +66,7 @@ test('test', async ({ page }) => {
   await page1.getByRole('button', { name: 'Submit' }).click();
   await page1.getByRole('button', { name: 'Confirm' }).click();
   await page1.locator('div').filter({ hasText: /^Confirm$/ }).nth(1).click();
-  await page1.goto('https://admin.onechanneladmin.com/wms/orders?orderId=2026-000453&warehouse=wh1');
+  await page1.goto('/wms/orders?orderId=2026-000453&warehouse=wh1');
   await page1.getByText('pack Unassigned').click();
   await page1.locator('.pi.pi-list').click();
   await page1.locator('#fulfillLpn > div').first().click();
