@@ -4,44 +4,32 @@ import { capturePageOrModal } from "./oneProductHubV2Capture.js";
 export const ONE_PRODUCT_HUB_V2_BASE_URL =
   process.env.ONEPRODUCTHUB_BASE_URL ||
   process.env.ONEPRODUCTHUB_V2_BASE_URL ||
-  "https://oneproducthub.com";
+  "http://localhost:3000";
 
-/** Production API — live frontend is currently baked to localhost:4000; tests rewrite to this. */
+/**
+ * API the tests rewrite localhost:4000 calls to. playwright.config.js sets it from
+ * lib/targetGuard.cjs (local by default; the live backend only on a production read-only run).
+ */
 export const ONE_PRODUCT_HUB_V2_API_BASE =
   process.env.ONEPRODUCTHUB_API_BASE_URL ||
-  "https://oneproducthub-backend.onechanneladmin.com";
+  "http://localhost:4000";
+
+/** Credentials come only from env (.env or CI secrets); there are no fallbacks in code. */
+const fromEnv = (...keys) => keys.map((k) => process.env[k]).find(Boolean) || "";
 
 export const ONE_PRODUCT_HUB_V2_CLIENT_CREDENTIALS = {
-  email:
-    process.env.ONEPRODUCTHUB_CLIENT_EMAIL ||
-    process.env.ONEPRODUCTHUB_V2_CLIENT_EMAIL ||
-    "anuragsinghg99@gmail.com",
-  password:
-    process.env.ONEPRODUCTHUB_CLIENT_PASSWORD ||
-    process.env.ONEPRODUCTHUB_V2_CLIENT_PASSWORD ||
-    "Seed@123456",
+  email: fromEnv("ONEPRODUCTHUB_CLIENT_EMAIL", "ONEPRODUCTHUB_V2_CLIENT_EMAIL"),
+  password: fromEnv("ONEPRODUCTHUB_CLIENT_PASSWORD", "ONEPRODUCTHUB_V2_CLIENT_PASSWORD"),
 };
 
 export const ONE_PRODUCT_HUB_V2_BRAND_CREDENTIALS = {
-  email:
-    process.env.ONEPRODUCTHUB_BRAND_EMAIL ||
-    process.env.ONEPRODUCTHUB_V2_BRAND_EMAIL ||
-    "anuragsinghg999@gmail.com",
-  password:
-    process.env.ONEPRODUCTHUB_BRAND_PASSWORD ||
-    process.env.ONEPRODUCTHUB_V2_BRAND_PASSWORD ||
-    "Seed@123456",
+  email: fromEnv("ONEPRODUCTHUB_BRAND_EMAIL", "ONEPRODUCTHUB_V2_BRAND_EMAIL"),
+  password: fromEnv("ONEPRODUCTHUB_BRAND_PASSWORD", "ONEPRODUCTHUB_V2_BRAND_PASSWORD"),
 };
 
 export const ONE_PRODUCT_HUB_V2_ADMIN_CREDENTIALS = {
-  email:
-    process.env.ONEPRODUCTHUB_ADMIN_EMAIL ||
-    process.env.ONEPRODUCTHUB_V2_ADMIN_EMAIL ||
-    "superadmin@seed.oneproducthub.com",
-  password:
-    process.env.ONEPRODUCTHUB_ADMIN_PASSWORD ||
-    process.env.ONEPRODUCTHUB_V2_ADMIN_PASSWORD ||
-    "Seed@123456",
+  email: fromEnv("ONEPRODUCTHUB_ADMIN_EMAIL", "ONEPRODUCTHUB_V2_ADMIN_EMAIL"),
+  password: fromEnv("ONEPRODUCTHUB_ADMIN_PASSWORD", "ONEPRODUCTHUB_V2_ADMIN_PASSWORD"),
 };
 
 export function hasAdminCredentials() {
@@ -126,6 +114,11 @@ export async function openLoginForRole(page, role) {
  * @param {{ email: string; password: string }} credentials
  */
 export async function submitSignInForm(page, { email, password }) {
+  if (!email || !password) {
+    throw new Error(
+      "Missing OneProductHub login: set ONEPRODUCTHUB_<CLIENT|BRAND|ADMIN>_EMAIL and _PASSWORD in .env.",
+    );
+  }
   const emailInput = page.getByRole("textbox", { name: "Email Address" });
   await expect(emailInput).toBeVisible({ timeout: VISIBILITY_TIMEOUT });
   await emailInput.fill(email);

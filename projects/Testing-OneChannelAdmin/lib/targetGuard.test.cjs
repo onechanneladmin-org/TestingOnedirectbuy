@@ -106,3 +106,31 @@ test("no spec hard-codes the live admin or backend host", () => {
   walk(path.resolve(__dirname, "..", "tests"));
   assert.deepEqual(offenders, []);
 });
+
+test("mixed live/staging targets are refused, even with ALLOW_PROD_READONLY", () => {
+  const LIVE = "https://admin.onechanneladmin.com";
+  const STG = "https://staging-admin.onechanneladmin.com";
+  for (const [env, e2e] of [
+    [{ PLAYWRIGHT_BASE_URL: LIVE, ALLOW_PROD_READONLY: "1" }, STG],
+    [{ PLAYWRIGHT_BASE_URL: STG, ALLOW_PROD_READONLY: "1" }, LIVE],
+  ]) {
+    const r = g.checkRun(env, e2e);
+    assert.equal(r.ok, false, `${env.PLAYWRIGHT_BASE_URL} + ${e2e}`);
+    assert.match(r.reason, /different sides of production/);
+  }
+  assert.equal(g.checkRun({ PLAYWRIGHT_BASE_URL: STG }, LIVE).ok, false);
+});
+
+test("staging run keeps the host block; prod read-only run forces flows read-only", () => {
+  const stg = g.checkRun({}, "https://staging-admin.onechanneladmin.com");
+  assert.equal(stg.ok, true);
+  assert.equal(stg.forceReadOnly, false);
+  assert.match(stg.launchArgs[0], /MAP \*\.onechanneladmin\.com ~NOTFOUND/);
+  const prod = g.checkRun(
+    { PLAYWRIGHT_BASE_URL: "https://admin.onechanneladmin.com", ALLOW_PROD_READONLY: "1" },
+    "https://admin.onechanneladmin.com",
+  );
+  assert.equal(prod.ok, true);
+  assert.equal(prod.forceReadOnly, true);
+  assert.deepEqual(prod.legacy.readOnlySpecs, ["login.spec.js"]);
+});

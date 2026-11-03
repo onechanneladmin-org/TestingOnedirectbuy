@@ -1,5 +1,5 @@
 import { test, expect } from "../../fixtures/zukaTest.js";
-import { ALLOW_ORDER_E2E, E2E_VENDOR, ADMIN_URL, STEP_TIMEOUT } from "../../helpers/zukaEnv.js";
+import { ALLOW_ORDER_E2E, ORDER_E2E, E2E_VENDOR, ADMIN_URL, STEP_TIMEOUT } from "../../helpers/zukaEnv.js";
 import { api, orderSegment } from "../../helpers/zukaApi.js";
 import { signIn } from "../../helpers/zukaAuth.js";
 import {
@@ -33,11 +33,12 @@ import {
 /**
  * Doc §3: customer → restaurant → driver → delivered, on the live site.
  * Pays with Zuka Credit (CO-08) so no card is needed. Each run creates real
- * orders on Burger House (the test kitchen's restaurant). Disable with
- * ZUKA_ALLOW_ORDER_E2E=0.
+ * orders on Burger House (the test kitchen's restaurant). Off unless
+ * ZUKA_ALLOW_ORDER_E2E=1, and on the live site also ZUKA_ALLOW_PROD_ORDERS=1.
+ * No retries: a retry would place the orders again.
  */
-test.describe.configure({ mode: "serial" });
-test.skip(!ALLOW_ORDER_E2E, "ZUKA_ALLOW_ORDER_E2E=0 — live order lifecycle disabled");
+test.describe.configure({ mode: "serial", retries: 0 });
+test.skip(!ALLOW_ORDER_E2E, ORDER_E2E.reason);
 
 const MIN_WALLET = 60;
 

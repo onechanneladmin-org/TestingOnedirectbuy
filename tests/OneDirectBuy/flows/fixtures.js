@@ -26,8 +26,8 @@ export function odbTarget(env = process.env) {
   const host = new URL(baseURL).hostname;
   const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(host);
   const prod = !targetEnv.isNonProdTarget(env);
-  // The storefront's API (src/api/core/config.js): dev API for local/dev, /api on production.
-  const apiURL = (env.ONEDIRECTBUY_API_URL || (prod ? `${new URL(baseURL).origin}/api` : "https://dev.onedirectbuy.com")).replace(/\/+$/, "");
+  // The storefront's API: staging → staging-api, production → /api, local/dev → dev API (lib/targetEnv.cjs).
+  const apiURL = targetEnv.resolveApiUrl(env);
   return { baseURL, apiURL, local, prod, writable: !prod };
 }
 

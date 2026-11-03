@@ -4,8 +4,14 @@
 const { chromium } = require("@playwright/test");
 const fs = require("fs");
 const path = require("path");
+const targetGuard = require("../lib/targetGuard.cjs");
 
-const BASE = process.env.ONEPRODUCTHUB_BASE_URL || "https://oneproducthub.com";
+// Same target gate as playwright.config.js: local by default, the live site only
+// with ALLOW_PROD_READONLY=1 (these crawls only look; they never submit).
+const TARGET = targetGuard.checkTarget(process.env);
+if (!TARGET.ok) throw new Error(`[crawl] ${TARGET.reason}`);
+
+const BASE = TARGET.baseUrl;
 
 async function dump(page) {
   return page.evaluate(() => {
@@ -45,6 +51,7 @@ async function dump(page) {
 
 (async () => {
   const browser = await chromium.launch({
+    args: targetGuard.hostResolverArgs(TARGET),
     headless: true,
     channel: process.platform === "win32" ? "chrome" : undefined,
   });

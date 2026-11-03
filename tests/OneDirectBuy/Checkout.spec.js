@@ -9,7 +9,7 @@ import {
   fillAddressForm,
   testAddressData,
 } from "../helpers/oneDirectBuyAddress.js";
-import { fillCheckoutShipping } from "../helpers/buyerPurchaseJourney.js";
+import { fillCheckoutShipping, assertStripeTestMode } from "../helpers/buyerPurchaseJourney.js";
 import {
   sellerPortalNotOnStorefrontError,
 } from "../helpers/oneDirectBuySeller.js";
@@ -292,6 +292,7 @@ test.describe("OneDirectBuy — Checkout", () => {
       if (!(await pay.isVisible({ timeout: 20_000 }).catch(() => false))) {
         throw new Error("No Pay now button to check duplicate-order prevention.");
       }
+      await assertStripeTestMode(page);
       await pay.click({ force: true }).catch(() => {});
       const busy =
         (await pay.getAttribute("disabled").catch(() => null)) != null ||
@@ -427,6 +428,7 @@ test.describe("OneDirectBuy — Checkout", () => {
       if (!(await pay.isVisible({ timeout: 20_000 }).catch(() => false))) {
         throw new Error("No Pay now button to retry after a payment interruption.");
       }
+      await assertStripeTestMode(page);
       await pay.click({ force: true }).catch(() => {});
       await expect(page).toHaveURL(/\/account\/checkout/, { timeout: 15_000 });
       if (!(await payNowButton(page).isVisible({ timeout: 10_000 }).catch(() => false))) {

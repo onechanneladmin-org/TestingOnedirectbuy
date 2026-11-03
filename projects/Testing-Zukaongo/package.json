@@ -12,6 +12,7 @@
     "test:functional": "playwright test tests/Zukaongo/functional",
     "test:ui-audit": "playwright test tests/Zukaongo/ui-audit",
     "test:regression": "playwright test",
+    "test:unit": "node --test lib/orderGuard.test.cjs",
     "test:flow": "cross-env CI_TESTS_CONFIG=flows.config.json node scripts/run-ci-tests.js",
     "test:flow:smoke": "cross-env CI_TESTS_CONFIG=flows.config.json node scripts/run-ci-tests.js smoke",
     "test:flow:functional": "cross-env CI_TESTS_CONFIG=flows.config.json node scripts/run-ci-tests.js functional",

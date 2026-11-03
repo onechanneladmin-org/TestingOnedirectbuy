@@ -10,6 +10,7 @@
     "test:debug": "playwright test --debug",
     "test:smoke": "playwright test tests/OneproducthubV2/LoginAdmin.spec.js tests/OneproducthubV2/LoginBrand.spec.js tests/OneproducthubV2/LoginClient.spec.js",
     "test:regression": "playwright test",
+    "test:unit": "node --test lib/targetGuard.test.cjs",
     "test:flow": "cross-env CI_TESTS_CONFIG=flows.config.json node scripts/run-ci-tests.js",
     "test:flow:smoke": "cross-env CI_TESTS_CONFIG=flows.config.json node scripts/run-ci-tests.js smoke",
     "report": "playwright show-report",

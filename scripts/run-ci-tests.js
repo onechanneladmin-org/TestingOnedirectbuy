@@ -137,7 +137,13 @@ function resolveTestFiles(config, suite) {
   ).toLowerCase();
 
   if (suiteKey === "all") {
-    return { testFiles: tests.map((t) => t.file), selectedFlows: null };
+    // Order-placing specs stay out unless the order gate allows them (lib/targetEnv.cjs).
+    const orders = targetEnv.orderPlacingDecision(process.env, ROOT);
+    const kept = tests.filter((t) => !targetEnv.placesOrders(t) || orders.ok);
+    for (const t of tests.filter((x) => !kept.includes(x))) {
+      console.log(`[run-ci-tests] skipping ${t.file}: ${orders.reason}`);
+    }
+    return { testFiles: kept.map((t) => t.file), selectedFlows: null };
   }
 
   if (suiteKey === "smoke") {

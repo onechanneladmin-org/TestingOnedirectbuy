@@ -11,12 +11,17 @@ function resolveEmail() {
 function resolvePassword() {
   const fromEnv = process.env.DATATABLE_LOGIN_PASSWORD;
   if (fromEnv && fromEnv.length >= 8 && !/\s/.test(fromEnv)) return fromEnv;
-  return "s1VdeF6F4E6RvZo";
+  throw new Error("Missing DATATABLE_LOGIN_PASSWORD in .env (8+ characters, no spaces); there is no fallback.");
 }
 
+/** Read when a test signs in (not at import), so a missing password fails that test only. */
 export const DATATABLE_CREDENTIALS = {
-  email: resolveEmail(),
-  password: resolvePassword(),
+  get email() {
+    return resolveEmail();
+  },
+  get password() {
+    return resolvePassword();
+  },
 };
 
 export const CHOOSE_VIEW_OPTIONS = [

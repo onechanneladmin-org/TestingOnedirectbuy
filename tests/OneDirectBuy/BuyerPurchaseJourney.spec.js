@@ -17,10 +17,15 @@ import {
   assertOrderInAccount,
 } from "../helpers/buyerPurchaseJourney.js";
 import { MARKERS } from "../helpers/softCheck.js";
+import targetEnv from "../../lib/targetEnv.cjs";
+
+// Places a real order: only with ODB_ALLOW_ORDERS=1 on a staging or local target.
+const ORDERS = targetEnv.orderPlacingDecision(process.env);
 
 const DESKTOP = { width: 1920, height: 1080 };
 
 test.describe("OneDirectBuy — Buyer purchase journey", () => {
+  test.skip(!ORDERS.ok, ORDERS.reason);
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(DESKTOP);
   });

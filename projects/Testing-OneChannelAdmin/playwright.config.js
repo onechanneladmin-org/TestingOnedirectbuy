@@ -32,36 +32,29 @@ if (process.env.API_URL && !process.env.REPORT_API_URL) {
 
 // E2E flow settings (E2E_* vars from this project's .env or the hub .env).
 const e2eBaseURL = e2eEnv.e2eSettings().baseURL;
-// The flows' own host goes through the same target gate. On a production read-only run the
-// flows are forced read-only (tests/support/guard.js aborts every write) and writes stay off.
-const flowsTarget = targetGuard.checkTarget({
-  PLAYWRIGHT_BASE_URL: e2eBaseURL,
-  ALLOW_PROD_READONLY: process.env.ALLOW_PROD_READONLY,
-});
-if (!flowsTarget.ok) {
-  throw new Error(`[config] E2E_BASE_URL: ${flowsTarget.reason}`);
+const E2E_AUTH_FILE = e2eEnv.AUTH_FILE;
+const localChrome = process.env.CI || process.env.PW_USE_CHROME === "0" ? {} : { channel: "chrome" };
+// Target gate (lib/targetGuard.cjs): staging by default; the live admin only with
+// ALLOW_PROD_READONLY=1, then only the read-only legacy specs, and the guide flows forced
+// read-only (tests/support/guard.js aborts every write). Mixed live/staging targets are refused.
+const run = targetGuard.checkRun(process.env, e2eBaseURL);
+if (!run.ok) {
+  throw new Error(`[config] ${run.reason}`);
 }
-if (flowsTarget.prod) {
+const target = run.legacy;
+process.env.PLAYWRIGHT_BASE_URL = target.baseUrl;
+if (run.forceReadOnly) {
   process.env.E2E_READ_ONLY = "1";
   delete process.env.E2E_ALLOW_PROD_WRITES;
   delete process.env.UX_ALLOW_WRITES;
 }
-const E2E_AUTH_FILE = e2eEnv.AUTH_FILE;
-const localChrome = process.env.CI || process.env.PW_USE_CHROME === "0" ? {} : { channel: "chrome" };
-// Target gate: staging by default; the live admin only with ALLOW_PROD_READONLY=1
-// and then only the read-only specs (lib/targetGuard.cjs).
-const target = targetGuard.checkTarget(process.env);
-if (!target.ok) {
-  throw new Error(`[config] ${target.reason}`);
-}
-process.env.PLAYWRIGHT_BASE_URL = target.baseUrl;
 if (target.prod) {
   console.warn(
-    `[config] ALLOW_PROD_READONLY=1 — production run limited to: ${target.readOnlySpecs.join(", ")}`,
+    `[config] ALLOW_PROD_READONLY=1 — production run limited to: ${target.readOnlySpecs.join(", ")} + read-only flows`,
   );
 }
 /** Non-prod runs: the browser cannot resolve live 1CA hosts. */
-const guardLaunchArgs = flowsTarget.prod ? [] : targetGuard.hostResolverArgs(target);
+const guardLaunchArgs = run.launchArgs;
 /** Production read-only runs: only the allowlisted spec files. */
 const prodOnly = target.prod
   ? { testMatch: target.readOnlySpecs.map((f) => `**/${f}`), testIgnore: [] }

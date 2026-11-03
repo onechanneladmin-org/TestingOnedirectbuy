@@ -2,6 +2,7 @@
 import path from "path";
 import { config as loadDotenv } from "dotenv";
 import { defineConfig, devices } from "@playwright/test";
+import targetGuard from "./lib/targetGuard.cjs";
 
 /**
  * Environment variables are loaded from `.env` here and again in global-setup.cjs.
@@ -26,6 +27,22 @@ if (process.env.API_TOKEN && !process.env.REPORT_UPLOAD_AUTH_TOKEN) {
 if (process.env.API_URL && !process.env.REPORT_API_URL) {
   process.env.REPORT_API_URL = process.env.API_URL;
 }
+
+// Target gate: local by default; the live site only with ALLOW_PROD_READONLY=1 and
+// then only the read-only specs (lib/targetGuard.cjs). UI and API are checked separately.
+const target = targetGuard.checkTarget(process.env);
+if (!target.ok) {
+  throw new Error(`[config] ${target.reason}`);
+}
+process.env.ONEPRODUCTHUB_BASE_URL = target.baseUrl;
+process.env.ONEPRODUCTHUB_API_BASE_URL = target.apiUrl;
+if (target.prod) {
+  console.warn(
+    `[config] ALLOW_PROD_READONLY=1 — production run limited to: ${target.readOnlySpecs.join(", ")}`,
+  );
+}
+/** Non-prod runs: the browser cannot resolve the live hosts. */
+const guardLaunchArgs = targetGuard.hostResolverArgs(target);
 
 const ci = Boolean(process.env.CI);
 const testEnv = (
@@ -127,17 +144,15 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL when tests use relative goto(); product helpers still use their own URLs. */
-    baseURL:
-      process.env.BASE_URL ||
-      process.env.ONEPRODUCTHUB_BASE_URL ||
-      process.env.PLAYWRIGHT_BASE_URL ||
-      undefined,
+    baseURL: target.baseUrl,
 
     headless: useHeadless,
-    launchOptions:
-      testEnv === "production"
-        ? { args: ["--disable-dev-shm-usage"] }
-        : undefined,
+    launchOptions: {
+      args: [
+        ...(testEnv === "production" ? ["--disable-dev-shm-usage"] : []),
+        ...guardLaunchArgs,
+      ],
+    },
 
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
@@ -162,6 +177,8 @@ export default defineConfig({
     {
       name: "oneproducthub",
       testDir: "./tests/OneproducthubV2",
+      // Production read-only run: only the allow-listed spec files.
+      ...(target.prod ? { testMatch: target.readOnlySpecs.map((f) => `**/${f}`) } : {}),
       use: {
         ...devices["Desktop Chrome"],
         ...(ci || process.env.PW_USE_CHROME === "0"

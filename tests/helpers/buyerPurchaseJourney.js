@@ -21,6 +21,36 @@ import {
   testAddressData,
 } from "./oneDirectBuyAddress.js";
 import { MARKERS, isInfraError } from "./softCheck.js";
+import core from "../../lib/checkStepCore.js";
+import targetEnv from "../../lib/targetEnv.cjs";
+
+/**
+ * Call right before any click on Pay. Refuses unless the target is dev/staging/local
+ * and every Stripe frame on the page carries a pk_test_ key (no key found = refused).
+ * @param {import('@playwright/test').Page} page
+ */
+export async function assertStripeTestMode(page) {
+  if (!targetEnv.isNonProdTarget(process.env)) {
+    throw new Error("Refusing to pay: the target is production (lib/targetEnv.cjs).");
+  }
+  const keys = await page
+    .locator('iframe[src*="stripe"]')
+    .evaluateAll((frames) =>
+      frames
+        .map((f) => {
+          try {
+            const u = new URL(f.src);
+            const hash = new URLSearchParams(u.hash.replace(/^#/, ""));
+            return u.searchParams.get("apiKey") || u.searchParams.get("key") || hash.get("apiKey") || hash.get("key") || "";
+          } catch {
+            return "";
+          }
+        })
+        .filter(Boolean),
+    );
+  if (!keys.length) core.assertStripeTestPublishableKey("");
+  for (const k of keys) core.assertStripeTestPublishableKey(k);
+}
 
 /**
  * @param {import('@playwright/test').Page} page
@@ -396,6 +426,7 @@ export async function fillCheckoutShipping(page) {
 async function fillStripeSandboxCard(page) {
   const cardNumber =
     process.env.ONEDIRECTBUY_STRIPE_TEST_CARD || "4242424242424242";
+  core.assertStripeTestCard(cardNumber);
   const cardExp = process.env.ONEDIRECTBUY_STRIPE_TEST_EXP || "12 / 34";
   const cardCvc = process.env.ONEDIRECTBUY_STRIPE_TEST_CVC || "123";
   const cardZip = process.env.ONEDIRECTBUY_STRIPE_TEST_ZIP || "34746";
@@ -628,6 +659,7 @@ export async function attemptPlaceOrder(page) {
   }
 
   await page.waitForTimeout(800);
+  await assertStripeTestMode(page);
   await payBtn.click();
 
   // Payment can take a few seconds in sandbox.

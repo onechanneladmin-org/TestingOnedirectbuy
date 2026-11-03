@@ -4,16 +4,20 @@
 const { chromium } = require("@playwright/test");
 const fs = require("fs");
 const path = require("path");
+const targetGuard = require("../lib/targetGuard.cjs");
 
-const BASE = process.env.ONEPRODUCTHUB_BASE_URL || "https://oneproducthub.com";
-const API =
-  process.env.ONEPRODUCTHUB_API_BASE_URL ||
-  "https://oneproducthub-backend.onechanneladmin.com";
+// Same target gate as playwright.config.js: local by default, the live site only
+// with ALLOW_PROD_READONLY=1 (these crawls only look; they never submit).
+const TARGET = targetGuard.checkTarget(process.env);
+if (!TARGET.ok) throw new Error(`[crawl] ${TARGET.reason}`);
+
+const BASE = TARGET.baseUrl;
+const API = TARGET.apiUrl;
 
 const CREDS = {
   Brand: {
     email: process.env.ONEPRODUCTHUB_BRAND_EMAIL || "anuragsinghg999@gmail.com",
-    password: process.env.ONEPRODUCTHUB_BRAND_PASSWORD || "Seed@123456",
+    password: process.env.ONEPRODUCTHUB_BRAND_PASSWORD || "",
     landing: /Workspace Overview/i,
     hashes: [
       "dashboard",
@@ -48,7 +52,7 @@ const CREDS = {
   },
   Client: {
     email: process.env.ONEPRODUCTHUB_CLIENT_EMAIL || "anuragsinghg99@gmail.com",
-    password: process.env.ONEPRODUCTHUB_CLIENT_PASSWORD || "Seed@123456",
+    password: process.env.ONEPRODUCTHUB_CLIENT_PASSWORD || "",
     landing: /Welcome back,/i,
     hashes: [
       "dashboard",
@@ -70,7 +74,7 @@ const CREDS = {
     email:
       process.env.ONEPRODUCTHUB_ADMIN_EMAIL ||
       "superadmin@seed.oneproducthub.com",
-    password: process.env.ONEPRODUCTHUB_ADMIN_PASSWORD || "Seed@123456",
+    password: process.env.ONEPRODUCTHUB_ADMIN_PASSWORD || "",
     landing: /Admin Dashboard/i,
     hashes: [
       "dashboard",
@@ -171,6 +175,7 @@ async function signIn(page, role) {
 
 (async () => {
   const browser = await chromium.launch({
+    args: targetGuard.hostResolverArgs(TARGET),
     headless: true,
     channel: process.platform === "win32" ? "chrome" : undefined,
   });

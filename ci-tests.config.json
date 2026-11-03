@@ -20,7 +20,8 @@
     {
       "file": "tests/OneDirectBuy/BuyerPurchaseJourney.spec.js",
       "enabled": false,
-      "description": "Gated journey: login → cart → checkout → place order (needs buyer secrets — re-enable later)"
+      "description": "Gated journey: login → cart → checkout → place order (needs buyer secrets — re-enable later)",
+      "placesOrders": true
     },
     {
       "file": "tests/OneDirectBuy/Login.spec.js",

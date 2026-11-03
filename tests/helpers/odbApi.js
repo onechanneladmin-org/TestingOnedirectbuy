@@ -7,7 +7,7 @@
  *   expectOrderStatus(order, ["placed", "processing"]);
  *   expectMoney(order.total, uiTotal, "order total = total shown on the confirmation page");
  *
- * Base URL: ONEDIRECTBUY_API_URL (default https://dev.onedirectbuy.com — same as couponApi.js).
+ * Base URL: ONEDIRECTBUY_API_URL (default: the target's own API — same as couponApi.js).
  * Read-only (GET) on purpose; writes happen through the UI under test.
  */
 import { expect } from "@playwright/test";

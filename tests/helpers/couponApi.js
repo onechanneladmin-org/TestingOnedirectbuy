@@ -3,16 +3,17 @@
  * Uses Node's global fetch (no browser) so API cases run fast and without a page.
  *
  * Env:
- *   ONEDIRECTBUY_API_URL            storefront API (default https://dev.onedirectbuy.com)
+ *   ONEDIRECTBUY_API_URL            storefront API (default: the target's own API, see lib/targetEnv.cjs)
  *   ONEDIRECTBUY_TEST_COUPON        coupon code to use for the "valid coupon" cases
  *                                   (default: first active coupon from GET /coupons)
  *   ONEDIRECTBUY_COUPON_PRODUCT_SLUG product used to seed carts
  *   ONEDIRECTBUY_ADMIN_API_TOKEN    Firebase ID token of a platform admin (optional)
  */
 
-export const API_URL = (
-  process.env.ONEDIRECTBUY_API_URL || "https://dev.onedirectbuy.com"
-).replace(/\/$/, "");
+import targetEnv from "../../lib/targetEnv.cjs";
+
+/** Same API the target gate checked (lib/targetEnv.cjs → resolveApiUrl). */
+export const API_URL = targetEnv.resolveApiUrl(process.env);
 
 const PRODUCT_SLUG =
   process.env.ONEDIRECTBUY_COUPON_PRODUCT_SLUG ||

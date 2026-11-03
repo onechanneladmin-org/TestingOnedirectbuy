@@ -105,8 +105,40 @@ function hostResolverArgs(target) {
   return [`--host-resolver-rules=${rules.join(", ")}`];
 }
 
+/**
+ * One decision for the whole run: the legacy specs (PLAYWRIGHT_BASE_URL) and the guide
+ * flows (E2E_BASE_URL) must be on the same side. A live target next to a staging one is
+ * refused, so the host block can never be switched off by one of them.
+ * @returns {{ ok: true, prod: boolean, legacy: object, flows: object, launchArgs: string[], forceReadOnly: boolean } | { ok: false, reason: string }}
+ */
+function checkRun(env = process.env, e2eBaseUrl) {
+  const legacy = checkTarget(env);
+  if (!legacy.ok) return legacy;
+  const flows = checkTarget({
+    PLAYWRIGHT_BASE_URL: e2eBaseUrl || legacy.baseUrl,
+    ALLOW_PROD_READONLY: env.ALLOW_PROD_READONLY,
+  });
+  if (!flows.ok) return { ok: false, reason: `E2E_BASE_URL: ${flows.reason}` };
+  if (legacy.prod !== flows.prod) {
+    return {
+      ok: false,
+      reason:
+        `Refusing to run: PLAYWRIGHT_BASE_URL (${legacy.baseUrl}) and E2E_BASE_URL (${flows.baseUrl}) ` +
+        "are on different sides of production. Point both at staging, or both at the live admin with ALLOW_PROD_READONLY=1.",
+    };
+  }
+  return {
+    ok: true,
+    prod: legacy.prod,
+    legacy,
+    flows,
+    launchArgs: hostResolverArgs(legacy),
+    forceReadOnly: legacy.prod,
+  };
+}
 
 module.exports = {
+  checkRun,
   DEFAULT_BASE_URL,
   DEFAULT_API_URL,
   PRODUCTION_READ_ONLY_SPECS,

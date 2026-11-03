@@ -10,7 +10,7 @@ import { clickSidebarNav, STEP_TIMEOUT } from "../helpers/oneProductHubV2Nav.js"
 
 const BRAND_NAME = "Onefulfillcenter";
 const BRAND_LOGIN = {
-  email: "sophie@onechanneladmin.com",
+  email: process.env.ONEPRODUCTHUB_SHARED_BRAND_EMAIL || "",
   password: ONE_PRODUCT_HUB_V2_BRAND_CREDENTIALS.password,
 };
 

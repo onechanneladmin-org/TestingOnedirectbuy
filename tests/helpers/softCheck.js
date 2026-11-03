@@ -37,14 +37,14 @@ export function isInfraError(err) {
 
 /**
  * Out of scope for the storefront: the sheet marks the row Later / Not Required,
- * or the feature lives in OneChannel (seller/admin). Recorded as skipped, never
- * as passed. Everything else, including a storefront feature that is missing,
- * is a failure.
+ * or the feature lives in OneChannel (seller/admin). The test is reported as
+ * skipped (testInfo.skip), never as passed. Everything else, including a
+ * storefront feature that is missing or marked New Functionality, is a failure.
  */
 export function isExpectedAbsentOnStorefront(err) {
   const msg = String(err && err.message != null ? err.message : err);
   return (
-    /sheet:\s*(New Functionality|Later versions|Not Required)/i.test(msg) ||
+    /sheet:\s*(Later versions|Not Required)/i.test(msg) ||
     /not on the OneDirectBuy storefront/i.test(msg) ||
     /seller\/admin catalog lives in OneChannel/i.test(msg) ||
     /not a storefront flow/i.test(msg) ||
@@ -150,12 +150,11 @@ export function createSoftChecker(page, testInfo) {
           status: "skipped",
           severity,
         });
-        testInfo.annotations.push({
-          type: "out-of-scope",
-          description: `${id} ${title}: ${String(err && err.message != null ? err.message : err).split("\n")[0]}`,
-        });
-        // Not a failure: let the journey continue, as before.
-        return true;
+        const why = `${id} ${title}: ${String(err && err.message != null ? err.message : err).split("\n")[0]}`;
+        testInfo.annotations.push({ type: "out-of-scope", description: why });
+        // Reported as skipped, not passed. Checks that already failed still fail the test.
+        testInfo.skip(true, `Out of scope — ${why}`);
+        return false;
       }
       const marker = forceMarker || classifyError(err);
       const category = opts.category || issueCategory(marker);

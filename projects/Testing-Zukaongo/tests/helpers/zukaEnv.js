@@ -2,6 +2,8 @@
  * ZUKAongo sites, test accounts and run flags.
  * Passwords come only from .env / CI secrets (see .env.example).
  */
+import orderGuard from "../../lib/orderGuard.cjs";
+
 export const CUSTOMER_URL = (process.env.ZUKA_CUSTOMER_URL || "https://zukaongo.com").replace(/\/$/, "");
 export const ADMIN_URL = (process.env.ZUKA_ADMIN_URL || "https://admin.zukaongo.com").replace(/\/$/, "");
 export const PARTNER_URL = (process.env.ZUKA_PARTNER_URL || "https://drivers.zukaongo.com").replace(/\/$/, "");
@@ -118,8 +120,12 @@ function flag(name, fallback) {
   return v === "1" || v.toLowerCase() === "true";
 }
 
-/** Live order lifecycle (pays with Zuka Credit on the test customer). On by default. */
-export const ALLOW_ORDER_E2E = flag("ZUKA_ALLOW_ORDER_E2E", true);
+/**
+ * Live order lifecycle (pays with Zuka Credit on the test customer). Off by default:
+ * needs ZUKA_ALLOW_ORDER_E2E=1, plus ZUKA_ALLOW_PROD_ORDERS=1 on the live site (lib/orderGuard.cjs).
+ */
+export const ORDER_E2E = orderGuard.orderE2eDecision(process.env);
+export const ALLOW_ORDER_E2E = ORDER_E2E.ok;
 /** Submitting partner applications emails the support inbox. Off by default. */
 export const ALLOW_PARTNER_SUBMIT = flag("ZUKA_ALLOW_PARTNER_SUBMIT", false);
 
