@@ -1633,10 +1633,50 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
   const dark = await runThemePass("dark", { writeReport: true });
   const themeFindings = [];
   let light = null;
+
+  // Evidence is captured by publishFindings from the LIVE page, so each theme's findings have to
+  // be published while that theme is still on screen. Publishing both blocks at the end — after
+  // the audit restores dark — gave every light-mode finding a dark-mode screenshot (the light and
+  // dark page shots came out byte-identical), which is what made the light pass look like it had
+  // never run. Publish order is unchanged: dark page, dark interaction, light page, light
+  // interaction, so issue ids still read as two blocks.
+  const base = dark || {
+    pageFindings: [],
+    interactionFindings: [],
+    components: { findings: [], coverage: {} },
+    overlayStats: emptyOverlayStats(),
+    result: {},
+  };
+  const darkInteraction = [...base.interactionFindings];
+  // User actions that failed earlier on this page (runUserActionSteps) are findings too. They are
+  // run before the audit, in the app's default theme, so they belong with the dark pass.
+  for (const f of page.__uxActionFailures || []) {
+    darkInteraction.push(
+      specFinding({
+        ruleId: "interaction.user-action",
+        severity: "major",
+        element: `${f.action.type} "${f.action.name}"`,
+        message: `User action ${f.id} failed: ${f.error}`,
+        expected: "The control responds and the page can return to where it was",
+        actual: f.error,
+      }),
+    );
+  }
+  page.__uxActionFailures = [];
+  await publishFindings(base.pageFindings, "page", "dark");
+  await publishFindings(darkInteraction, "interaction", "dark");
+
+  let lightPageFindings = [];
+  let lightInteraction = [];
   if (dark) {
     try {
       light = await runThemePass("light", { writeReport: false });
       if (light) {
+        // Still in light mode here — publish before the restore below so the shots show light.
+        lightPageFindings = tagTheme(light.pageFindings, "light");
+        lightInteraction = tagTheme(light.interactionFindings, "light");
+        await publishFindings(lightPageFindings, "page", "light");
+        await publishFindings(lightInteraction, "interaction", "light");
         console.log(
           `[ux-audit] theme on ${entry.path || entry.name}: light pass found ${light.pageFindings.length + light.interactionFindings.length}`,
         );
@@ -1669,6 +1709,11 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
     }
     // Leave the app as we found it: currenttheme persists and leaks into later specs.
     await setTheme(page, "dark").catch(() => {});
+    // Only reached when light mode could not be entered, so these publish in dark by necessity.
+    if (themeFindings.length) {
+      lightInteraction = [...lightInteraction, ...themeFindings];
+      await publishFindings(themeFindings, "interaction", "light");
+    }
   } else {
     console.log(`[ux-audit] theme on ${entry.path || entry.name}: no theme control, dark only`);
   }
@@ -1707,7 +1752,6 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
     }
   }
 
-  const base = dark || { pageFindings: [], interactionFindings: [], components: { findings: [], coverage: {} }, overlayStats: emptyOverlayStats(), result: {} };
   const result = base.result;
   const components = base.components;
   const overlayStats = base.overlayStats;
@@ -1718,41 +1762,14 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
     components.coverage = mergeCoverage(mergeCoverage({}, components.coverage), light.components.coverage);
   }
 
-  const pageFindings = [...base.pageFindings, ...tagTheme(light ? light.pageFindings : [], "light")];
-
-  const lightInteraction = [
-    ...tagTheme(light ? light.interactionFindings : [], "light"),
-    ...themeFindings,
-  ];
-  const darkInteraction = [...base.interactionFindings];
-  // User actions that failed earlier on this page (runUserActionSteps) are findings too. They are
-  // run before the audit, in the app's default theme, so they belong with the dark pass.
-  for (const f of page.__uxActionFailures || []) {
-    darkInteraction.push(
-      specFinding({
-        ruleId: "interaction.user-action",
-        severity: "major",
-        element: `${f.action.type} "${f.action.name}"`,
-        message: `User action ${f.id} failed: ${f.error}`,
-        expected: "The control responds and the page can return to where it was",
-        actual: f.error,
-      }),
-    );
-  }
-  page.__uxActionFailures = [];
+  const pageFindings = [...base.pageFindings, ...lightPageFindings];
   const interactionFindings = [...darkInteraction, ...lightInteraction];
 
-  // Publish one theme at a time. Issue ids are handed out in publish order, so this is what makes
-  // the report read as two blocks — every dark finding, then every light one — instead of
-  // interleaving page findings from both themes and then interaction findings from both, which
-  // buried the light-mode results in the middle of the list.
+  // Both blocks are already published (each inside its own theme, above); this only reports the
+  // split so a run log shows at a glance that light mode was really audited.
   console.log(
     `[ux-audit] findings on ${entry.path || entry.name}: dark ${base.pageFindings.length + darkInteraction.length}, light ${(light ? light.pageFindings.length : 0) + lightInteraction.length}`,
   );
-  await publishFindings(base.pageFindings, "page", "dark");
-  await publishFindings(darkInteraction, "interaction", "dark");
-  await publishFindings(tagTheme(light ? light.pageFindings : [], "light"), "page", "light");
-  await publishFindings(lightInteraction, "interaction", "light");
   console.log(
     `[ux-audit] overlays on ${entry.path || entry.name}: ${overlayStats.modals} modal, ${overlayStats.popups} popup, ${overlayStats.sidebars} sidebar`,
   );

@@ -41,17 +41,29 @@ test("Home Dashboard UI UX audit", async ({ page }) => {
 
   // The dashboard opens on "Today". Widen it to "This year" so the audit sees populated charts
   // and tables rather than a page of empty states, then mount everything below the fold.
-  await soft("HD-03A", "Select the This year date range and wait for data", async () => {
-    await selectDateRange(page, "This year");
-  });
+  await soft(
+    "HD-03A",
+    "Select the This year date range and wait for data",
+    async () => {
+      await selectDateRange(page, "This year");
+    },
+  );
 
-  await soft("HD-03B", "Scroll to the bottom and validate every component loaded", async () => {
-    await scrollThroughPage(page);
-  });
+  await soft(
+    "HD-03B",
+    "Scroll to the bottom and validate every component loaded",
+    async () => {
+      await scrollThroughPage(page);
+    },
+  );
 
-  await soft(entry.stepPrefix + "-05A", "List user actions, run each one, and return to this page", async () => {
-    await runUserActionSteps(page, entry, soft);
-  });
+  await soft(
+    entry.stepPrefix + "-05A",
+    "List user actions, run each one, and return to this page",
+    async () => {
+      await runUserActionSteps(page, entry, soft);
+    },
+  );
 
   await soft("HD-04", "Run all UI audit rules on Home Dashboard", async () => {
     await runFullUxAudit(page, entry, reportFlowIssue);
