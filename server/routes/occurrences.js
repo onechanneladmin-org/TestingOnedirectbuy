@@ -119,6 +119,8 @@ router.get("/:occurrenceId", async (req, res, next) => {
       runDir: occurrence.runDir,
       liveIssueCount: occurrence.liveIssueCount || 0,
       liveIssues: occurrence.liveIssues || [],
+      // What each theme validated, so a caller can see light-mode coverage without the DOCX.
+      componentCoverage: occurrence.componentCoverage || {},
       useCaseId: occurrence.envSummary?.useCaseId || "",
       progress: {
         pending: counts.pending,
