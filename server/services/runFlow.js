@@ -516,9 +516,29 @@ async function startFlowRun(flowId, opts = {}) {
       projectRoot,
     };
     await occurrence.save();
-    child.stdout?.on("data", (b) => process.stdout.write(b));
-    child.stderr?.on("data", (b) => process.stderr.write(b));
+    // Mirror the child's output into the same run log the visible-terminal
+    // branch writes, so finalize can report *why* a run died before step one.
+    const pipedLog = openRunLog(occurrenceId);
+    const tee = (stream) => (b) => {
+      stream.write(b);
+      if (pipedLog !== null) {
+        try {
+          fs.writeSync(pipedLog, b);
+        } catch {
+          // a full or vanished log must never kill the run
+        }
+      }
+    };
+    child.stdout?.on("data", tee(process.stdout));
+    child.stderr?.on("data", tee(process.stderr));
     child.on("close", async (code) => {
+      if (pipedLog !== null) {
+        try {
+          fs.closeSync(pipedLog);
+        } catch {
+          // ignore
+        }
+      }
       try {
         await finalizeOccurrence(occurrenceId, code ?? 1);
       } catch (err) {
@@ -633,6 +653,53 @@ async function ingestLiveStepFile(occurrenceId, liveFile, getOffset, setOffset) 
 }
 
 /**
+ * Playwright can die while loading the config (a target-guard refusal, a bad
+ * `.env`, a syntax error) — before a single step is reported. The exit code
+ * alone ("exited 1 before reporting live steps") hides why, so pull the real
+ * message out of the run log the launcher writes.
+ *
+ * @param {string} occurrenceId
+ * @returns {string} the startup error, or "" when the log shows none
+ */
+/** The run log both spawn branches write, so finalize has one place to look. */
+function runLogPath(occurrenceId) {
+  return path.join(ROOT, "reports", `flow-run-${occurrenceId}.log`);
+}
+
+/** @returns {number|null} an fd for the run log, or null when it cannot be opened. */
+function openRunLog(occurrenceId) {
+  try {
+    fs.mkdirSync(path.join(ROOT, "reports"), { recursive: true });
+    return fs.openSync(runLogPath(occurrenceId), "w");
+  } catch {
+    return null;
+  }
+}
+
+function readStartupError(occurrenceId) {
+  const logPath = runLogPath(occurrenceId);
+  let text = "";
+  try {
+    if (!fs.existsSync(logPath)) return "";
+    text = fs.readFileSync(logPath, "utf8");
+  } catch {
+    return "";
+  }
+  // Strip ANSI colour so the message renders cleanly in the UI.
+  const lines = text
+    .replace(/\u001b\[[0-9;]*m/g, "")
+    .split(/\r?\n/)
+    .map((l) => l.trim());
+
+  // The config throw is the most actionable: it names the fix.
+  const config = lines.find((l) => /^Error:\s*\[config\]/.test(l));
+  if (config) return config.replace(/^Error:\s*/, "");
+
+  const failed = lines.find((l) => /^[A-Za-z]*Error:\s/.test(l));
+  return failed || "";
+}
+
+/**
  * @param {string} occurrenceId
  * @param {number} exitCode
  */
@@ -724,8 +791,10 @@ async function finalizeOccurrence(occurrenceId, exitCode) {
   const infraIssue = (issues?.issues || occurrence.liveIssues || []).find(
     (issue) => issue.marker === "[INFRA]" || /Executable doesn't exist/i.test(issue.evidence || ""),
   );
+  const startupError = realExit !== 0 ? readStartupError(occurrenceId) : "";
   const infraError = String(
     infraIssue?.evidence ||
+      startupError ||
       (realExit !== 0
         ? `Playwright exited ${realExit} before reporting live steps`
         : ""),
