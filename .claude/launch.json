@@ -1,0 +1,59 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hub",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "server"
+      ],
+      "port": 3847
+    },
+    {
+      "name": "odb-storefront",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd /d D:\\DesktopWrokingShell\\OneAuto\\OneDirectBuy\\AutopartMarketplace && node node_modules/next/dist/bin/next start -p 3005"
+      ],
+      "port": 3005
+    },
+    {
+      "name": "zuka-api",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "D:\\DesktopWrokingShell\\OneAuto\\zuka-app\\.cache\\start-api-local.cmd"
+      ],
+      "port": 3001
+    },
+    {
+      "name": "zuka-mobile-web",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd /d D:\\DesktopWrokingShell\\OneAuto\\zuka-app && node .cache\\start-web-local.cjs mobile"
+      ],
+      "port": 8081
+    },
+    {
+      "name": "zuka-admin-web",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd /d D:\\DesktopWrokingShell\\OneAuto\\zuka-app && node .cache\\start-web-local.cjs admin"
+      ],
+      "port": 8082
+    },
+    {
+      "name": "zuka-driver-web",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd /d D:\\DesktopWrokingShell\\OneAuto\\zuka-app && node .cache\\start-web-local.cjs driver"
+      ],
+      "port": 8083
+    }
+  ]
+}
