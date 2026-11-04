@@ -10,3 +10,6 @@ node_modules/
 
 # Local secrets
 .env
+# any local copy or backup of it (.env.bak, .env.local, .env.prod ...)
+.env.*
+!.env.example

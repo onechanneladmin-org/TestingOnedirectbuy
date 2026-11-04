@@ -12,6 +12,9 @@ node_modules/
 
 # Local secrets
 .env
+# any local copy or backup of it (.env.bak, .env.local, .env.prod ...)
+.env.*
+!.env.example
 
 # Disk-backed Mongo memory DB (recent runs persistence)
 /server/data/mongo-memory/
