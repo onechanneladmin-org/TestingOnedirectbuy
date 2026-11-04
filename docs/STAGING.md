@@ -34,31 +34,32 @@ Note: the production public API origin is **backend.onechanneladmin.com**. `api.
 | marketplace-core | https://staging-api.onedirectbuy.com/marketplace-core | https://api.onedirectbuy.com/marketplace-core |
 
 ### Zuka (ZukaOngo)
-**Being built (2026-11-04)** by the Zuka session and the 1CA session. The hostnames are planned; confirm them here once live.
+**Live since 2026-11-04.** Started and smoke-tested by the 1CA session (API, DB, the four web hosts, customer browsing).
 
-| What | Staging (planned) | Production |
+| What | Staging | Production |
 |---|---|---|
 | Customer web | https://staging.zukaongo.com | https://zukaongo.com |
-| API | https://staging-api.zukaongo.com | https://api.zukaongo.com |
+| API | https://staging-api.zukaongo.com (GKE `staging/zuka-api`) | https://api.zukaongo.com |
 | Restaurant partners | https://staging-partners.zukaongo.com | https://partners.zukaongo.com |
 | Drivers app | https://staging-drivers.zukaongo.com | https://drivers.zukaongo.com |
 | Zuka admin | https://staging-admin.zukaongo.com | https://admin.zukaongo.com |
 
-Plan:
-- DB `zuka_staging`, Stripe and PayPal test keys only, payouts off.
-- The 1CA link points at 1CA staging.
-- A separate Zuka on/off switch on the staging page.
-- Cloudflare/DNS for zukaongo.com is approved in the Zuka chat.
+- DB `zuka_staging` (copy of live taken 2026-11-04), test payments only, payouts off. The site shows a STAGING banner.
+- Emails / texts / pushes go only to the allowlist (k8s secret `staging/zuka-staging-notify`, key `allowlist`). Ask the 1CA session to add a tester.
+- Same Firebase project as live: testers use their normal test logins.
+- The 1CA link points at 1CA staging and is OFF in the staging DB; turn it on in staging-admin → Settings → Integrations only to test Connect Zuka on staging.
+- Orders and E2E for Zuka run on staging only.
 
 ## Start and stop
-- **Superadmin:** https://admin.onechanneladmin.com/v2/superadmin/staging (Start / Stop / status). Zuka will get its own switch there.
-- **Testers (being built, branch `feat/staging-tester-access`):**
+- **Superadmin:** https://admin.onechanneladmin.com/v2/superadmin/staging (Start / Stop / status). Two switches: **core** (1CA + ODB) and **Zuka**.
+- **Testers (live 2026-11-04):**
   - The `staging:start` permission on a role in the oneauto or platform org lets a tester press Start with their own login.
-  - Or a superadmin creates a time-limited start link with a QR code (1 h, 8 h, 24 h or 7 d, revocable). It can only start staging.
+  - Or a superadmin creates a time-limited start link with a QR code (1 h, 8 h, 24 h or 7 d, revocable) at /v2/superadmin/staging; the public page is /v2/s/staging. It can start core, Zuka or both, and can only start staging.
+- **Auto-stop:** each group goes back to 0 pods after 60 min without use. A 503 "unconditional drop overload" on a staging host means it is stopped: start it again.
 - **CLI** (onechanneladmin-latest `deploymentsAll/staging/`):
-  - `./staging-up.sh` (`--check` for capacity only)
+  - `./staging-up.sh [core|zuka|all]` (default core; `--check` for capacity only)
   - `./staging-status.sh`
-  - `./staging-down.sh`
+  - `./staging-down.sh [core|zuka|all]` (default core)
   - Run them with `/bin/sh`; zsh doesn't split `K="kubectl -n staging"`.
 - **Low memory:** if staging won't start, scale the pods you don't need to 0 (`onechannel-queueworkload`, `onechannel-marketplace`) and start only the services under test.
 
