@@ -645,6 +645,17 @@ async function ingestLiveStepFile(occurrenceId, liveFile, getOffset, setOffset) 
         } catch (err) {
           console.warn("[runFlow] live issue ingest:", err.message);
         }
+      } else if (ev.kind === "coverage" && ev.theme && ev.coverage) {
+        // What each theme's pass actually validated, pass or fail. Without this the report only
+        // ever shows failures, so a component checked in light mode and found healthy leaves no
+        // trace and looks like it was never looked at.
+        try {
+          await upsertReport(occurrenceId, {
+            appendCoverage: { theme: ev.theme, page: ev.page || "", coverage: ev.coverage },
+          });
+        } catch (err) {
+          console.warn("[runFlow] live coverage ingest:", err.message);
+        }
       }
     }
   } finally {
@@ -986,6 +997,17 @@ async function upsertReport(occurrenceId, body) {
     const err = new Error(`Occurrence not found: ${occurrenceId}`);
     err.status = 404;
     throw err;
+  }
+
+  // Mid-run: one theme's component coverage, kept per theme rather than merged so the report can
+  // show dark and light separately.
+  if (body?.appendCoverage && typeof body.appendCoverage === "object") {
+    const { theme, page, coverage } = body.appendCoverage;
+    occurrence.componentCoverage = occurrence.componentCoverage || {};
+    occurrence.componentCoverage[String(theme)] = { page: page || "", coverage: coverage || {} };
+    occurrence.markModified("componentCoverage");
+    await occurrence.save();
+    return { occurrenceId, flowId: occurrence.flowId, coverageThemes: Object.keys(occurrence.componentCoverage) };
   }
 
   // Mid-run: soft() can append a single issue onto the occurrence (DB source of truth)

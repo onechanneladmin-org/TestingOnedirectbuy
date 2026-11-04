@@ -50,6 +50,40 @@ async function buildReportDocx({ occurrence, report }) {
     }),
   );
 
+  // What each theme validated, pass or fail. Issues below list only failures, so without this a
+  // component checked in light mode and found healthy leaves no trace in the report.
+  const coverageByTheme = occurrence.componentCoverage || {};
+  const themes = Object.keys(coverageByTheme).sort();
+  if (themes.length) {
+    children.push(
+      new Paragraph({ text: "Components validated, by theme", heading: HeadingLevel.HEADING_1, spacing: { before: 240 } }),
+    );
+    for (const theme of themes) {
+      const entry = coverageByTheme[theme] || {};
+      const rows = Object.entries(entry.coverage || {})
+        .filter(([, c]) => c && c.found)
+        .sort(([a], [b]) => a.localeCompare(b));
+      children.push(
+        new Paragraph({
+          text: `${theme.toUpperCase()} MODE${entry.page ? ` — ${entry.page}` : ""}`,
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 160 },
+        }),
+      );
+      children.push(
+        new Paragraph({
+          text: rows.length
+            ? rows.map(([kind, c]) => `${kind}: found ${c.found}, probed ${c.probed}${c.failed ? `, failed ${c.failed}` : ""}`).join("\n")
+            : "No components inventoried for this theme.",
+          spacing: { after: 160 },
+        }),
+      );
+    }
+  }
+
+  children.push(
+    new Paragraph({ text: "Issues", heading: HeadingLevel.HEADING_1, spacing: { before: 240 } }),
+  );
   if (!issues.length) {
     children.push(
       new Paragraph({

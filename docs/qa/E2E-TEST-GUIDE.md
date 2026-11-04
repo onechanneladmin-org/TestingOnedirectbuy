@@ -85,6 +85,33 @@ Companion files in `docs/qa/`:
 - **Functional:** the expected result in the sheet is not met.
 - **Data:** the UI and the API disagree (amount, status or quantity).
 
+### 2.5 UI/UX audit: both themes, every component
+
+Every page audit (`runFullUxAudit` in `projects/Testing-OneChannelAdmin/tests/Onechanneladmin/ux-flows/uxAuditSteps.js`) runs the same battery twice. Keep it that way.
+
+**Dark first, then light — the whole battery each time.**
+- The order per theme is: load the bare page → switch theme → apply `entry.prepare` → rules → components → overlays → side menu → inactive tabs → three-dot menus.
+- Dark runs to completion before light starts. `currenttheme` persists in `localStorage`, so the theme is forced rather than inherited from whatever the previous spec left.
+- Switch the theme on a freshly loaded page. The component and overlay passes probe dialogs and can tear down the top bar, and the theme control goes with it — switching on a dirty page finds no toggle and silently skips the whole second theme.
+- A light pass that cannot run is reported (`design.validation.theme-switch`), never dropped quietly.
+- Never make the second theme a rules-only pass. Light-mode defects live in components and overlays — a control that loses its accessible name, a dialog that cannot be reached, an icon that turns white-on-white.
+
+**Do not infer the theme from `document.body`.** This app keeps the body dark in both modes; only some surfaces repaint. Read `localStorage.currenttheme`.
+
+**Every component gets probed, in both themes.**
+- The coverage line prints `kind found/probed!failed`. A kind showing `n/0` is not covered — it was counted and ignored. Fix the probe, don't accept the number.
+- Adding a component kind means: a selector in `KINDS`, a probe in `PROBES`, and `PROBE_EVERY_INSTANCE` if the probe only reads (so the third table on a page is not skipped). `STATIC_ONLY` is for kinds a probe would damage — file upload, editor, tree.
+- Probes restore what they change. The date-range pills are clicked through and put back on the option they started on.
+- App chrome (top bar, left nav, chat drawer) is excluded from page inventories and audited once by `global-chrome.spec.js`.
+
+**Three-dot (kebab) menus are checked explicitly.** They carry no `aria-haspopup`, `aria-label` or `data-testid`, so the generic menu-button selector never matches them. `auditKebabMenus` opens each one and checks icon contrast (3:1, WCAG 1.4.11), that the panel opens with usable contents rather than a clipped header, that it stays on screen, that Esc closes it, and that it survives 375px.
+
+**Reporting.**
+- Findings are filed against `entry.auditStepId` — the step that actually runs the audit. The old hardcoded `<PREFIX>-05` left every finding attached to a step the flow did not have, and the dashboard listed none of them.
+- The report is grouped by theme: all dark findings, then all light. Issue ids are handed out in publish order, so publishing per theme is what produces the grouping.
+- Every issue title is prefixed `[DARK MODE]` / `[LIGHT MODE]`, carries a `theme` field, and leads its evidence with the theme.
+- `report.md` / `report.json` are rewritten after both passes to merge the two themes **and** the interaction findings. `uiAudit` only writes its own rule findings, so without that merge the human-readable report shows neither light mode nor any `components.*` result.
+
 ---
 
 ## 3. Audit of the existing scripts

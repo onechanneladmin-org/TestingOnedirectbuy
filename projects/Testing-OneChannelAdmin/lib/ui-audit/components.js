@@ -45,6 +45,9 @@ const KINDS = {
   // kind: they never appeared in the coverage line and nothing checked that they rendered at all.
   table: ".p-datatable",
   chart: ".p-chart",
+  // Count badges (notifications, tabs). Small, coloured, and easy to make unreadable — exactly the
+  // kind of thing a theme switch breaks.
+  badge: ".p-badge, .p-overlay-badge > .p-badge",
 };
 
 /** Kinds whose controls get an accessible-name / label check. */
@@ -645,6 +648,48 @@ const PROBES = {
       : [finding(el.kind, "renders", "major", el, "Chart canvas is blank",
           "the chart paints its data", painted.why)];
   },
+  /**
+   * A count badge is only useful if it can be read: it needs a value, and that value needs contrast
+   * against the badge's own fill (WCAG 1.4.3, 4.5:1 for text this size).
+   */
+  async badge(page, el) {
+    const badge = loc(page, el);
+    const text = (await badge.innerText().catch(() => "")).replace(/\s+/g, " ").trim();
+    if (!text) {
+      return [finding(el.kind, "has-value", "minor", el, "Badge shows no value",
+        "the badge displays its count", "empty badge")];
+    }
+    const colours = await badge.evaluate((node) => {
+      const style = getComputedStyle(node);
+      let parent = node;
+      let background = style.backgroundColor;
+      while (parent && /rgba\(0, 0, 0, 0\)|transparent/.test(background)) {
+        parent = parent.parentElement;
+        background = parent ? getComputedStyle(parent).backgroundColor : "rgb(255,255,255)";
+      }
+      return { foreground: style.color, background };
+    }).catch(() => null);
+    if (!colours) return [];
+    const parse = (value) => {
+      const parts = String(value || "").match(/[\d.]+/g);
+      if (!parts || parts.length < 3) return null;
+      const [r, g, b] = parts.slice(0, 3).map((n) => {
+        const channel = Number(n) / 255;
+        return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const a = parse(colours.foreground);
+    const b = parse(colours.background);
+    if (a === null || b === null) return [];
+    const [light, dark] = a >= b ? [a, b] : [b, a];
+    const ratio = Number(((light + 0.05) / (dark + 0.05)).toFixed(2));
+    return ratio >= 4.5
+      ? []
+      : [finding(el.kind, "contrast", "major", el, `Badge text "${text}" is only ${ratio}:1 against the badge`,
+          "at least 4.5:1 so the count can be read",
+          `${colours.foreground} on ${colours.background} = ${ratio}:1`)];
+  },
   async "sortable-header"(page, el) {
     const th = loc(page, el);
     const sortOf = () => th.getAttribute("aria-sort");
@@ -746,7 +791,7 @@ const STATIC_ONLY = new Set(["file-upload", "editor", "tree"]);
  * instead of the first `perKind`. Without this a page with three tables had only two of them
  * looked at, and the third could be blank with nothing to show for it.
  */
-const PROBE_EVERY_INSTANCE = new Set(["table", "chart", "breadcrumb"]);
+const PROBE_EVERY_INSTANCE = new Set(["table", "chart", "breadcrumb", "badge"]);
 
 async function auditComponents(page, { reportDir, perKind = PER_KIND_PROBES, reload, rootSelector = "", surfaceName = "", formProbe = false } = {}) {
   const items = await inventory(page, rootSelector).catch(() => []);

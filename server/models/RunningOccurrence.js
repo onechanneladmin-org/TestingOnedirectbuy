@@ -77,6 +77,8 @@ const RunningOccurrenceSchema = new mongoose.Schema(
     runDir: { type: String, default: "" },
     steps: [StepResultSchema],
     liveIssues: { type: Array, default: [] },
+    // Per-theme component coverage: { dark: { page, coverage }, light: { page, coverage } }.
+    componentCoverage: { type: Object, default: {} },
     liveIssueCount: { type: Number, default: 0 },
     envSummary: {
       type: Object,

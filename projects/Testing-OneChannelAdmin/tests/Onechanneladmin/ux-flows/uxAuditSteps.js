@@ -1602,6 +1602,18 @@ async function runFullUxAudit(page, entry, reportFlowIssue, captureIssueScreensh
     console.log(
       `[ux-audit] components on ${entry.path || entry.name} [${theme}]: ${coverageLine || "(none)"} (found/probed!failed)`,
     );
+    // Send this theme's coverage to the dashboard so the report can list what light mode actually
+    // validated, not only what failed in it.
+    try {
+      require("../../helpers/flowStep").appendLive({
+        kind: "coverage",
+        theme,
+        page: entry.path || entry.name || "",
+        coverage: themeComponents.coverage || {},
+      });
+    } catch {
+      // reporting must never break the audit
+    }
 
     const themeOverlayStats = emptyOverlayStats();
     const themeInteraction = [
