@@ -117,9 +117,57 @@ async function flowStep(stepId, title, fn) {
   }
 }
 
+/**
+ * devIssuesReporter builds ISSUES_FOR_DEVELOPERS from Playwright failures plus whatever JSON it
+ * finds in this buffer. Nothing ever wrote to it, so that report listed one row — "Test failed:
+ * ..." — while the audit's own findings went only to the dashboard's live stream. Mirror each
+ * issue here so the developer report carries them too, per theme.
+ */
+const DEV_ISSUES_BUFFER = path.resolve(
+  process.cwd(),
+  "test-results",
+  "dev-issues",
+  "_buffer",
+);
+
+function bufferDevIssue(payload) {
+  try {
+    fs.mkdirSync(DEV_ISSUES_BUFFER, { recursive: true });
+    const id = String(payload.id || `issue-${Date.now()}`).replace(/[^a-z0-9._-]+/gi, "-");
+    const file = path.join(DEV_ISSUES_BUFFER, `${id}.json`);
+    const theme = payload.theme ? `${String(payload.theme).toUpperCase()} MODE` : "";
+    fs.writeFileSync(
+      file,
+      JSON.stringify({
+        testFile: payload.specFile || "",
+        testTitle: payload.pageName || payload.pagePath || "",
+        issues: [
+          {
+            source: "ux-audit",
+            severity: payload.severity || "major",
+            id: payload.id || "",
+            title: theme ? `[${theme}] ${payload.title || ""}` : payload.title || "",
+            step: payload.step || "",
+            url: payload.pagePath || "",
+            screenshotPath: payload.screenshotFile || "",
+            evidence: payload.evidence || "",
+            suggestion: payload.expected
+              ? `Expected: ${payload.expected}`
+              : "Open the screenshot, confirm against the page, then fix the component.",
+            capturedAt: new Date().toISOString(),
+          },
+        ],
+      }),
+    );
+  } catch {
+    // reporting must never break a test
+  }
+}
+
 async function reportFlowIssue(issue) {
   const payload = { ...(issue || {}) };
   appendLive({ kind: "issue", issue: payload });
+  bufferDevIssue(payload);
 }
 
 module.exports = {

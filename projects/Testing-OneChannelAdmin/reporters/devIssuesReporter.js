@@ -48,7 +48,7 @@ function renderMarkdown(issues, meta) {
   }
 
   const lines = [];
-  lines.push(`# OneProductHub V2 — Issues for Developers`);
+  lines.push(`# OneChannelAdmin — Issues for Developers`);
   lines.push("");
   lines.push(`**Generated:** ${meta.generatedAt}`);
   lines.push(`**Run status:** ${meta.runStatus}`);
@@ -116,8 +116,8 @@ function renderMarkdown(issues, meta) {
   lines.push("");
   lines.push(`1. Start with **CRITICAL** items.`);
   lines.push(`2. Open the screenshot path next to each issue.`);
-  lines.push(`3. Reproduce on https://oneproducthub.onechanneladmin.com/`);
-  lines.push(`4. Fix, then re-run: \`npx playwright test tests/OneproducthubV2\``);
+  lines.push(`3. Reproduce on the target in .env (E2E_BASE_URL)`);
+  lines.push(`4. Fix, then re-run: \`npx playwright test tests/Onechanneladmin\``);
   lines.push("");
 
   return lines.join("\n");
@@ -159,7 +159,7 @@ function renderHtml(issues, meta) {
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>OneProductHub V2 — Issues for Developers</title>
+  <title>OneChannelAdmin — Issues for Developers</title>
   <style>
     body { font-family: Segoe UI, system-ui, sans-serif; margin: 24px; color: #0f172a; background: #f8fafc; }
     h1 { margin: 0 0 8px; }
@@ -176,7 +176,7 @@ function renderHtml(issues, meta) {
   </style>
 </head>
 <body>
-  <h1>OneProductHub V2 — Issues for Developers</h1>
+  <h1>OneChannelAdmin — Issues for Developers</h1>
   <div class="meta">
     Generated: ${escape(meta.generatedAt)} · Run status: ${escape(meta.runStatus)} · Total issues: ${issues.length}
   </div>
