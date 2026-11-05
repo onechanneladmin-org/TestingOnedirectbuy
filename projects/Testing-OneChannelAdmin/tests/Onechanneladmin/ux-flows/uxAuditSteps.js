@@ -716,14 +716,26 @@ async function setTheme(page, want) {
 const KEBAB_SELECTOR = [
   "button:has(.pi-ellipsis-v)",
   "button:has(.pi-ellipsis-h)",
+  // PrimeReact renders some buttons as a div (the date pills are div.p-button), so matching only
+  // <button> misses any three-dot control built that way.
+  ".p-button:has(.pi-ellipsis-v)",
+  ".p-button:has(.pi-ellipsis-h)",
   "[role=button]:has(.pi-ellipsis-v)",
+  "[role=button]:has(.pi-ellipsis-h)",
+  "a:has(.pi-ellipsis-v)",
+  "a:has(.pi-ellipsis-h)",
   "button[aria-label*='more' i]",
   "button[aria-label*='option' i]",
+  "[role=button][aria-label*='more' i]",
 ].join(", ");
 
 const KEBAB_PANEL = ".p-overlaypanel, .p-menu, .p-tieredmenu, .p-slidemenu, [role=menu], .p-contextmenu";
 
-/** Max kebab controls probed per page per theme, so a grid of cards cannot blow up the run. */
+/**
+ * Cap on the controls whose MENU is opened: each one clicks, waits and presses Esc, so a grid of
+ * cards would otherwise dominate the run. The contrast check is not capped — it only reads computed
+ * styles, so every three-dot icon on the page is measured (see auditKebabMenus).
+ */
 const MAX_KEBABS = 4;
 /** A panel this short is a header with its body clipped, not a usable menu. */
 const MIN_USABLE_PANEL_HEIGHT = 40;
@@ -787,33 +799,36 @@ async function auditKebabMenus(page, entry, theme) {
     return findings;
   }
   console.log(
-    `[ux-audit] kebab on ${where} [${theme}]: ${total} found, probing ${Math.min(total, MAX_KEBABS)}`,
+    `[ux-audit] kebab on ${where} [${theme}]: ${total} found, contrast on all ${total}, opening ${Math.min(total, MAX_KEBABS)}`,
   );
+
+  // Contrast first, on EVERY control. It only reads computed styles, so there is no reason to cap
+  // it — capping meant a page with more three-dot buttons than MAX_KEBABS silently left some of
+  // their icons unmeasured, which is exactly the case where one looks "not captured".
+  for (let index = 0; index < total; index += 1) {
+    const colours = await kebabColours(buttons.nth(index)).catch(() => null);
+    if (!colours) continue;
+    const ratio = contrastRatio(colours.foreground, colours.background);
+    if (ratio === null || ratio >= MIN_ICON_CONTRAST) continue;
+    findings.push(
+      specFinding({
+        ruleId: "components.kebab-menu.icon-contrast",
+        severity: "major",
+        element: `three-dot menu #${index + 1}`,
+        selector: `${KEBAB_SELECTOR.split(",")[0].trim()} #${index + 1}`,
+        // No theme in the message: tagTheme() appends "(light mode)" to the light pass, and
+        // saying it here too gives "... in light mode (light mode)".
+        message: `Three-dot icon is only ${ratio}:1 against its background`,
+        expected: `at least ${MIN_ICON_CONTRAST}:1 (WCAG 1.4.11) so the control can be seen`,
+        actual: `${theme} mode: icon ${colours.foreground} on ${colours.background} = ${ratio}:1`,
+      }),
+    );
+  }
 
   for (let index = 0; index < Math.min(total, MAX_KEBABS); index += 1) {
     const button = buttons.nth(index);
     const label = `three-dot menu #${index + 1}`;
-    const selector = `button:has(.pi-ellipsis-v) #${index + 1}`;
-
-    const colours = await kebabColours(button).catch(() => null);
-    if (colours) {
-      const ratio = contrastRatio(colours.foreground, colours.background);
-      if (ratio !== null && ratio < MIN_ICON_CONTRAST) {
-        findings.push(
-          specFinding({
-            ruleId: "components.kebab-menu.icon-contrast",
-            severity: "major",
-            element: label,
-            selector,
-            // No theme in the message: tagTheme() appends "(light mode)" to the light pass, and
-            // saying it here too gives "... in light mode (light mode)".
-            message: `Three-dot icon is only ${ratio}:1 against its background`,
-            expected: `at least ${MIN_ICON_CONTRAST}:1 (WCAG 1.4.11) so the control can be seen`,
-            actual: `${theme} mode: icon ${colours.foreground} on ${colours.background} = ${ratio}:1`,
-          }),
-        );
-      }
-    }
+    const selector = `${KEBAB_SELECTOR.split(",")[0].trim()} #${index + 1}`;
 
     await button.scrollIntoViewIfNeeded().catch(() => {});
     const clicked = await button.click({ timeout: 5000 }).then(() => true, () => false);
