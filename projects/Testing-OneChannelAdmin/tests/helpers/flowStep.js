@@ -135,7 +135,6 @@ function bufferDevIssue(payload) {
     fs.mkdirSync(DEV_ISSUES_BUFFER, { recursive: true });
     const id = String(payload.id || `issue-${Date.now()}`).replace(/[^a-z0-9._-]+/gi, "-");
     const file = path.join(DEV_ISSUES_BUFFER, `${id}.json`);
-    const theme = payload.theme ? `${String(payload.theme).toUpperCase()} MODE` : "";
     fs.writeFileSync(
       file,
       JSON.stringify({
@@ -146,7 +145,9 @@ function bufferDevIssue(payload) {
             source: "ux-audit",
             severity: payload.severity || "major",
             id: payload.id || "",
-            title: theme ? `[${theme}] ${payload.title || ""}` : payload.title || "",
+            // publishFindings already prefixes the title with [DARK MODE] / [LIGHT MODE];
+            // prefixing again here printed it twice.
+            title: payload.title || "",
             step: payload.step || "",
             url: payload.pagePath || "",
             screenshotPath: payload.screenshotFile || "",
