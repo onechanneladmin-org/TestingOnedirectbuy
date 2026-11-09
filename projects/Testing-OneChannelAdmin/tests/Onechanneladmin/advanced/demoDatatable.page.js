@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 
-export const DATATABLE_URL = "/v2/demo/datatable";
+// The Catalog products table. (/v2/demo/datatable was only a redirect to this page and was removed 2026-11-09.)
+export const DATATABLE_URL = "/products/catalog";
 
 function resolveEmail() {
   const fromEnv = process.env.TEST_LOGIN_EMAIL || process.env.DATATABLE_LOGIN_EMAIL;
@@ -401,7 +402,7 @@ export class DemoDatatablePage {
 
   async resetToCleanState() {
     await this.dismissBlockingOverlays();
-    if (!this.page.url().includes("/v2/demo/datatable")) {
+    if (!this.page.url().includes(DATATABLE_URL)) {
       await this.openDatatable();
       return;
     }

@@ -1,5 +1,5 @@
 /**
- * Live-discovered three-dot filter operators from /v2/demo/datatable.
+ * Live-discovered three-dot filter operators from the Catalog products table (/products/catalog).
  * Overlay always has Match + operator select + Clear/Apply.
  */
 
