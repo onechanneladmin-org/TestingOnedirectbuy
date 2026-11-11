@@ -30,7 +30,7 @@ async function waitForFileReady(filePath, maxMs = 30000) {
  * - PW_UI_ANALYSIS_OUTPUT_DIR — UI analysis folder with index.html (set by config / uiAnalysisReporter)
  * - REPORT_UPLOAD=1 — enable upload when REPORT_UPLOAD_AUTH_TOKEN is set (off by default locally)
  * - REPORT_UPLOAD=0|false — skip upload
- * - REPORT_UPLOAD_URL — override endpoint (default dev.onechanneladmin.com upload API)
+ * - REPORT_UPLOAD_URL — upload endpoint (required; no default since dev.onechanneladmin.com was retired)
  * - REPORT_UPLOAD_FIELD_NAME — multipart file field (default htmlFile)
  * - REPORT_UPLOAD_NAME — Playwright report display name
  * - REPORT_UPLOAD_UI_ANALYSIS_NAME — UI analysis report display name
