@@ -26,6 +26,19 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
+      - name: Move the GCP key file out of the workspace (keeps it out of docker build contexts)
+        # google-github-actions/auth writes gha-creds-*.json into $GITHUB_WORKSPACE; `docker build .`
+        # would copy it into the image. Move it to $RUNNER_TEMP and repoint the env vars the auth
+        # action exported (its post step still deletes the file via GOOGLE_GHA_CREDS_PATH).
+        shell: bash
+        run: |
+          shopt -s nullglob
+          for f in "$GITHUB_WORKSPACE"/gha-creds-*.json; do
+            dest="$RUNNER_TEMP/$(basename "$f")"
+            mv -f "$f" "$dest"
+            { echo "GOOGLE_APPLICATION_CREDENTIALS=$dest"; echo "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE=$dest"; echo "GOOGLE_GHA_CREDS_PATH=$dest"; } >> "$GITHUB_ENV"
+          done
+
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 

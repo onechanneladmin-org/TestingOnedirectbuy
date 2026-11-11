@@ -18,3 +18,6 @@ pnpm-lock.yaml
 README.md
 **/*.md
 !server/**/*.md
+
+# google-github-actions/auth key file (never commit / never copy into images)
+gha-creds-*.json
