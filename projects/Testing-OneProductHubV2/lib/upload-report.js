@@ -7,9 +7,9 @@ const fs = require("fs");
 const path = require("path");
 const archiver = require("archiver");
 
-const DEFAULT_URL =
-  process.env.REPORT_UPLOAD_URL ||
-  "https://dev.onechanneladmin.com/marketplace/testingreports/upload";
+// No default host: dev.onechanneladmin.com (a developer's Cloudflare tunnel) is retired
+// (2026-11-11). Uploads need an explicit REPORT_UPLOAD_URL.
+const DEFAULT_URL = process.env.REPORT_UPLOAD_URL || "";
 
 const PLACEHOLDER_TOKENS = new Set([
   "",
@@ -50,6 +50,7 @@ function isReportUploadEnabled() {
   return (
     (process.env.REPORT_UPLOAD === "1" ||
       process.env.REPORT_UPLOAD === "true") &&
+    Boolean(DEFAULT_URL) &&
     isConfiguredUploadToken()
   );
 }
