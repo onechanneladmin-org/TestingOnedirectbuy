@@ -91,26 +91,34 @@ Use-case IDs per flow: in the sheet, filter the **Flow** column (tabs `Main_v2` 
 
 ## 5. Progress (update this table as you go)
 
-| Flow | Status | Notes |
-|---|---|---|
-| A1 | exists | verify on first run |
-| A2 | written, not run | fix selectors on first run |
-| B3 | exists, off | SAVE10 apply bug |
-| E1 | not started | |
-| A3 | not started | needs data-testids |
-| A5 | not started | needs data-testids |
-| A6 | not started | needs data-testids |
-| B2 | not started | |
-| A4 | not started | |
-| A7 | not started | |
-| B4 | not started | |
-| B0 | not started | |
-| B1 | not started | |
-| B5 | not started | |
-| A8 | not started | needs a low-permission test user |
-| B6 | not started | needs a B2B test org |
-| S1 | not started | needs a test seller |
-| C1 | not started | |
+Updated 2026-11-12 (QA1). **Every flow now has a spec** (A1–A8, C1, B0, B1, B4, B5 since f25c9dd; E1, B2, B6, S1 added 2026-11-12). What is still missing to RUN them is not code but test data (see "Blocked on" below). Details and findings: `Documents/reports/QA1-E2E-2026-11-12.md` (outside this repo).
+
+| Flow | Spec | Status | Notes |
+|---|---|---|---|
+| A1 | 1CA `flows/a1-login-menu.spec.js` | written, not run | needs the QA admin login |
+| A2 | 1CA `flows/a2-order-details-ux.spec.js` | written, not run | needs the QA admin login |
+| B3 | `Coupons.spec.js` | exists, off | SAVE10 apply bug |
+| E1 | 1CA `flows/e1-order-to-return.spec.js` (+ `support/odb.js`) | written 11-12, not run | needs admin + buyer logins, staging up, `ODB_ALLOW_ORDERS=1` |
+| A3 | 1CA `flows/a3-pick-pack-ship.spec.js` | written, not run | needs the QA admin login + writes |
+| A5 | 1CA `flows/a5-refund.spec.js` | written, not run | same |
+| A6 | 1CA `flows/a6-return-rma.spec.js` | written, not run | same |
+| B2 | `flows/b2-checkout.spec.js` | written 11-12, not run | needs the test buyer + a non-prod storefront + `ODB_ALLOW_ORDERS=1` |
+| A4 | 1CA `flows/a4-short-pick-cancel-refund.spec.js` | written, not run | QA admin login + writes |
+| A7 | 1CA `flows/a7-cancel.spec.js` | written, not run | same |
+| B4 | `flows/b4-my-orders.spec.js` | written, not run | needs the test buyer |
+| B0 | `flows/b0-account.spec.js` | written, not run | needs the test buyer |
+| B1 | `flows/b1-browse.spec.js` | **run 3× on production, read-only** | fails only on real site findings: axe a11y defects (QA1 report F2–F5) and the Cloudflare challenge on /vendor (F1); cart steps run on staging only |
+| B5 | `flows/b5-mobile.spec.js` | **run 3× on production, read-only** | same a11y findings at 390 px (F2–F6) |
+| A8 | 1CA `flows/a8-permissions.spec.js` | written, not run | needs a low-permission test user |
+| B6 | `flows/b6-b2b.spec.js` | **public part run 3×** (blocked by the Cloudflare challenge on /account/*, F1); signed-in part not run | written to the CURRENT B2B rules (no org credit/terms); needs a B2B test buyer |
+| S1 | `flows/s1-seller.spec.js` | **run 3× on production, read-only**: application validation + storefront = API pass their checks; fails on a11y (F2–F4) and the /vendor challenge (F1) | seller portal steps (brand approval, product create, inventory) need a test seller in OneChannel |
+| C1 | 1CA `flows/c1-crm.spec.js` | written, not run | needs the QA admin login (CRM) |
+
+**Blocked on (owner):** the QA admin login (+ TOTP secret), the test buyer, a low-permission user, a B2B test buyer and a test seller, put in the gitignored `.env` files (root and `projects/Testing-OneChannelAdmin/`); and staging started (`/v2/superadmin/staging`) for every flow that writes. No test logins exist in `.env`, GitHub secrets or Secret Manager today.
+
+**How to run the public flows (read-only, safe on production):**
+`ALLOW_PROD=1 ONEDIRECTBUY_BASE_URL=https://onedirectbuy.com ONEDIRECTBUY_API_URL=https://onedirectbuy.com/api npx playwright test tests/OneDirectBuy/flows --project=chromium --workers=1 --retries=0`
+(the target guard limits a production run to `productionReadOnly` in `ci-tests.config.json`; every write step skips there).
 
 ## 6. Rules that don't change
 

@@ -5,7 +5,7 @@
 // Every screen gets checkStep (screenshot, axe, layout, console, 5xx); every count, title and price is
 // read back from the storefront API. Cart tests write a guest cart, so they run only on a dev/local
 // target (odb.writable); on production (ALLOW_PROD=1) they skip.
-import { test, expect, go, productHrefs, apiGet, centsFromText, cents } from "./fixtures.js";
+import { test, expect, go, passChallenge, productHrefs, apiGet, centsFromText, cents } from "./fixtures.js";
 import { checkStep } from "../../helpers/checkStep.js";
 
 const KEYWORD = process.env.ODB_SEARCH_KEYWORD || "wheel";
@@ -42,10 +42,11 @@ test.describe("B1 browse @flow", () => {
   });
 
   test("ODB-UC-027 header links open their page", async ({ page, health }, testInfo) => {
-    for (const [name, url] of [[/All products/i, /\/shop/], [/Track your order/i, /track/i], [/Sell on OneDirectBuy/i, /sell|seller/i]]) {
+    for (const [name, url] of [[/All products/i, /\/shop/], [/Track your order/i, /track/i], [/Sell on OneDirectBuy/i, /sell|seller|vendor/i]]) {
       await go(page, "/");
       await page.getByRole("link", { name }).first().click();
       await expect(page, `${name} opens its page`).toHaveURL(url);
+      await passChallenge(page);
       await expect(page.getByRole("heading").first()).toBeVisible();
     }
     await checkStep(page, testInfo, { id: "ODB-UC-027", name: "header link target", health });
@@ -88,7 +89,7 @@ test.describe("B1 browse @flow", () => {
     await go(page, `/search?keyword=${NO_RESULTS}`);
     await expect(page.getByRole("heading", { name: /Search result for/i })).toBeVisible();
     await expect(page.getByText(/Unable to load search results/i), "no load error").toHaveCount(0);
-    await expect(page.getByText(/0 record\(s\) found|no (products|results)/i).first(), "empty-state message").toBeVisible();
+    await expect(page.getByText(/0 record\(s\) found|no (products|results)/i).filter({ visible: true }).first(), "empty-state message").toBeVisible();
     expect(await productHrefs(page), "no product cards").toEqual([]);
     await checkStep(page, testInfo, { id: "ODB-UC-031", name: "no results", health });
   });
@@ -102,7 +103,7 @@ test.describe("B1 browse @flow", () => {
     const product = await apiGet(odb, `/products/${href.split("/").pop()}`);
     await expect(page.getByRole("heading", { level: 1 }).first(), "title = API").toHaveText(product.title, { ignoreCase: true });
     const price = product.aggregate && product.aggregate.lowestPrice;
-    await expect(page.getByText(new RegExp(`\\$${Number(price).toFixed(2).replace(".", "\\.")}`)).first(), `price $${price} = API lowest offer`).toBeVisible();
+    await expect(page.getByText(new RegExp(`\\$${Number(price).toFixed(2).replace(".", "\\.")}`)).filter({ visible: true }).first(), `price $${price} = API lowest offer`).toBeVisible();
     await expect(pdpAddToCart(page), "Add to cart shown for an in-stock product").toBeVisible();
     await checkStep(page, testInfo, { id: "ODB-UC-056", name: "product page", health });
   });

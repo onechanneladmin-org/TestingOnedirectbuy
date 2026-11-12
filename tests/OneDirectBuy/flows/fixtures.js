@@ -87,9 +87,23 @@ export const test = base.extend({
 
 export { expect };
 
+/**
+ * Some routes (login, register, become-a-vendor) sit behind a Cloudflare managed challenge
+ * ("Just a moment…", meta refresh). It clears by itself in a real browser; wait for it so steps and
+ * checkStep look at the storefront page, not the interstitial. A challenge that never clears fails here
+ * (it is not something a test may click through).
+ */
+export async function passChallenge(page, timeout = 45_000) {
+  const onChallenge = async () => /just a moment|attention required/i.test(await page.title().catch(() => ""));
+  if (!(await onChallenge())) return;
+  await expect.poll(onChallenge, { message: "Cloudflare challenge cleared by itself", timeout }).toBe(false);
+  await page.waitForLoadState("domcontentloaded");
+}
+
 /** Open a storefront path, dismiss the cookie banner and the assistant overlay. */
 export async function go(page, path = "/") {
   await gotoOneDirectBuy(page, path);
+  await passChallenge(page);
   await dismissCookieBanner(page);
   await dismissAssistantOverlay(page);
 }

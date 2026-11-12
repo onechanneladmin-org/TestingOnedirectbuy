@@ -23,17 +23,31 @@ const { DYNAMIC_MASKS, LIMITS, stepSlug, classifyLayout, failing, isIgnoredConso
 /** Collect console errors, uncaught exceptions and our own 5xx responses on a page. */
 export function watchHealth(page) {
   let issues = [];
+  // URLs answered with a Cloudflare managed challenge (header cf-mitigated: challenge). Some storefront
+  // routes (login, register, become-a-vendor) are challenged for every client, so the Next.js prefetch
+  // of their links gets a 403 and logs a console error. That is a site-config finding (reported in
+  // QA1-E2E-2026-11-12.md F1), recorded as kind "cf-challenge" (moderate: listed in every report, not
+  // failing the step) so that every other 403 / console error still fails.
+  const challenged = new Set();
+  const isCfNoise = (loc, text) =>
+    challenged.has(loc.split("?")[0]) || /challenges\.cloudflare\.com/.test(loc) || /challenges\.cloudflare\.co/.test(text);
   page.on("console", (msg) => {
     if (msg.type() !== "error") return;
-    const text = msg.text();
-    if (!isIgnoredConsole(text)) issues.push({ kind: "console", severity: "serious", text: text.slice(0, 500) });
+    const loc = msg.location()?.url || "";
+    // "Failed to load resource" carries no URL in its text: add the resource so the report names it.
+    const text = /Failed to load resource/.test(msg.text()) && loc ? `${msg.text()} ${loc.split("?")[0]}` : msg.text();
+    if (!isIgnoredConsole(text)) issues.push({ kind: "console", severity: "serious", text: text.slice(0, 500), loc });
   });
   page.on("pageerror", (err) => issues.push({ kind: "pageerror", severity: "serious", text: String(err?.message || err).slice(0, 500) }));
   page.on("response", (res) => {
+    if (res.status() === 403 && res.headers()["cf-mitigated"] === "challenge") challenged.add(res.url().split("?")[0]);
     if (isOwn5xx(res.status(), res.url())) issues.push({ kind: "http5xx", severity: "serious", text: `${res.status()} ${res.request().method()} ${res.url().split("?")[0]}` });
   });
+  // Classified when read (the console message can arrive before its response event).
+  const classify = (i) =>
+    i.kind === "console" && isCfNoise(i.loc || "", i.text) ? { kind: "cf-challenge", severity: "moderate", text: i.text } : (({ loc, ...rest }) => rest)(i);
   return {
-    issues: () => [...issues],
+    issues: () => issues.map(classify),
     reset: () => {
       issues = [];
     },
@@ -69,7 +83,15 @@ async function measureLayout(page, rootSel) {
         offscreen: controls
           .filter((el) => {
             const r = el.getBoundingClientRect();
-            return r.right > vw + 1 || r.left < -1;
+            if (!(r.right > vw + 1 || r.left < -1)) return false;
+            // Not a defect: hidden from users on purpose (honeypot fields, aria-hidden, tabindex=-1) or a
+            // slide/strip inside a horizontal scroller or carousel (reachable by scrolling or its arrows).
+            if (el.closest("[aria-hidden=true], [inert]") || el.tabIndex < 0) return false;
+            for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+              const ox = getComputedStyle(a).overflowX;
+              if (["hidden", "auto", "scroll", "clip"].includes(ox) && a.scrollWidth > a.clientWidth + 1) return false;
+            }
+            return true;
           })
           .map((el) => ({ sel: label(el), text: (el.innerText || el.value || "").trim().slice(0, 40) })),
         small: controls

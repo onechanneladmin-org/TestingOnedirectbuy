@@ -423,9 +423,11 @@ export async function fillCheckoutShipping(page) {
  * Uses common test card 4242 4242 4242 4242.
  * @param {import('@playwright/test').Page} page
  */
-async function fillStripeSandboxCard(page) {
+export async function fillStripeSandboxCard(page, { card } = {}) {
+  // `card` overrides the env card (e.g. the published decline card 4000000000000002); only
+  // Stripe's published test numbers pass assertStripeTestCard below.
   const cardNumber =
-    process.env.ONEDIRECTBUY_STRIPE_TEST_CARD || "4242424242424242";
+    card || process.env.ONEDIRECTBUY_STRIPE_TEST_CARD || "4242424242424242";
   core.assertStripeTestCard(cardNumber);
   const cardExp = process.env.ONEDIRECTBUY_STRIPE_TEST_EXP || "12 / 34";
   const cardCvc = process.env.ONEDIRECTBUY_STRIPE_TEST_CVC || "123";
