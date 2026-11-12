@@ -7,7 +7,11 @@
     "tests/OneDirectBuy/Search.spec.js",
     "tests/OneDirectBuy/LegalPages.spec.js",
     "tests/OneDirectBuy/ErrorHandlingSeo.spec.js",
-    "tests/OneDirectBuy/ResponsiveAccessibility.spec.js"
+    "tests/OneDirectBuy/ResponsiveAccessibility.spec.js",
+    "tests/OneDirectBuy/flows/b1-browse.spec.js",
+    "tests/OneDirectBuy/flows/b5-mobile.spec.js",
+    "tests/OneDirectBuy/flows/s1-seller.spec.js",
+    "tests/OneDirectBuy/flows/b6-b2b.spec.js"
   ],
   "workers": 4,
   "retries": 1,
