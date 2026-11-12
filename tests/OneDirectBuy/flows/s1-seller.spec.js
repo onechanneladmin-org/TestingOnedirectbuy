@@ -10,7 +10,7 @@
 // Not here: brand approval, product create/approve, inventory and CSV import live in the seller portal
 // (OneChannel), not on the storefront (tests/helpers/oneDirectBuySeller.js). They need a test seller
 // login on staging — tracked as an owner ask in docs/qa/HANDOFF.md § 5.
-import { test, expect, go, apiGet } from "./fixtures.js";
+import { test, expect, go, apiGet, passChallenge } from "./fixtures.js";
 import { checkStep } from "../../helpers/checkStep.js";
 
 const SELLER_SLUG = process.env.ODB_TEST_SELLER_SLUG || "onedirectbuy";
@@ -21,11 +21,12 @@ const continueBtn = (page) => page.getByRole("button", { name: /^Continue to rev
 test.describe("S1 seller @flow", () => {
   test("ODB-UC-183 become-a-vendor → Start selling opens the seller application", async ({ page, health }, testInfo) => {
     await go(page, "/vendor/become-a-vendor");
-    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Sell on OneDirect\s?Buy|Become a (Vendor|Seller)/i }).first()).toBeVisible();
     await checkStep(page, testInfo, { id: "ODB-UC-183", name: "become a vendor", health });
     const cta = page.getByRole("link", { name: /Start Selling|Apply Now|Start seller application/i }).first();
     await cta.click();
     await expect(page).toHaveURL(/\/vendor\/seller-application/);
+    await passChallenge(page);
     await expect(page.getByRole("heading", { level: 1, name: /Apply to sell on OneDirect\s?Buy/i })).toBeVisible();
     await checkStep(page, testInfo, { id: "ODB-UC-183", name: "seller application", health });
   });

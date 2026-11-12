@@ -9,7 +9,7 @@
 // Public checks run anywhere (read-only). Signed-in checks need a B2B test buyer:
 //   ODB_B2B_LOGIN=1, ONEDIRECTBUY_B2B_EMAIL / ONEDIRECTBUY_B2B_PASSWORD (gitignored .env only),
 // and a non-production target (the checkout check writes a cart). Nothing is paid here.
-import { test, expect, go } from "./fixtures.js";
+import { test, expect, go, passChallenge } from "./fixtures.js";
 import { checkStep } from "../../helpers/checkStep.js";
 import { fillLoginForm } from "../../helpers/oneDirectBuyAuth.js";
 import { clearCart, addProductAndOpenCart, proceedToCheckout, fillCheckoutShipping } from "../../helpers/buyerPurchaseJourney.js";
@@ -39,6 +39,8 @@ test.describe("B6 B2B buyer @flow", () => {
     expect(res.headers.get("location") || "", "redirect target").toMatch(/\/account\/wallet/);
     await go(page, "/account/b2b-credits");
     await expect(page, "lands on the wallet (or its login gate)").toHaveURL(/\/account\/(wallet|login)/);
+    await passChallenge(page);
+    await expect(page.getByRole("heading", { name: /Welcome back|Wallet/i }).first(), "wallet or login page rendered").toBeVisible();
     await checkStep(page, testInfo, { id: "QA-071", name: "b2b-credits redirect", health });
   });
 
